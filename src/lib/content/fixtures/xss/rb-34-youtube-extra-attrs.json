@@ -1,0 +1,28 @@
+{
+  "name": "rb-34-youtube-extra-attrs",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "dQw4w9WgXcQ",
+          "src": "https://evil.example",
+          "start": 30,
+          "allow": "camera",
+          "sandbox": "",
+          "title": "ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああい"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "dQw4w9WgXcQ",
+          "title": "  <題名> \"&\"  "
+        }
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" title=\"ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ\" width=\"560\" height=\"315\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"encrypted-media; picture-in-picture; fullscreen\" allowfullscreen></iframe><iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" title=\"&lt;題名&gt; &quot;&amp;&quot;\" width=\"560\" height=\"315\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"encrypted-media; picture-in-picture; fullscreen\" allowfullscreen></iframe></div>"
+}

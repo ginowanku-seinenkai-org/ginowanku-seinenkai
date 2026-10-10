@@ -1,0 +1,75 @@
+{
+  "name": "rb-28-other-protocols",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "a",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "data:text/html,<script>alert(1)</script>"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "b",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "vbscript:msgbox(1)"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "c",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "file:///etc/passwd"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "d",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "mailto:a@example.com"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "e",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "tel:0000"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>abcde</p></div>"
+}

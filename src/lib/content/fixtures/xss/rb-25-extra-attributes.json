@@ -1,0 +1,40 @@
+{
+  "name": "rb-25-extra-attributes",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "attrs": {
+          "class": "x",
+          "style": "color:red",
+          "id": "a",
+          "onclick": "alert(1)",
+          "data-x": "1"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "文字"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2,
+          "onerror": "alert(1)",
+          "class": "x"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>文字</p><h2>見出し</h2></div>"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "rb-08-empty-doc",
+  "input": {
+    "type": "doc",
+    "content": []
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"></div>"
+}

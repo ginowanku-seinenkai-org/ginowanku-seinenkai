@@ -1,0 +1,28 @@
+{
+  "name": "rb-03-bold",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "普通"
+          },
+          {
+            "type": "text",
+            "text": "太字",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>普通<strong>太字</strong></p></div>"
+}

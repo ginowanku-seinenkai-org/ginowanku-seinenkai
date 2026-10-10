@@ -1,0 +1,27 @@
+{
+  "name": "rb-30-quote-in-href",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "x",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://example.com/\"onmouseover=\"alert(1)"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p><a href=\"https://example.com/%22onmouseover=%22alert(1)\" target=\"_blank\" rel=\"noopener noreferrer\">x</a></p></div>"
+}

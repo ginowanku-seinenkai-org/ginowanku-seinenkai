@@ -1,0 +1,70 @@
+{
+  "name": "rb-33-bad-video-ids",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "abc"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "abcdefghijkl"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "\"><script>"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "../../x"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "dQw4w9WgXcQ?autoplay=1"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "javascript:alert(1)"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": ""
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": null
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": 12345678901
+        }
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"></div>"
+}

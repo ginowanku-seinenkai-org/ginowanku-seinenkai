@@ -1,0 +1,63 @@
+{
+  "name": "rb-29-relative-links",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "a",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "//evil.example/"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "b",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "/news"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "c",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "#top"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "d",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": ""
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>abcd</p></div>"
+}

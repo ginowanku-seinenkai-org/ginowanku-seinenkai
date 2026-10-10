@@ -1,0 +1,30 @@
+{
+  "name": "rb-32-link-extra-attrs",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "x",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://example.com",
+                  "target": "_self",
+                  "title": "t",
+                  "rel": "opener"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p><a href=\"https://example.com/\" target=\"_blank\" rel=\"noopener noreferrer\">x</a></p></div>"
+}

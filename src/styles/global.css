@@ -824,6 +824,11 @@ h1:focus {
   padding-block: 32px 48px;
 }
 
+/* グリッドの子が中身（表など）の幅で押し広げられないようにする */
+.article > * {
+  min-width: 0;
+}
+
 .evbox {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

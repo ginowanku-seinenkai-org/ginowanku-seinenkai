@@ -1,0 +1,40 @@
+{
+  "name": "ginowanku-seinenkai",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "engines": {
+    "node": "24.21.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "fetch-data": "tsx scripts/fetch-data.ts",
+    "fetch-photos": "tsx scripts/fetch-photos.ts",
+    "build": "astro build && tsx scripts/postbuild.ts",
+    "build:fixture": "tsx scripts/prepare-fixture.ts && astro build && tsx scripts/postbuild.ts",
+    "preview": "astro preview",
+    "lint": "eslint . && prettier --check .",
+    "typecheck": "astro check && tsc --noEmit",
+    "test": "vitest run --passWithNoTests --exclude 'tests/dist/**'",
+    "test:dist": "vitest run --passWithNoTests tests/dist"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
+    "astro": "7.3.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.1",
+    "eslint": "10.12.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-astro": "3.2.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.9",
+    "prettier-plugin-astro": "1.1.0",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "5.0.3"
+  }
+}

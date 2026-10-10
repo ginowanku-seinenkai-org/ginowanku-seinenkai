@@ -133,7 +133,8 @@ const mail = 'info@ginowanku-seinenkai.com';
       <p>
         当会は、ホームページの運営に次の外部サービスを利用しています。お預かりした情報は、これらのサービスに保存されたり、これらのサービスを通じて送られたりします。海外の事業者のサービスを含みます。
       </p>
-      <div class="tbl-wrap">
+      {/* 横にスクロールする表はキーボードでも操作できるようにする（axe：scrollable-region-focusable） */}
+      <div class="tbl-wrap" tabindex="0" role="region" aria-labelledby="services">
         <table class="tbl">
           <thead>
             <tr>

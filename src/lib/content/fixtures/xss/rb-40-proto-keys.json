@@ -1,0 +1,46 @@
+{
+  "name": "rb-40-proto-keys",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {
+          "__proto__": {
+            "level": 2
+          },
+          "constructor": {
+            "x": 1
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "x",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "__proto__": {
+                    "href": "https://evil.example/"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><h3>見出し</h3><p>x</p></div>"
+}

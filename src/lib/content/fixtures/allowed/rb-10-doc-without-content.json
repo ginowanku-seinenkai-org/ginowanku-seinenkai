@@ -1,0 +1,8 @@
+{
+  "name": "rb-10-doc-without-content",
+  "input": {
+    "type": "doc"
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"></div>"
+}

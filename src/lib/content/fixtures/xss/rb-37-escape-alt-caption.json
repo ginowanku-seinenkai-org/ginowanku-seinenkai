@@ -1,0 +1,27 @@
+{
+  "name": "rb-37-escape-alt-caption",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "photo",
+        "attrs": {
+          "photoId": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+          "caption": "\"説明\" <i>&"
+        }
+      }
+    ]
+  },
+  "photos": {
+    "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee": {
+      "src": "/photos/x/full.jpg",
+      "thumbSrc": "/photos/x/thumb.jpg",
+      "width": 800,
+      "height": 600,
+      "thumbWidth": 480,
+      "thumbHeight": 360,
+      "alt": "\"引用\" <b>&"
+    }
+  },
+  "expected": "<div class=\"content-body\"><figure><img src=\"/photos/x/full.jpg\" srcset=\"/photos/x/thumb.jpg 480w, /photos/x/full.jpg 800w\" sizes=\"(min-width: 768px) 720px, 100vw\" width=\"800\" height=\"600\" alt=\"&quot;引用&quot; &lt;b&gt;&amp;\" loading=\"lazy\" decoding=\"async\"><figcaption>&quot;説明&quot; &lt;i&gt;&amp;</figcaption></figure></div>"
+}

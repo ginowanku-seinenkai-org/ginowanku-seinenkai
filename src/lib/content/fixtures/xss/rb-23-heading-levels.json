@@ -1,0 +1,67 @@
+{
+  "name": "rb-23-heading-levels",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 1
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 4
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 6
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": "2"
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "content": [
+          {
+            "type": "text",
+            "text": "見出し"
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><h3>見出し</h3><h3>見出し</h3><h3>見出し</h3><h3>見出し</h3><h3>見出し</h3></div>"
+}

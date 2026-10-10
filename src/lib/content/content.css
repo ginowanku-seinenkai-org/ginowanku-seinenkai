@@ -1,0 +1,116 @@
+/* 本文（renderBody() の出力）用の CSS（03 §5.4、D-52）
+   .content-body の中だけに効く。色と余白は .content-body に定義した変数で指定し、他の CSS に依存しない。
+   見た目はデザイン見本に合わせる。Web フォントは使わない（03 §1）。
+   公開サイトと管理画面で同じ内容（正は公開サイト。00 §2.2） */
+
+.content-body {
+  --cb-ink: #1b2130;
+  --cb-ink-2: #596173;
+  --cb-head: #1d2d5a;
+  --cb-accent: #c23a22;
+  --cb-gap: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--cb-gap);
+  color: var(--cb-ink);
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .content-body {
+    --cb-ink: #eceff6;
+    --cb-ink-2: #a6aec2;
+    --cb-head: #eceff6;
+    --cb-accent: #ff7458;
+  }
+}
+
+:root[data-theme='dark'] .content-body {
+  --cb-ink: #eceff6;
+  --cb-ink-2: #a6aec2;
+  --cb-head: #eceff6;
+  --cb-accent: #ff7458;
+}
+
+.content-body > * {
+  min-width: 0;
+  margin: 0;
+}
+
+.content-body p {
+  max-width: 40em;
+}
+
+.content-body h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--cb-head);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+}
+
+.content-body h2::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: var(--cb-accent);
+  transform: rotate(45deg);
+}
+
+.content-body h3 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.content-body ul,
+.content-body ol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 1.4em;
+}
+
+.content-body a {
+  color: var(--cb-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.content-body strong {
+  font-weight: 700;
+}
+
+.content-body figure {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.content-body img {
+  max-width: 100%;
+  height: auto;
+}
+
+.content-body figcaption {
+  color: var(--cb-ink-2);
+  font-size: 14px;
+}
+
+/* min-height は YouTube の埋め込みプレーヤーの最低の表示領域（200×200px）のため（D-52） */
+.content-body iframe {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}

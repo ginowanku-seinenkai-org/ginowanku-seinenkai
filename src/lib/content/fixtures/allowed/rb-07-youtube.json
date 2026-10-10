@@ -1,0 +1,23 @@
+{
+  "name": "rb-07-youtube",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "M7lc1UVf-VE",
+          "title": "夏祭りの演舞"
+        }
+      },
+      {
+        "type": "youtube",
+        "attrs": {
+          "videoId": "abc_DEF-123"
+        }
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><iframe src=\"https://www.youtube-nocookie.com/embed/M7lc1UVf-VE\" title=\"夏祭りの演舞\" width=\"560\" height=\"315\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"encrypted-media; picture-in-picture; fullscreen\" allowfullscreen></iframe><iframe src=\"https://www.youtube-nocookie.com/embed/abc_DEF-123\" title=\"YouTube動画\" width=\"560\" height=\"315\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"encrypted-media; picture-in-picture; fullscreen\" allowfullscreen></iframe></div>"
+}

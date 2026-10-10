@@ -1,0 +1,19 @@
+{
+  "name": "rb-20-script-text",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "<script>alert(1)</script>"
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>&lt;script&gt;alert(1)&lt;/script&gt;</p></div>"
+}

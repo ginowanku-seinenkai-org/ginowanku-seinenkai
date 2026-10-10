@@ -1,0 +1,63 @@
+{
+  "name": "rb-24-unknown-marks",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "斜体",
+            "marks": [
+              {
+                "type": "italic"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "下線",
+            "marks": [
+              {
+                "type": "underline"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "コード",
+            "marks": [
+              {
+                "type": "code"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "色",
+            "marks": [
+              {
+                "type": "textStyle",
+                "attrs": {
+                  "style": "color:red"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "強調",
+            "marks": [
+              {
+                "type": "highlight"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>斜体下線コード色強調</p></div>"
+}

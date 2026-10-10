@@ -1,0 +1,68 @@
+{
+  "name": "rb-22-unknown-nodes",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "codeBlock",
+        "content": [
+          {
+            "type": "text",
+            "text": "コード"
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "content": [
+          {
+            "type": "tableRow",
+            "content": [
+              {
+                "type": "tableCell",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "セル"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "image",
+        "attrs": {
+          "src": "https://evil.example/x.jpg"
+        }
+      },
+      {
+        "type": "iframe",
+        "attrs": {
+          "src": "https://evil.example"
+        }
+      },
+      {
+        "type": "html",
+        "text": "<b>x</b>"
+      },
+      {
+        "type": "script",
+        "content": [
+          {
+            "type": "text",
+            "text": "alert(1)"
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\">コード<p>セル</p>alert(1)</div>"
+}

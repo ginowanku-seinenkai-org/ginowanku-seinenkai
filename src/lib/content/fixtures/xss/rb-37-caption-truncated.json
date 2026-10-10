@@ -1,0 +1,27 @@
+{
+  "name": "rb-37-caption-truncated",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "photo",
+        "attrs": {
+          "photoId": "0f0e0d0c-0b0a-4908-8706-050403020100",
+          "caption": "説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説"
+        }
+      }
+    ]
+  },
+  "photos": {
+    "0f0e0d0c-0b0a-4908-8706-050403020100": {
+      "src": "/photos/0f0e0d0c-0b0a-4908-8706-050403020100/full.jpg",
+      "thumbSrc": "/photos/0f0e0d0c-0b0a-4908-8706-050403020100/thumb.jpg",
+      "width": 1600,
+      "height": 1200,
+      "thumbWidth": 480,
+      "thumbHeight": 360,
+      "alt": "練習の様子"
+    }
+  },
+  "expected": "<div class=\"content-body\"><figure><img src=\"/photos/0f0e0d0c-0b0a-4908-8706-050403020100/full.jpg\" srcset=\"/photos/0f0e0d0c-0b0a-4908-8706-050403020100/thumb.jpg 480w, /photos/0f0e0d0c-0b0a-4908-8706-050403020100/full.jpg 1600w\" sizes=\"(min-width: 768px) 720px, 100vw\" width=\"1600\" height=\"1200\" alt=\"練習の様子\" loading=\"lazy\" decoding=\"async\"><figcaption>説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説説</figcaption></figure></div>"
+}

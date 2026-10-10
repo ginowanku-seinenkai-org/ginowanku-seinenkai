@@ -1,0 +1,19 @@
+{
+  "name": "rb-09-unicode",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "エイサー🥁 が゚ ｱｲｳ 𠮷"
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>エイサー🥁 が゚ ｱｲｳ 𠮷</p></div>"
+}

@@ -15,7 +15,7 @@
     "preview": "astro preview",
     "lint": "eslint . && prettier --check .",
     "typecheck": "astro check && tsc --noEmit",
-    "test": "vitest run --passWithNoTests --exclude 'tests/dist/**'",
+    "test": "vitest run --exclude 'tests/dist/**'",
     "test:dist": "vitest run --passWithNoTests tests/dist"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-astro": "3.2.1",
     "globals": "17.13.0",
+    "jsdom": "30.1.2",
     "prettier": "3.9.9",
     "prettier-plugin-astro": "1.1.0",
     "tsx": "4.23.15",

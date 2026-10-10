@@ -1,0 +1,54 @@
+{
+  "name": "rb-38-broken-structure",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": "文字列"
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": 123
+          },
+          {
+            "type": "text",
+            "text": "残る"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "印なし",
+            "marks": "bold"
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": {
+          "0": {
+            "type": "listItem"
+          }
+        }
+      },
+      null,
+      "文字列",
+      42,
+      [
+        {
+          "type": "text",
+          "text": "配列"
+        }
+      ]
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>残る</p><p>印なし</p><ul></ul></div>"
+}

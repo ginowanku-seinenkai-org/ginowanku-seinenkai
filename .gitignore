@@ -1,0 +1,20 @@
+# 依存・ビルド出力
+node_modules/
+dist/
+.astro/
+
+# fetch-data・fetch-photos の出力と写真のキャッシュ（00 §5.1、03 §1.1）
+.data/
+.data.tmp/
+.cache/
+public/photos/
+
+# Playwright のログイン状態
+playwright/.auth/
+
+# 環境変数（秘密を含みうる）
+.env
+.env.*
+
+# OS・エディタ
+.DS_Store

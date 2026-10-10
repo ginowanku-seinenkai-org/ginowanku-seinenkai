@@ -1,0 +1,10 @@
+dist/
+.astro/
+.data/
+.data.tmp/
+.cache/
+public/photos/
+pnpm-lock.yaml
+
+# 手で書く文書は整形しない
+*.md

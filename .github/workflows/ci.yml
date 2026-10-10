@@ -26,6 +26,19 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - name: ワークフローの検査（07 WF-01。D-50）
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          set -euo pipefail
+          file="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl --fail-with-body -sSL -o "$RUNNER_TEMP/$file" \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${file}"
+          echo "${ACTIONLINT_SHA256}  $RUNNER_TEMP/$file" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$file" -C "$RUNNER_TEMP" actionlint
+          shellcheck --version | head -n 2
+          "$RUNNER_TEMP/actionlint"
       - name: 依存の取得
         run: pnpm install --frozen-lockfile
       - name: Lint・書式

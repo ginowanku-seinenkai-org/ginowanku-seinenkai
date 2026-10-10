@@ -1,0 +1,60 @@
+{
+  "hero_photo_id": "f1000004-0000-4000-8000-000000000004",
+  "hero_catch": "受け継ぐ太鼓の響き",
+  "contact_flow": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "フォームから依頼を送信"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "1週間以内にメールで返信"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "日程と内容を相談して決定"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "instagram_url": "https://www.instagram.com/example",
+  "facebook_url": "https://www.facebook.com/example",
+  "tiktok_url": null,
+  "join_age_label": "高校生以上"
+}

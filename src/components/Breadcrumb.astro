@@ -1,0 +1,22 @@
+---
+// パンくず（03 §6.2）。最後の項目はリンクにしない
+interface Props {
+  items: { label: string; href?: string }[];
+}
+const { items } = Astro.props;
+const trail = [{ label: 'トップ', href: '/' }, ...items];
+---
+
+<nav class="crumb" aria-label="パンくずリスト">
+  <ol>
+    {trail.map((item, i) =>
+      i === trail.length - 1 ? (
+        <li aria-current="page">{item.label}</li>
+      ) : (
+        <li>
+          <a href={item.href}>{item.label}</a>
+        </li>
+      ),
+    )}
+  </ol>
+</nav>

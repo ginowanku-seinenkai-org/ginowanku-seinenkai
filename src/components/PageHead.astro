@@ -1,0 +1,21 @@
+---
+// トップ以外のページ見出し（パンくず・h1・リード）
+import Breadcrumb from './Breadcrumb.astro';
+
+interface Props {
+  title: string;
+  crumbs: { label: string; href?: string }[];
+  lead?: string | null;
+}
+const { title, crumbs, lead } = Astro.props;
+---
+
+<div class="phead">
+  <div class="wrap phead-in">
+    <Breadcrumb items={crumbs} />
+    <slot name="before-title" />
+    <h1>{title}</h1>
+    {lead && <p class="lead">{lead}</p>}
+    <slot />
+  </div>
+</div>

@@ -1,0 +1,110 @@
+[
+  {
+    "key": "about",
+    "title": "青年会について",
+    "lead": "宜野湾区の伝統のエイサーを受け継ぐ青年会です。",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "宜野湾区青年会とは"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "宜野湾区の若者が集まり、旧盆の道じゅねーや地域の行事で演舞しています。"
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "旧盆の道じゅねー"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "地域の行事での演舞"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "練習について"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "週末の夜に公民館で練習しています。"
+            }
+          ]
+        }
+      ]
+    },
+    "cover_photo_id": "f1000005-0000-4000-8000-000000000005",
+    "updated_at": "2026-09-01T09:00:00+09:00"
+  },
+  {
+    "key": "join",
+    "title": "メンバー募集",
+    "lead": "一緒にエイサーを踊る仲間を募集しています。",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "経験は問いません。見学もできます。"
+            }
+          ]
+        }
+      ]
+    },
+    "cover_photo_id": null,
+    "updated_at": "2026-09-01T09:00:00+09:00"
+  }
+]

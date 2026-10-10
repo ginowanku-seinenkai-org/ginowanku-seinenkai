@@ -1,0 +1,18 @@
+---
+// S07 メンバー募集（対象年齢を本文の前に目立たせて表示。F-19）
+import FixedPage from '../components/FixedPage.astro';
+import { loadSiteData } from '../lib/data.ts';
+
+const data = await loadSiteData();
+---
+
+<FixedPage pageKey="join">
+  <p class="target-lg" slot="before-body">
+    対象：{data.settings.join_age_label}
+  </p>
+  <p class="btn-row">
+    <a class="btn btn-shu" href="/contact?kind=join">
+      入会について問い合わせる
+    </a>
+  </p>
+</FixedPage>

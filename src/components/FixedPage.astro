@@ -1,0 +1,37 @@
+---
+// 固定ページ（S02・S07）
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CoverImage from './CoverImage.astro';
+import PageHead from './PageHead.astro';
+import { renderBody } from '../lib/content/render-body.ts';
+import { loadSiteData, renderContext } from '../lib/data.ts';
+import { DESCRIPTIONS } from '../lib/messages.ts';
+import { buildMeta, descriptionFromBody } from '../lib/seo.ts';
+
+interface Props {
+  pageKey: 'about' | 'join';
+}
+const { pageKey } = Astro.props;
+const data = await loadSiteData();
+const page = data.pages[pageKey];
+const cover = page.cover_photo_id === null ? undefined : data.photos.get(page.cover_photo_id);
+const meta = buildMeta({
+  name: page.title,
+  path: `/${pageKey}`,
+  description: page.lead?.trim()
+    ? page.lead.trim()
+    : descriptionFromBody(page.body, DESCRIPTIONS.top),
+  image: cover ?? null,
+});
+const html = renderBody(page.body, renderContext(data, `固定ページ ${pageKey} の本文`));
+---
+
+<BaseLayout meta={meta} current={pageKey}>
+  <PageHead title={page.title} crumbs={[{ label: page.title }]} lead={page.lead} />
+  <article class="wrap narrow article">
+    <slot name="before-body" />
+    <CoverImage photo={cover} />
+    <Fragment set:html={html} />
+    <slot />
+  </article>
+</BaseLayout>

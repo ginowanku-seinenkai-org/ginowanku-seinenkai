@@ -1,0 +1,28 @@
+---
+// SNS へのリンク。外部リンクは新しいタブで開く（03 §5.3 と同じ属性）
+import type { PublicSiteSettings } from '../lib/view-schemas.ts';
+
+interface Props {
+  settings: PublicSiteSettings;
+  footer?: boolean;
+}
+const { settings, footer = false } = Astro.props;
+const links = [
+  { label: 'Instagram', url: settings.instagram_url },
+  { label: 'Facebook', url: settings.facebook_url },
+  { label: 'TikTok', url: settings.tiktok_url },
+].filter((l): l is { label: string; url: string } => l.url !== null);
+---
+
+{links.length > 0 && (
+  <ul class={footer ? undefined : 'sns'} aria-label="公式SNS">
+    {links.map((l) => (
+      <li>
+        <a href={l.url} target="_blank" rel="noopener noreferrer">
+          {l.label}
+          <span class="visually-hidden">（新しいタブで開きます）</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

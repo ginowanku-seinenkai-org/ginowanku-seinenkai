@@ -11,7 +11,7 @@ export default defineConfig(
   tseslint.configs.strict,
   astro.configs.recommended,
   {
-    files: ['scripts/**/*.ts', '*.config.{js,mjs,ts}'],
+    files: ['scripts/**/*.ts', 'tests/**/*.ts', '*.config.{js,mjs,ts}', 'lighthouserc.cjs'],
     languageOptions: { globals: globals.node },
   },
   {

@@ -1,0 +1,42 @@
+---
+// ページ送り（03 §6.2）。1ページしかなければ出さない
+import { pageUrl } from '../lib/posts.ts';
+
+interface Props {
+  base: string;
+  currentPage: number;
+  lastPage: number;
+}
+const { base, currentPage, lastPage } = Astro.props;
+const pages = Array.from({ length: lastPage }, (_, i) => i + 1);
+---
+
+{lastPage > 1 && (
+  <nav class="pager" aria-label="ページ送り">
+    <ul>
+      {currentPage > 1 && (
+        <li>
+          <a href={pageUrl(base, currentPage - 1)} rel="prev">
+            前へ
+          </a>
+        </li>
+      )}
+      {pages.map((n) => (
+        <li>
+          {n === currentPage ? (
+            <span aria-current="page">{n}</span>
+          ) : (
+            <a href={pageUrl(base, n)}>{n}</a>
+          )}
+        </li>
+      ))}
+      {currentPage < lastPage && (
+        <li>
+          <a href={pageUrl(base, currentPage + 1)} rel="next">
+            次へ
+          </a>
+        </li>
+      )}
+    </ul>
+  </nav>
+)}

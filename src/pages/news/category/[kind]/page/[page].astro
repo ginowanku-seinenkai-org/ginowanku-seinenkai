@@ -1,0 +1,21 @@
+---
+import type { GetStaticPaths } from 'astro';
+import NewsListPage from '../../../../../components/NewsListPage.astro';
+import { loadSiteData } from '../../../../../lib/data.ts';
+import { newsPosts, paginate } from '../../../../../lib/posts.ts';
+import { NEWS_KINDS, type NewsKind } from '../../../../../lib/view-schemas.ts';
+
+export const getStaticPaths = (async () => {
+  const data = await loadSiteData();
+  return NEWS_KINDS.flatMap((kind) =>
+    paginate(newsPosts(data, kind))
+      .slice(1)
+      .map((p) => ({ params: { kind, page: String(p.currentPage) } })),
+  );
+}) satisfies GetStaticPaths;
+
+const kind = Astro.params.kind as NewsKind;
+const page = Number(Astro.params.page);
+---
+
+<NewsListPage kind={kind} page={page} />

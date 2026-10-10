@@ -16,15 +16,22 @@
     "lint": "eslint . && prettier --check .",
     "typecheck": "astro check && tsc --noEmit",
     "test": "vitest run --exclude 'tests/dist/**'",
-    "test:dist": "vitest run --passWithNoTests tests/dist"
+    "test:dist": "vitest run tests/dist",
+    "test:e2e": "playwright test",
+    "test:lhci": "lhci autorun"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
-    "astro": "7.3.8"
+    "@supabase/supabase-js": "2.117.3",
+    "astro": "7.3.8",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.64.0",
     "@types/node": "24.19.1",
     "eslint": "10.12.0",
     "eslint-config-prettier": "10.1.8",

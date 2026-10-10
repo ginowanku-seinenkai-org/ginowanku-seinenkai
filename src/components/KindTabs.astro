@@ -1,0 +1,27 @@
+---
+// /news 系の上部の絞り込み（03 §6.2）
+import type { NewsKind } from '../lib/view-schemas.ts';
+
+interface Props {
+  current: NewsKind | null;
+}
+const { current } = Astro.props;
+const tabs: { kind: NewsKind | null; href: string; label: string }[] = [
+  { kind: null, href: '/news', label: 'すべて' },
+  { kind: 'news', href: '/news/category/news', label: 'お知らせ' },
+  { kind: 'event', href: '/news/category/event', label: '行事' },
+  { kind: 'recruit', href: '/news/category/recruit', label: '募集' },
+];
+---
+
+<nav class="tabs" aria-label="種類で絞り込み">
+  <ul>
+    {tabs.map((t) => (
+      <li>
+        <a href={t.href} aria-current={t.kind === current ? 'page' : undefined}>
+          {t.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

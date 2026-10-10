@@ -1,6 +1,6 @@
 # 依存・ビルド出力
 node_modules/
-dist/
+/dist/
 .astro/
 
 # fetch-data・fetch-photos の出力と写真のキャッシュ（00 §5.1、03 §1.1）
@@ -18,3 +18,8 @@ playwright/.auth/
 
 # OS・エディタ
 .DS_Store
+
+# Playwright・Lighthouse CI の結果
+test-results/
+playwright-report/
+.lighthouseci/

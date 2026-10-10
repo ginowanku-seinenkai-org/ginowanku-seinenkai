@@ -1,0 +1,12 @@
+---
+import type { GetStaticPaths } from 'astro';
+import NewsListPage from '../../../../components/NewsListPage.astro';
+import { NEWS_KINDS, type NewsKind } from '../../../../lib/view-schemas.ts';
+
+export const getStaticPaths = (() =>
+  NEWS_KINDS.map((kind) => ({ params: { kind } }))) satisfies GetStaticPaths;
+
+const kind = Astro.params.kind as NewsKind;
+---
+
+<NewsListPage kind={kind} page={1} />

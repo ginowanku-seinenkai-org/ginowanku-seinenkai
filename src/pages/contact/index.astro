@@ -1,0 +1,44 @@
+---
+// S08 演舞依頼・お問い合わせ（03 §6.5）。フォーム（03 §8）は feature/inquiry-form（00 §6 順12）で足す
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import InstagramDmLink from '../../components/InstagramDmLink.astro';
+import PageHead from '../../components/PageHead.astro';
+import { renderBody } from '../../lib/content/render-body.ts';
+import { loadSiteData, renderContext } from '../../lib/data.ts';
+import { CONTACT_NOTICE, DESCRIPTIONS } from '../../lib/messages.ts';
+import { isEmptyBody } from '../../lib/plain-text.ts';
+import { buildMeta } from '../../lib/seo.ts';
+
+const data = await loadSiteData();
+const meta = buildMeta({
+  name: '演舞依頼・お問い合わせ',
+  path: '/contact',
+  description: DESCRIPTIONS.contact,
+});
+const flow = data.settings.contact_flow;
+const showFlow = !isEmptyBody(flow);
+const flowHtml = showFlow ? renderBody(flow, renderContext(data, 'サイト設定の依頼の流れ')) : '';
+---
+
+<BaseLayout meta={meta} current="contact">
+  <PageHead title="演舞依頼・お問い合わせ" crumbs={[{ label: '演舞依頼・お問い合わせ' }]} />
+  <div class="wrap narrow article">
+    {showFlow && (
+      <section aria-labelledby="flow-heading">
+        <div class="sec-h">
+          <h2 id="flow-heading">演舞依頼の流れ</h2>
+        </div>
+        <Fragment set:html={flowHtml} />
+      </section>
+    )}
+    <div class="notice">
+      <p class="main">
+        {CONTACT_NOTICE.reply.before}
+        <InstagramDmLink url={data.settings.instagram_url} />
+        {CONTACT_NOTICE.reply.after}
+      </p>
+      <p class="sub">{CONTACT_NOTICE.autoReply}</p>
+      <p class="sub">{CONTACT_NOTICE.required}</p>
+    </div>
+  </div>
+</BaseLayout>

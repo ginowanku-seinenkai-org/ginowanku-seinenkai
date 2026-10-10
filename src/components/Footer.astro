@@ -1,0 +1,31 @@
+---
+// フッター（03 §6.2）。SNS は Instagram・Facebook・TikTok の順で、URL のないものは出さない（F-11、D-40）
+import { SITE_NAME } from '../lib/messages.ts';
+import type { PublicSiteSettings } from '../lib/view-schemas.ts';
+import SnsLinks from './SnsLinks.astro';
+
+interface Props {
+  settings: PublicSiteSettings;
+}
+const { settings } = Astro.props;
+---
+
+<footer class="ftr">
+  <div class="wrap ftr-in">
+    <a class="brand" href="/">
+      {SITE_NAME}
+    </a>
+    <SnsLinks settings={settings} footer />
+    <nav aria-label="フッターのメニュー">
+      <ul>
+        <li>
+          <a href="/contact">演舞依頼・お問い合わせ</a>
+        </li>
+        <li>
+          <a href="/privacy">プライバシーポリシー</a>
+        </li>
+      </ul>
+    </nav>
+    <small>© {SITE_NAME}</small>
+  </div>
+</footer>

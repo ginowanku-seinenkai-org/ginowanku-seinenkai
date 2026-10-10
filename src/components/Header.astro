@@ -1,0 +1,44 @@
+---
+// ヘッダーとナビ（03 §6.2）。menu.ts が読み込まれるまではナビを開いたまま表示する
+import { SITE_NAME } from '../lib/messages.ts';
+
+export type NavKey = 'top' | 'about' | 'news' | 'activities' | 'join' | 'contact' | null;
+interface Props {
+  current: NavKey;
+}
+const { current } = Astro.props;
+const items: { key: Exclude<NavKey, null>; href: string; label: string; cta?: boolean }[] = [
+  { key: 'top', href: '/', label: 'トップ' },
+  { key: 'about', href: '/about', label: '青年会について' },
+  { key: 'news', href: '/news', label: 'お知らせ・行事' },
+  { key: 'activities', href: '/activities', label: '活動記録' },
+  { key: 'join', href: '/join', label: 'メンバー募集' },
+  { key: 'contact', href: '/contact', label: '演舞依頼・お問い合わせ', cta: true },
+];
+---
+
+<header class="hdr">
+  <div class="wrap hdr-in" data-menu>
+    <a class="brand" href="/">
+      {SITE_NAME}
+    </a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" hidden>
+      <span class="bars" aria-hidden="true"></span>メニュー
+    </button>
+    <nav class="nav" id="site-nav" aria-label="メインメニュー">
+      <ul>
+        {items.map((item) => (
+          <li class={item.cta ? 'cta' : undefined}>
+            <a href={item.href} aria-current={current === item.key ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  import '../scripts/menu.ts';
+</script>

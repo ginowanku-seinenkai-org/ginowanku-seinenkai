@@ -1,0 +1,48 @@
+---
+// 記事の写真一覧（03 §6.7）。JavaScript が無いときはリンク先の画像を直接開く
+import { photoSrc } from '../lib/posts.ts';
+import type { PublicPhoto } from '../lib/view-schemas.ts';
+
+interface Props {
+  photos: PublicPhoto[];
+}
+const { photos } = Astro.props;
+---
+
+<ul class="gallery" data-gallery>
+  {photos.map((photo) => (
+    <li>
+      <a href={photoSrc(photo, 'full')} data-width={photo.width} data-height={photo.height}>
+        <img
+          src={photoSrc(photo, 'thumb')}
+          width={photo.thumb_width}
+          height={photo.thumb_height}
+          alt={photo.alt}
+          loading="lazy"
+          decoding="async"
+        />
+      </a>
+    </li>
+  ))}
+</ul>
+<dialog class="lb" aria-label="写真の拡大表示" data-lightbox>
+  <div class="lb-in">
+    <img class="lb-img" src="" alt="" width="1600" height="1200" data-lightbox-img />
+    <p class="lb-cap" data-lightbox-cap></p>
+    <div class="lb-bar">
+      <button class="lb-btn" type="button" data-lightbox-prev>
+        前へ
+      </button>
+      <button class="lb-btn" type="button" data-lightbox-close>
+        閉じる
+      </button>
+      <button class="lb-btn" type="button" data-lightbox-next>
+        次へ
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import '../scripts/lightbox.ts';
+</script>

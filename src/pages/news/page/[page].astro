@@ -1,0 +1,17 @@
+---
+import type { GetStaticPaths } from 'astro';
+import NewsListPage from '../../../components/NewsListPage.astro';
+import { loadSiteData } from '../../../lib/data.ts';
+import { newsPosts, paginate } from '../../../lib/posts.ts';
+
+export const getStaticPaths = (async () => {
+  const data = await loadSiteData();
+  return paginate(newsPosts(data))
+    .slice(1)
+    .map((p) => ({ params: { page: String(p.currentPage) } }));
+}) satisfies GetStaticPaths;
+
+const page = Number(Astro.params.page);
+---
+
+<NewsListPage kind={null} page={page} />

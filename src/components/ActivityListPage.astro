@@ -1,0 +1,43 @@
+---
+// 活動記録の一覧（S05）
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from './PageHead.astro';
+import Pagination from './Pagination.astro';
+import PostCard from './PostCard.astro';
+import { loadSiteData } from '../lib/data.ts';
+import { DESCRIPTIONS, EMPTY } from '../lib/messages.ts';
+import { activityPosts, pageUrl, paginate } from '../lib/posts.ts';
+import { buildMeta } from '../lib/seo.ts';
+
+interface Props {
+  page: number;
+}
+const { page } = Astro.props;
+const data = await loadSiteData();
+const pages = paginate(activityPosts(data));
+const current = pages[page - 1] ?? { items: [], currentPage: page, lastPage: pages.length };
+const meta = buildMeta({
+  name: '活動記録',
+  page,
+  path: pageUrl('/activities', page),
+  description: DESCRIPTIONS.activities,
+});
+---
+
+<BaseLayout meta={meta} current="activities">
+  <PageHead title="活動記録" crumbs={[{ label: '活動記録' }]} />
+  <div class="wrap sec">
+    {current.items.length === 0 ? (
+      <p class="empty">{EMPTY.activities}</p>
+    ) : (
+      <ul class="cards">
+        {current.items.map((post) => (
+          <li>
+            <PostCard post={post} data={data} />
+          </li>
+        ))}
+      </ul>
+    )}
+    <Pagination base="/activities" currentPage={current.currentPage} lastPage={current.lastPage} />
+  </div>
+</BaseLayout>

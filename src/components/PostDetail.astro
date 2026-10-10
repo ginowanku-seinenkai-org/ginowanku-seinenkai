@@ -1,0 +1,87 @@
+---
+// 記事の詳細（S04・S06。03 §6.5）
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CoverImage from './CoverImage.astro';
+import EndedBadge from './EndedBadge.astro';
+import EventDate from './EventDate.astro';
+import Gallery from './Gallery.astro';
+import KindLabel from './KindLabel.astro';
+import PageHead from './PageHead.astro';
+import { renderBody } from '../lib/content/render-body.ts';
+import { loadSiteData, renderContext } from '../lib/data.ts';
+import { formatPublishedOn } from '../lib/date.ts';
+import { eventEndDate, isEnded, postUrl } from '../lib/posts.ts';
+import { DESCRIPTIONS } from '../lib/messages.ts';
+import { buildMeta, descriptionFromBody, eventJsonLd } from '../lib/seo.ts';
+import type { PublicPhoto, PublicPost } from '../lib/view-schemas.ts';
+
+interface Props {
+  post: PublicPost;
+}
+const { post } = Astro.props;
+const data = await loadSiteData();
+const isActivity = post.kind === 'activity';
+const cover = post.cover_photo_id === null ? undefined : data.photos.get(post.cover_photo_id);
+const gallery = (data.postPhotos.get(post.id) ?? [])
+  .map((row) => data.photos.get(row.photo_id))
+  .filter((p): p is PublicPhoto => p !== undefined);
+const description = descriptionFromBody(post.body, DESCRIPTIONS.top);
+const meta = buildMeta({
+  name: post.title,
+  path: postUrl(post),
+  description,
+  ogType: 'article',
+  image: cover ?? null,
+});
+const event = eventJsonLd(post, description, cover ?? null);
+const ended = isEnded(post, data.today);
+const endDate = eventEndDate(post);
+const listHref = isActivity ? '/activities' : '/news';
+const listLabel = isActivity ? '活動記録' : 'お知らせ・行事';
+const html = renderBody(post.body, renderContext(data, `記事${post.id}の本文`));
+---
+
+<BaseLayout meta={meta} current={isActivity ? 'activities' : 'news'} jsonLd={event ? [event] : []}>
+  <PageHead
+    title={post.title}
+    crumbs={[{ label: listLabel, href: listHref }, { label: post.title }]}
+  >
+    <div class="meta" slot="before-title">
+      {!isActivity && <KindLabel kind={post.kind} />}
+      <time datetime={post.published_on}>{formatPublishedOn(post.published_on)}</time>
+    </div>
+  </PageHead>
+  <article class="wrap narrow article">
+    {post.kind === 'event' && (
+      <dl class="evbox" data-event-end={endDate ?? undefined} data-ended-behavior="badge">
+        <dt>日時</dt>
+        <dd>
+          <EventDate post={post} />
+          {endDate && <EndedBadge ended={ended} />}
+        </dd>
+        {post.event_place !== null && (
+          <>
+            <dt>場所</dt>
+            <dd>{post.event_place}</dd>
+          </>
+        )}
+        <dd class="done" data-ended-note hidden={!ended}>
+          この行事は終了しました
+        </dd>
+      </dl>
+    )}
+    <CoverImage photo={cover} />
+    <Fragment set:html={html} />
+    {gallery.length > 0 && (
+      <section aria-labelledby="gallery-heading">
+        <div class="sec-h">
+          <h2 id="gallery-heading">写真</h2>
+        </div>
+        <Gallery photos={gallery} />
+      </section>
+    )}
+    <p>
+      <a class="back" href={listHref}>{`${listLabel}の一覧へ`}</a>
+    </p>
+  </article>
+</BaseLayout>

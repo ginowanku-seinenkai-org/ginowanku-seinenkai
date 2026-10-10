@@ -1,0 +1,25 @@
+---
+// 詳細ページ・固定ページのカバー写真（03 §14：優先読み込み、srcset）
+import { photoSrc } from '../lib/posts.ts';
+import type { PublicPhoto } from '../lib/view-schemas.ts';
+
+interface Props {
+  photo: PublicPhoto | undefined;
+}
+const { photo } = Astro.props;
+---
+
+{photo && (
+  <img
+    class="cover"
+    src={photoSrc(photo, 'full')}
+    srcset={`${photoSrc(photo, 'thumb')} ${photo.thumb_width}w, ${photoSrc(photo, 'full')} ${photo.width}w`}
+    sizes="(min-width: 768px) 720px, 100vw"
+    width={photo.width}
+    height={photo.height}
+    alt={photo.alt}
+    loading="eager"
+    fetchpriority="high"
+    decoding="async"
+  />
+)}

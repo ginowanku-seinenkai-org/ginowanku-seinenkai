@@ -1,0 +1,15 @@
+---
+// 「InstagramのDM」：URL があればリンク、無ければ文字だけ（06 §4.1）
+interface Props {
+  url: string | null;
+}
+const { url } = Astro.props;
+---
+
+{url ? (
+  <a href={url} target="_blank" rel="noopener noreferrer">
+    InstagramのDM
+  </a>
+) : (
+  'InstagramのDM'
+)}

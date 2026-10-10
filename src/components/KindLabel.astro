@@ -1,0 +1,11 @@
+---
+import { KIND_LABELS } from '../lib/posts.ts';
+import type { PostKind } from '../lib/view-schemas.ts';
+
+interface Props {
+  kind: PostKind;
+}
+const { kind } = Astro.props;
+---
+
+<span class={`kind k-${kind}`}>{KIND_LABELS[kind]}</span>

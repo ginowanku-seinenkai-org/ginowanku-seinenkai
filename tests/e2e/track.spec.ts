@@ -6,6 +6,7 @@ import { expect, test } from './fixtures.ts';
 
 const SITE = 'https://ginowanku-seinenkai.com';
 const LOCAL = 'http://127.0.0.1:4329';
+const TRACK_URL = 'https://supabase.test/functions/v1/track';
 
 async function serveAsProduction(page: Page) {
   await page.route(`${SITE}/**`, async (route) => {
@@ -13,10 +14,10 @@ async function serveAsProduction(page: Page) {
     const response = await route.fetch({ url: `${LOCAL}${url.pathname}${url.search}` });
     const type = response.headers()['content-type'] ?? '';
     if (!type.includes('text/html')) return route.fulfill({ response });
-    const html = (await response.text()).replace(
-      'data-site-env="local"',
-      'data-site-env="production"',
-    );
+    // 本番と同じく https の送り先にする（http の 127.0.0.1 は WebKit が混在コンテンツとして止めるため）
+    const html = (await response.text())
+      .replace('data-site-env="local"', 'data-site-env="production"')
+      .replace(/data-track-endpoint="[^"]*"/, `data-track-endpoint="${TRACK_URL}"`);
     return route.fulfill({ response, body: html });
   });
 }

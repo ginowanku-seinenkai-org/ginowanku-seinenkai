@@ -1,6 +1,7 @@
 ---
-// S08 演舞依頼・お問い合わせ（03 §6.5）。フォーム（03 §8）は feature/inquiry-form（00 §6 順12）で足す
+// S08 演舞依頼・お問い合わせ（03 §6.5・§8）
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactForm from '../../components/ContactForm.astro';
 import InstagramDmLink from '../../components/InstagramDmLink.astro';
 import PageHead from '../../components/PageHead.astro';
 import { renderBody } from '../../lib/content/render-body.ts';
@@ -40,5 +41,9 @@ const flowHtml = showFlow ? renderBody(flow, renderContext(data, 'サイト設�
       <p class="sub">{CONTACT_NOTICE.autoReply}</p>
       <p class="sub">{CONTACT_NOTICE.required}</p>
     </div>
+    <ContactForm
+      instagramUrl={data.settings.instagram_url}
+      joinAgeLabel={data.settings.join_age_label}
+    />
   </div>
 </BaseLayout>

@@ -1,0 +1,67 @@
+---
+// 問い合わせフォームの入力欄1つ（03 §8.1・§13.3）。ラベル・説明・エラーを入力欄と結びつける
+interface Props {
+  name: string;
+  label: string;
+  required: boolean;
+  type?: 'text' | 'email' | 'tel' | 'textarea';
+  maxlength: number;
+  autocomplete?: string;
+  inputmode?: 'numeric' | 'email' | 'tel';
+  placeholder?: string;
+  hint?: string;
+  /** textarea を低めにする（希望日時は2行。03 §8.1） */
+  short?: boolean;
+}
+const {
+  name,
+  label,
+  required,
+  type = 'text',
+  maxlength,
+  autocomplete = 'off',
+  inputmode,
+  placeholder,
+  hint,
+  short = false,
+} = Astro.props;
+const id = `f-${name}`;
+const describedBy = `${id}-h ${id}-e`;
+---
+
+<div class="fld" data-field={name}>
+  <label class="lbl" for={id}>
+    <span data-label>{label}</span>
+    <span class={required ? 'req' : 'opt'} data-badge>
+      {required ? '必須' : '任意'}
+    </span>
+  </label>
+  {type === 'textarea' ? (
+    <textarea
+      id={id}
+      name={name}
+      class:list={['inp', { short }]}
+      maxlength={maxlength}
+      autocomplete={autocomplete}
+      placeholder={placeholder}
+      aria-describedby={describedBy}
+      rows={short ? 2 : 4}
+    />
+  ) : (
+    <input
+      id={id}
+      name={name}
+      class="inp"
+      type={type}
+      maxlength={maxlength}
+      autocomplete={autocomplete}
+      inputmode={inputmode}
+      placeholder={placeholder}
+      aria-describedby={describedBy}
+    />
+  )}
+  <p class="hint" id={`${id}-h`} data-hint hidden={!hint}>
+    {hint}
+  </p>
+  <p class="err" id={`${id}-e`} hidden></p>
+</div>

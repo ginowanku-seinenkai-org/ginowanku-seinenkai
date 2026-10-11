@@ -199,6 +199,14 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     }
   });
 
+  it('SNS のリンクはフッターにだけある（D-65）', () => {
+    for (const p of pages) {
+      const lists = Array.from(p.doc.querySelectorAll('ul[aria-label="公式SNS"]'));
+      expect(lists.length, p.path).toBe(1);
+      expect(lists[0]?.closest('footer'), p.path).not.toBeNull();
+    }
+  });
+
   it('個人の氏名を出さない：役員紹介の区画がない（D-41）', () => {
     for (const p of pages) expect(p.html).not.toContain('役員紹介');
   });

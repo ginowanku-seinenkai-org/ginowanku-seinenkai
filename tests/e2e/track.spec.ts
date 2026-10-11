@@ -62,11 +62,11 @@ test('EP-12 アクセス計測：1ページ1回、パスと流入元のホスト
   expect(headers['apikey']).toBeUndefined();
   expect(headers['authorization']).toBeUndefined();
 
-  // サイト内のリンクから移った：(internal)
-  await page.locator('header').getByRole('link', { name: '活動記録' }).first().click();
-  await expect(page).toHaveURL(`${SITE}/activities`);
+  // サイト内のリンクから移った：(internal)。スマホではヘッダーのメニューが閉じているため、フッターのリンクを使う
+  await page.locator('footer').getByRole('link', { name: 'プライバシーポリシー' }).click();
+  await expect(page).toHaveURL(`${SITE}/privacy`);
   await expect.poll(() => sent.length).toBe(2);
-  expect(sent[1]?.body).toEqual({ path: '/activities', referrer_host: '(internal)' });
+  expect(sent[1]?.body).toEqual({ path: '/privacy', referrer_host: '(internal)' });
 
   // 外部のページから来た：ホスト名だけ
   await page.goto(`${SITE}/about`, { referer: 'https://www.instagram.com/p/abc?x=1' });

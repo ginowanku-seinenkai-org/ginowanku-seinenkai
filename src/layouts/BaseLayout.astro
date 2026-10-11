@@ -5,6 +5,7 @@ import '../lib/content/content.css';
 import Footer from '../components/Footer.astro';
 import Header, { type NavKey } from '../components/Header.astro';
 import SeoHead from '../components/SeoHead.astro';
+import TrackScript from '../components/TrackScript.astro';
 import { loadSiteData } from '../lib/data.ts';
 import { getEnv } from '../lib/env.ts';
 import { serializeJsonLd, type PageMeta } from '../lib/seo.ts';
@@ -14,19 +15,21 @@ interface Props {
   current?: NavKey;
   /** /contact/thanks・404（03 §11.5） */
   noindex?: boolean;
-  /** アクセス計測を送るか（404 は false。03 §9。計測は feature/analytics で足す） */
+  /** アクセス計測を送るか（404 は false。03 §9） */
   track?: boolean;
   jsonLd?: Record<string, unknown>[];
 }
-const { meta, current = null, noindex = false, jsonLd = [] } = Astro.props;
+const { meta, current = null, noindex = false, track = true, jsonLd = [] } = Astro.props;
 const data = await loadSiteData();
 const env = getEnv();
 // プレビュー環境はすべてのページを検索に載せない（D-20、03 §11.5）
 const robots = env.siteEnv === 'preview' ? 'noindex, nofollow' : noindex ? 'noindex' : null;
+// 計測の送り先と環境（03 §9。送るかどうかはブラウザ側で判定する）
+const trackEndpoint = `${env.supabaseUrl.replace(/\/$/, '')}/functions/v1/track`;
 ---
 
 <!doctype html>
-<html lang="ja">
+<html lang="ja" data-site-env={env.siteEnv} data-track-endpoint={track ? trackEndpoint : undefined}>
   <head>
     <SeoHead meta={meta} robots={robots} />
     {jsonLd.map((item) => (
@@ -45,5 +48,6 @@ const robots = env.siteEnv === 'preview' ? 'noindex, nofollow' : noindex ? 'noin
     <script>
       import '../scripts/event-status.ts';
     </script>
+    {track && <TrackScript />}
   </body>
 </html>

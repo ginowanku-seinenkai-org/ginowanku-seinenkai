@@ -1,0 +1,39 @@
+---
+// S09 送信完了（06 §4.2）。noindex、sitemap から除外
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import InstagramDmLink from '../../components/InstagramDmLink.astro';
+import PageHead from '../../components/PageHead.astro';
+import { loadSiteData } from '../../lib/data.ts';
+import { buildMeta } from '../../lib/seo.ts';
+
+const data = await loadSiteData();
+const meta = buildMeta({ name: '送信完了', path: '/contact/thanks' });
+---
+
+<BaseLayout meta={meta} noindex>
+  <PageHead
+    title="お問い合わせを受け付けました"
+    crumbs={[{ label: '演舞依頼・お問い合わせ', href: '/contact' }, { label: '送信完了' }]}
+  />
+  <div class="wrap narrow article stack">
+    <div class="done-mark" aria-hidden="true"></div>
+    <p>
+      お問い合わせいただき、ありがとうございます。
+      <br />
+      内容を確認のうえ、1週間以内にご連絡します。
+    </p>
+    <p>
+      ご入力のメールアドレスに、受付確認の自動返信メールをお送りしました。迷惑メールのフォルダに入っている場合や、届かない場合があります。届いていなくても、お問い合わせは受け付けています。
+    </p>
+    <p>
+      1週間を過ぎても返信がない場合は、お手数ですが、
+      <InstagramDmLink url={data.settings.instagram_url} />
+      でご連絡ください。
+    </p>
+    <p>
+      <a class="btn btn-ink" href="/">
+        トップページへ戻る
+      </a>
+    </p>
+  </div>
+</BaseLayout>

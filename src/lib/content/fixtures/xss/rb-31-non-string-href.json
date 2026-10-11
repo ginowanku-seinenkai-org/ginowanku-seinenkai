@@ -1,0 +1,74 @@
+{
+  "name": "rb-31-non-string-href",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "a",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": 1
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "b",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": {
+                    "x": 1
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "c",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": ["https://example.com"]
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "d",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": null
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "e",
+            "marks": [
+              {
+                "type": "link"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>abcde</p></div>"
+}

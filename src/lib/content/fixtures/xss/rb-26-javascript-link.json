@@ -1,0 +1,27 @@
+{
+  "name": "rb-26-javascript-link",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "x",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "javascript:alert(1)"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>x</p></div>"
+}

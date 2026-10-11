@@ -1,0 +1,31 @@
+---
+// title・description・canonical・OGP（03 §11）。JSON-LD は BaseLayout の jsonLd で渡す
+import type { PageMeta } from '../lib/seo.ts';
+import { SITE_NAME } from '../lib/messages.ts';
+
+interface Props {
+  meta: PageMeta;
+  robots: string | null;
+}
+const { meta, robots } = Astro.props;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{meta.title}</title>
+{meta.description && <meta name="description" content={meta.description} />}
+{robots && <meta name="robots" content={robots} />}
+{meta.canonical && <link rel="canonical" href={meta.canonical} />}
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:locale" content="ja_JP" />
+<meta property="og:type" content={meta.ogType} />
+<meta property="og:title" content={meta.ogTitle} />
+{meta.description && <meta property="og:description" content={meta.description} />}
+<meta property="og:url" content={meta.ogUrl} />
+<meta property="og:image" content={meta.ogImage.url} />
+<meta property="og:image:width" content={String(meta.ogImage.width)} />
+<meta property="og:image:height" content={String(meta.ogImage.height)} />
+<meta property="og:image:alt" content={meta.ogImage.alt} />
+<meta name="twitter:card" content="summary_large_image" />

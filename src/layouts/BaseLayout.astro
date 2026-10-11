@@ -1,0 +1,49 @@
+---
+// 共通レイアウト（03 §6.2）
+import '../styles/global.css';
+import '../lib/content/content.css';
+import Footer from '../components/Footer.astro';
+import Header, { type NavKey } from '../components/Header.astro';
+import SeoHead from '../components/SeoHead.astro';
+import { loadSiteData } from '../lib/data.ts';
+import { getEnv } from '../lib/env.ts';
+import { serializeJsonLd, type PageMeta } from '../lib/seo.ts';
+
+interface Props {
+  meta: PageMeta;
+  current?: NavKey;
+  /** /contact/thanks・404（03 §11.5） */
+  noindex?: boolean;
+  /** アクセス計測を送るか（404 は false。03 §9。計測は feature/analytics で足す） */
+  track?: boolean;
+  jsonLd?: Record<string, unknown>[];
+}
+const { meta, current = null, noindex = false, jsonLd = [] } = Astro.props;
+const data = await loadSiteData();
+const env = getEnv();
+// プレビュー環境はすべてのページを検索に載せない（D-20、03 §11.5）
+const robots = env.siteEnv === 'preview' ? 'noindex, nofollow' : noindex ? 'noindex' : null;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <SeoHead meta={meta} robots={robots} />
+    {jsonLd.map((item) => (
+      <script is:inline type="application/ld+json" set:html={serializeJsonLd(item)} />
+    ))}
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      本文へ移動
+    </a>
+    <Header current={current} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer settings={data.settings} />
+    <script>
+      import '../scripts/event-status.ts';
+    </script>
+  </body>
+</html>

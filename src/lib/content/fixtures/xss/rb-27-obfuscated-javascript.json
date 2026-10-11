@@ -1,0 +1,75 @@
+{
+  "name": "rb-27-obfuscated-javascript",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "a",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "JaVaScRiPt:alert(1)"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "b",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": " javascript:alert(1)"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "c",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "java\tscript:alert(1)"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "d",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "java\nscript:alert(1)"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "e",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "java\u0000script:alert(1)"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>abcde</p></div>"
+}

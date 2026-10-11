@@ -1,0 +1,41 @@
+{
+  "name": "rb-35-bad-photo",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "photo",
+        "attrs": {
+          "photoId": "not-a-uuid"
+        }
+      },
+      {
+        "type": "photo",
+        "attrs": {
+          "photoId": "0F0E0D0C-0B0A-4908-8706-050403020100"
+        }
+      },
+      {
+        "type": "photo",
+        "attrs": {
+          "photoId": "11111111-2222-4333-8444-555555555555"
+        }
+      },
+      {
+        "type": "photo"
+      }
+    ]
+  },
+  "photos": {
+    "0f0e0d0c-0b0a-4908-8706-050403020100": {
+      "src": "/photos/0f0e0d0c-0b0a-4908-8706-050403020100/full.jpg",
+      "thumbSrc": "/photos/0f0e0d0c-0b0a-4908-8706-050403020100/thumb.jpg",
+      "width": 1600,
+      "height": 1200,
+      "thumbWidth": 480,
+      "thumbHeight": 360,
+      "alt": "練習の様子"
+    }
+  },
+  "expected": "<div class=\"content-body\"></div>"
+}

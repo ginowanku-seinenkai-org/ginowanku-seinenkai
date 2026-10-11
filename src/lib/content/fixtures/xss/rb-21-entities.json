@@ -1,0 +1,19 @@
+{
+  "name": "rb-21-entities",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "& \" ' <img src=x onerror=alert(1)>"
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p>&amp; &quot; &#39; &lt;img src=x onerror=alert(1)&gt;</p></div>"
+}

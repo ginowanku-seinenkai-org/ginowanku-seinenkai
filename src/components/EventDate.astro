@@ -1,0 +1,16 @@
+---
+// 行事の日時（03 §6.4）
+import { eventDatetime, formatEventDate } from '../lib/date.ts';
+import type { PublicPost } from '../lib/view-schemas.ts';
+
+interface Props {
+  post: PublicPost;
+}
+const { post } = Astro.props;
+---
+
+{post.event_starts_at !== null && (
+  <time datetime={eventDatetime(post.event_starts_at, post.event_all_day)}>
+    {formatEventDate(post)}
+  </time>
+)}

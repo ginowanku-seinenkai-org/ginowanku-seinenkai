@@ -1,0 +1,66 @@
+{
+  "name": "rb-04-links",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "外部",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://example.com/a?b=1"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "http",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "http://example.com"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "内部",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://ginowanku-seinenkai.com/news/12"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "太字リンク",
+            "marks": [
+              {
+                "type": "bold"
+              },
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://ginowanku-seinenkai.com/about"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><p><a href=\"https://example.com/a?b=1\" target=\"_blank\" rel=\"noopener noreferrer\">外部</a><a href=\"http://example.com/\" target=\"_blank\" rel=\"noopener noreferrer\">http</a><a href=\"https://ginowanku-seinenkai.com/news/12\">内部</a><strong><a href=\"https://ginowanku-seinenkai.com/about\">太字リンク</a></strong></p></div>"
+}

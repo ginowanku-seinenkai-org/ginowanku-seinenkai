@@ -1,0 +1,33 @@
+---
+// S11 404（06 §4.4）。noindex、canonical なし、計測は送らない
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { buildMeta } from '../lib/seo.ts';
+
+const meta = buildMeta({ name: 'ページが見つかりません', path: '/404', noCanonical: true });
+---
+
+<BaseLayout meta={meta} noindex track={false}>
+  <PageHead title="ページが見つかりません" crumbs={[{ label: 'ページが見つかりません' }]} />
+  <div class="wrap narrow article stack">
+    <p class="big-num" aria-hidden="true">
+      404
+    </p>
+    <p>
+      お探しのページは、移動または削除された可能性があります。
+      <br />
+      URLに誤りがないかご確認ください。
+    </p>
+    <p class="btn-row">
+      <a class="btn btn-ink" href="/">
+        トップページへ
+      </a>
+      <a class="btn btn-line" href="/news">
+        お知らせ・行事
+      </a>
+      <a class="btn btn-line" href="/contact">
+        演舞依頼・お問い合わせ
+      </a>
+    </p>
+  </div>
+</BaseLayout>

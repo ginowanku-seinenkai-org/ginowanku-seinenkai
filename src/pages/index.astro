@@ -1,0 +1,154 @@
+---
+// S01 トップ（03 §6.5）
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EventDate from '../components/EventDate.astro';
+import KindLabel from '../components/KindLabel.astro';
+import PostCard from '../components/PostCard.astro';
+import SnsLinks from '../components/SnsLinks.astro';
+import { loadSiteData } from '../lib/data.ts';
+import { eventDateBox, formatPublishedOn } from '../lib/date.ts';
+import { DESCRIPTIONS, EMPTY, SITE_NAME } from '../lib/messages.ts';
+import {
+  activityPosts,
+  eventEndDate,
+  newsPosts,
+  photoSrc,
+  postUrl,
+  upcomingEvents,
+} from '../lib/posts.ts';
+import { buildMeta, organizationJsonLd } from '../lib/seo.ts';
+
+const data = await loadSiteData();
+const hero =
+  data.settings.hero_photo_id === null ? undefined : data.photos.get(data.settings.hero_photo_id);
+const events = upcomingEvents(data, 3);
+const news = newsPosts(data).slice(0, 5);
+const activities = activityPosts(data).slice(0, 3);
+const meta = buildMeta({
+  name: null,
+  path: '/',
+  description: DESCRIPTIONS.top,
+  image: hero ?? null,
+});
+const hasSns = [
+  data.settings.instagram_url,
+  data.settings.facebook_url,
+  data.settings.tiktok_url,
+].some((u) => u !== null);
+---
+
+<BaseLayout meta={meta} current="top" jsonLd={[organizationJsonLd(data.settings)]}>
+  <section class="hero">
+    {hero && (
+      <img
+        class="hero-photo"
+        src={photoSrc(hero, 'full')}
+        srcset={`${photoSrc(hero, 'thumb')} ${hero.thumb_width}w, ${photoSrc(hero, 'full')} ${hero.width}w`}
+        sizes="100vw"
+        width={hero.width}
+        height={hero.height}
+        alt={hero.alt}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    )}
+    <div class="wrap hero-in">
+      <h1>{SITE_NAME}</h1>
+      {data.settings.hero_catch && <p class="catch">{data.settings.hero_catch}</p>}
+    </div>
+  </section>
+
+  <section class="wrap sec" aria-labelledby="upcoming-heading">
+    <div class="sec-h">
+      <h2 id="upcoming-heading">次の行事</h2>
+    </div>
+    <p class="empty" data-upcoming-empty hidden={events.length > 0}>
+      {EMPTY.upcomingEvents}
+    </p>
+    {events.length > 0 && (
+      <ul class="events" data-upcoming-list>
+        {events.map((post) => {
+          const box = eventDateBox(post.event_starts_at ?? '');
+          return (
+            <li data-event-end={eventEndDate(post) ?? undefined} data-ended-behavior="hide">
+              <a class="ev" href={postUrl(post)}>
+                <span class="date" aria-hidden="true">
+                  <span class="m">{box.month}</span>
+                  <span class="d">{box.day}</span>
+                  <span class="w">{box.weekday}</span>
+                </span>
+                <span class="ev-body">
+                  <span class="ev-title">{post.title}</span>
+                  <span class="ev-meta">
+                    <EventDate post={post} />
+                    {post.event_place && <span>{post.event_place}</span>}
+                  </span>
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+  </section>
+
+  <section class="wrap sec" aria-labelledby="news-heading">
+    <div class="sec-h">
+      <h2 id="news-heading">お知らせ</h2>
+      <a class="more" href="/news">
+        一覧を見る
+      </a>
+    </div>
+    {news.length === 0 ? (
+      <p class="empty">{EMPTY.topNews}</p>
+    ) : (
+      <ul class="news">
+        {news.map((post) => (
+          <li>
+            <a href={postUrl(post)}>
+              <time datetime={post.published_on}>{formatPublishedOn(post.published_on)}</time>
+              <KindLabel kind={post.kind} />
+              <span class="t">{post.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  {activities.length > 0 && (
+    <section class="wrap sec" aria-labelledby="activities-heading">
+      <div class="sec-h">
+        <h2 id="activities-heading">活動記録</h2>
+        <a class="more" href="/activities">
+          一覧を見る
+        </a>
+      </div>
+      <ul class="cards">
+        {activities.map((post) => (
+          <li>
+            <PostCard post={post} data={data} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="wrap sec">
+    <div class="ctas">
+      <div class="cta join">
+        <h2>
+          <a href="/join">メンバー募集</a>
+        </h2>
+        <span class="target">対象：{data.settings.join_age_label}</span>
+      </div>
+      <div class="cta req">
+        <h2>
+          <a href="/contact">演舞依頼・お問い合わせ</a>
+        </h2>
+      </div>
+    </div>
+    {hasSns && <SnsLinks settings={data.settings} />}
+  </section>
+</BaseLayout>

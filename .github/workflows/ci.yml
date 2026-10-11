@@ -1,0 +1,120 @@
+# プルリクエストの検査（05 §2.2）。手順の順番と中身は 03 §2.3 が正
+name: ci
+
+on:
+  pull_request:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: ワークフローの検査（07 WF-01。D-50）
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          set -euo pipefail
+          file="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl --fail-with-body -sSL -o "$RUNNER_TEMP/$file" \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${file}"
+          echo "${ACTIONLINT_SHA256}  $RUNNER_TEMP/$file" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$file" -C "$RUNNER_TEMP" actionlint
+          shellcheck --version | head -n 2
+          "$RUNNER_TEMP/actionlint"
+      - name: 依存の取得
+        run: pnpm install --frozen-lockfile
+      - name: Lint・書式
+        run: pnpm lint
+      - name: 型チェック
+        run: pnpm typecheck
+      - name: 単体テスト
+        run: pnpm test
+      - name: 固定データでビルド（local）
+        run: pnpm build:fixture
+      - name: ビルド出力の検査（local）
+        run: pnpm test:dist
+      - name: 固定データでビルド（preview）
+        env:
+          PUBLIC_SITE_ENV: preview
+          PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_dummy
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+        run: pnpm build:fixture
+      - name: ビルド出力の検査（preview）
+        env:
+          PUBLIC_SITE_ENV: preview
+          PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_dummy
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+        run: pnpm test:dist
+
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 依存の取得
+        run: pnpm install --frozen-lockfile
+      - name: 固定データでビルド
+        run: pnpm build:fixture
+      - name: ブラウザの準備（PC の Chrome と iPhone の WebKit。07 §6.1）
+        run: pnpm exec playwright install --with-deps chromium webkit
+      - name: 画面操作テスト（07 §6.2、axe を含む）
+        run: pnpm test:e2e
+      - name: 失敗したときのレポートを保存
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: 依存の取得
+        run: pnpm install --frozen-lockfile
+      - name: 固定データでビルド
+        run: pnpm build:fixture
+      - name: 表示速度の検査（Lighthouse CI。07 NF-01。ランナーに入っている Chrome を使う）
+        run: pnpm test:lhci
+      - name: 結果を保存
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/reports/
+          retention-days: 7

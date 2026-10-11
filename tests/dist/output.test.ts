@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 // ビルド出力の検査（07 UT-20〜UT-29、03 §2.3）。build か build:fixture のあとに、ビルドと同じ PUBLIC_SITE_ENV で実行する
-// 計測は feature/analytics で足す
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -186,6 +185,17 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
         (s.getAttribute('src') ?? '').includes(loaders[0] ?? '?'),
       );
       expect(usesLoader, p.path).toBe(p.path === '/contact');
+    }
+  });
+
+  it('アクセス計測：404 以外の全ページが送り先と環境を持ち、404 は計測を読み込まない（UT-29、03 §9）', () => {
+    const endpoint = `${parseEnv(process.env).supabaseUrl.replace(/\/$/, '')}/functions/v1/track`;
+    for (const p of pages) {
+      const root = p.doc.documentElement;
+      // プレビューでは環境が preview になり、ブラウザ側の判定で送らない（D-20）
+      expect(root.dataset['siteEnv'], p.path).toBe(siteEnv);
+      if (p.path === '/404') expect(root.dataset['trackEndpoint']).toBeUndefined();
+      else expect(root.dataset['trackEndpoint'], p.path).toBe(endpoint);
     }
   });
 

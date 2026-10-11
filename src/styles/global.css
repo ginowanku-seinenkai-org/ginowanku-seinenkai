@@ -1108,13 +1108,40 @@ h1:focus {
 .sns a {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 20px;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
   border: 1.5px solid var(--line);
-  border-radius: 999px;
+  border-radius: 50%;
   background: var(--surface);
-  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.sns svg {
+  flex: none;
+}
+
+/* フッターではアイコンだけを並べる（枠なし。押せる範囲は 44px 以上） */
+.ftr .sns-ftr {
+  gap: 8px;
+}
+
+.ftr .sns-ftr a {
+  width: 44px;
+  height: 44px;
+  margin-left: -11px;
+  border: 0;
+  background: none;
+  color: var(--on-dark-2);
+}
+
+.ftr .sns-ftr li + li a {
+  margin-left: 0;
+}
+
+.ftr .sns-ftr a:hover {
+  color: var(--on-dark);
   text-decoration: none;
 }
 

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // ビルド出力の検査（07 UT-20〜UT-29、03 §2.3）。build か build:fixture のあとに、ビルドと同じ PUBLIC_SITE_ENV で実行する
-// フォーム（UT-29 の送信ボタン・Turnstile）は feature/inquiry-form、計測は feature/analytics で足す
+// 計測は feature/analytics で足す
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -151,6 +151,42 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       t.getAttribute('datetime'),
     );
     expect(dates).toEqual([PRIVACY_ESTABLISHED_ON, PRIVACY_VERSION]);
+  });
+
+  it('問い合わせフォーム：プレビューでは送れない（UT-29・07 EP-15、D-20）', () => {
+    const { doc } = pageAt('/contact');
+    const form = doc.querySelector<HTMLFormElement>('[data-contact-form]');
+    expect(form).not.toBeNull();
+    const button = form?.querySelector('button[type="submit"]');
+    const notice = doc.querySelector('.state-note:not(noscript .state-note)');
+    if (siteEnv === 'preview') {
+      expect(form?.dataset['preview']).toBe('true');
+      expect(button?.hasAttribute('disabled')).toBe(true);
+      expect(notice?.textContent).toBe('プレビュー環境では送信できません。');
+    } else {
+      expect(form?.dataset['preview']).toBe('false');
+      expect(button?.hasAttribute('disabled')).toBe(false);
+      expect(notice).toBeNull();
+    }
+    // 送り先は PUBLIC_SUPABASE_URL の submit-inquiry。版は privacy.ts の定数
+    expect(form?.dataset['endpoint']).toBe(
+      `${parseEnv(process.env).supabaseUrl.replace(/\/$/, '')}/functions/v1/submit-inquiry`,
+    );
+    expect(form?.dataset['privacyVersion']).toBe(PRIVACY_VERSION);
+  });
+
+  it('Turnstile は /contact のスクリプトだけが読み込む（03 §14）', () => {
+    const scripts = readdirSync(join(DIST, '_astro')).filter((f) => f.endsWith('.js'));
+    const loaders = scripts.filter((f) =>
+      read(join('_astro', f)).includes('challenges.cloudflare.com'),
+    );
+    expect(loaders).toHaveLength(1);
+    for (const p of pages) {
+      const usesLoader = Array.from(p.doc.querySelectorAll('script[src]')).some((s) =>
+        (s.getAttribute('src') ?? '').includes(loaders[0] ?? '?'),
+      );
+      expect(usesLoader, p.path).toBe(p.path === '/contact');
+    }
   });
 
   it('個人の氏名を出さない：役員紹介の区画がない（D-41）', () => {

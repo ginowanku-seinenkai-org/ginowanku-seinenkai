@@ -1,0 +1,206 @@
+---
+// 問い合わせフォーム（03 §8、文言は 06 §4.1）。動きは src/scripts/contact-form.ts
+// 設定はビルド時に data 属性で渡す（インラインのスクリプトを使わない。03 §12）
+import ContactField from './ContactField.astro';
+import InstagramDmLink from './InstagramDmLink.astro';
+import { getEnv } from '../lib/env.ts';
+import {
+  CONTACT_FIELDS as F,
+  CONTACT_MAX_LENGTH as MAX,
+  CONTACT_STATE,
+  INQUIRY_KINDS,
+  JOIN_GUIDE,
+  PRIVACY_AGREEMENT,
+} from '../lib/messages.ts';
+import { PRIVACY_VERSION } from '../lib/privacy.ts';
+
+interface Props {
+  instagramUrl: string | null;
+  joinAgeLabel: string;
+}
+const { instagramUrl, joinAgeLabel } = Astro.props;
+const env = getEnv();
+const preview = env.siteEnv === 'preview';
+const endpoint = `${env.supabaseUrl.replace(/\/$/, '')}/functions/v1/submit-inquiry`;
+---
+
+{preview && <p class="state-note">{CONTACT_STATE.preview}</p>}
+<noscript>
+  <p class="state-note">
+    {CONTACT_STATE.noscript.before}
+    <InstagramDmLink url={instagramUrl} />
+    {CONTACT_STATE.noscript.after}
+  </p>
+</noscript>
+<form
+  class="form"
+  id="contact-form"
+  novalidate
+  data-contact-form
+  data-preview={preview ? 'true' : 'false'}
+  data-endpoint={endpoint}
+  data-sitekey={env.turnstileSiteKey}
+  data-privacy-version={PRIVACY_VERSION}
+  data-join-age-label={joinAgeLabel}
+  data-instagram-url={instagramUrl ?? ''}
+>
+  <div class="summary" tabindex="-1" data-summary hidden>
+    <h2 data-summary-heading></h2>
+    <p data-summary-body></p>
+    <ul data-summary-list></ul>
+  </div>
+
+  <fieldset class="fld" data-field="kind" aria-describedby="f-kind-e">
+    <legend class="lbl">
+      {F.kind.label} <span class="req">必須</span>
+    </legend>
+    <div class="kinds">
+      {INQUIRY_KINDS.map((k) => (
+        <label>
+          <input type="radio" name="kind" value={k.value} id={`f-kind-${k.value}`} />
+          {k.label}
+        </label>
+      ))}
+    </div>
+    <p class="err" id="f-kind-e" hidden></p>
+  </fieldset>
+
+  <div class="form-body" data-after-kind hidden>
+    <div data-kind-only="performance other">
+      <ContactField
+        name="organization"
+        label={F.organization.label}
+        required
+        maxlength={MAX.organization}
+        autocomplete="organization"
+        placeholder={F.organization.placeholder}
+        hint={F.organization.hint.performance}
+      />
+    </div>
+    <p class="box-join" data-kind-only="join">
+      {JOIN_GUIDE.lines(joinAgeLabel)[0]}
+      <br />
+      {JOIN_GUIDE.lines(joinAgeLabel)[1]}
+    </p>
+    <ContactField
+      name="name"
+      label={F.name.label.performance}
+      required
+      maxlength={MAX.name}
+      autocomplete="name"
+      placeholder={F.name.placeholder}
+    />
+    <div class="fld" data-kind-only="join">
+      <ContactField
+        name="age"
+        label={F.age.label}
+        required
+        maxlength={3}
+        inputmode="numeric"
+        placeholder={F.age.placeholder}
+        hint={F.age.hint(joinAgeLabel)}
+      />
+      <p class="hint age-note" aria-live="polite" data-age-note></p>
+    </div>
+    <ContactField
+      name="email"
+      label={F.email.label}
+      required
+      type="email"
+      maxlength={MAX.email}
+      autocomplete="email"
+      inputmode="email"
+      placeholder={F.email.placeholder}
+      hint={F.email.hint}
+    />
+    <ContactField
+      name="phone"
+      label={F.phone.label}
+      required={false}
+      type="tel"
+      maxlength={MAX.phone}
+      autocomplete="tel"
+      placeholder={F.phone.placeholder}
+      hint={F.phone.hint}
+    />
+    <fieldset data-kind-only="performance">
+      <ContactField
+        name="preferred_datetime"
+        label={F.preferred_datetime.label}
+        required
+        type="textarea"
+        short
+        maxlength={MAX.preferred_datetime}
+        placeholder={F.preferred_datetime.placeholder}
+        hint={F.preferred_datetime.hint}
+      />
+      <ContactField
+        name="venue"
+        label={F.venue.label}
+        required
+        maxlength={MAX.venue}
+        placeholder={F.venue.placeholder}
+        hint={F.venue.hint}
+      />
+      <ContactField
+        name="event_summary"
+        label={F.event_summary.label}
+        required
+        type="textarea"
+        maxlength={MAX.event_summary}
+        placeholder={F.event_summary.placeholder}
+        hint={F.event_summary.hint}
+      />
+      <ContactField
+        name="performance_length"
+        label={F.performance_length.label}
+        required={false}
+        maxlength={MAX.performance_length}
+        placeholder={F.performance_length.placeholder}
+      />
+    </fieldset>
+    <ContactField
+      name="message"
+      label={F.message.label.performance}
+      required={false}
+      type="textarea"
+      maxlength={MAX.message}
+      placeholder={F.message.placeholder.performance}
+    />
+    <div class="hp" aria-hidden="true">
+      <label for="f-website">この欄には何も入力しないでください</label>
+      <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+  </div>
+
+  <div class="agree fld" data-field="privacy_agreed">
+    <p>{PRIVACY_AGREEMENT.summary}</p>
+    <label>
+      <input
+        type="checkbox"
+        id="f-privacy_agreed"
+        name="privacy_agreed"
+        aria-describedby="f-privacy_agreed-e"
+      />
+      <span>
+        <a href="/privacy" target="_blank" rel="noopener noreferrer">
+          {PRIVACY_AGREEMENT.link}
+        </a>
+        {PRIVACY_AGREEMENT.after}
+      </span>
+    </label>
+    <p class="err" id="f-privacy_agreed-e" hidden></p>
+  </div>
+
+  <div class="ts-box" data-turnstile hidden={preview}></div>
+  <p class="err" id="f-turnstile-e" hidden></p>
+
+  <button class="btn btn-shu btn-block" type="submit" disabled={preview} data-submit>
+    {CONTACT_STATE.submit}
+  </button>
+  <p class="status" role="status" data-status></p>
+</form>
+
+<script>
+  import '../scripts/contact-form.ts';
+</script>

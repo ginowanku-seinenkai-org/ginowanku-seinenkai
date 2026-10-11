@@ -17,6 +17,7 @@ const { meta, robots } = Astro.props;
 {robots && <meta name="robots" content={robots} />}
 {meta.canonical && <link rel="canonical" href={meta.canonical} />}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:locale" content="ja_JP" />
 <meta property="og:type" content={meta.ogType} />

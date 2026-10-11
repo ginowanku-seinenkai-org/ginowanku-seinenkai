@@ -8,3 +8,5 @@ pnpm-lock.yaml
 
 # 手で書く文書は整形しない
 *.md
+# 問い合わせの入力チェックは管理画面のリポジトリが正で、Deno の書式で整える（同じ内容を保つため。00 §2.2）
+src/lib/inquiry-schema.ts

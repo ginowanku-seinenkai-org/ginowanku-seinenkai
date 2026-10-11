@@ -151,12 +151,20 @@ h1:focus {
 .brand {
   display: inline-flex;
   align-items: center;
+  gap: 10px;
   min-height: 44px;
   color: var(--head);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-decoration: none;
+}
+
+/* ヘッダーの会のしるし（エンブレム） */
+.brand-mark {
+  flex: none;
+  width: 40px;
+  height: 40px;
 }
 
 .menu-btn {

@@ -22,21 +22,27 @@ async function serveAsProduction(page: Page) {
 }
 
 async function captureTrack(page: Page) {
+  // sendBeacon は route で受け止められないブラウザがあるため、送信そのものを request で数える
   const sent: { body: Record<string, unknown>; request: Request }[] = [];
-  await page.route('**/functions/v1/track', async (route) => {
+  page.on('request', (request) => {
+    if (!request.url().endsWith('/functions/v1/track')) return;
     sent.push({
-      body: JSON.parse(route.request().postData() ?? '{}') as Record<string, unknown>,
-      request: route.request(),
+      body: JSON.parse(request.postData() ?? '{}') as Record<string, unknown>,
+      request,
     });
-    await route.fulfill({ status: 204 });
   });
+  await page.route('**/functions/v1/track', (route) => route.fulfill({ status: 204 }));
   return sent;
 }
 
 /** 自動操作のブラウザでないように見せる（navigator.webdriver を false に） */
 async function notWebdriver(page: Page) {
   await page.addInitScript(() => {
-    Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false });
+    Object.defineProperty(Navigator.prototype, 'webdriver', {
+      get: () => false,
+      configurable: true,
+    });
+    Object.defineProperty(navigator, 'webdriver', { get: () => false, configurable: true });
   });
 }
 

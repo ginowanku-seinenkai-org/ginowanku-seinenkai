@@ -1,2 +1,4 @@
 allowBuilds:
   esbuild: true
+  # wrangler のローカル実行用の部品。pages deploy では使わないため、準備のスクリプトは動かさない
+  workerd: false

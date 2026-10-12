@@ -4,7 +4,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import EventDate from '../components/EventDate.astro';
 import KindLabel from '../components/KindLabel.astro';
 import PostCard from '../components/PostCard.astro';
-import SnsLinks from '../components/SnsLinks.astro';
 import { loadSiteData } from '../lib/data.ts';
 import { eventDateBox, formatPublishedOn } from '../lib/date.ts';
 import { DESCRIPTIONS, EMPTY, SITE_NAME } from '../lib/messages.ts';
@@ -30,11 +29,6 @@ const meta = buildMeta({
   description: DESCRIPTIONS.top,
   image: hero ?? null,
 });
-const hasSns = [
-  data.settings.instagram_url,
-  data.settings.facebook_url,
-  data.settings.tiktok_url,
-].some((u) => u !== null);
 ---
 
 <BaseLayout meta={meta} current="top" jsonLd={[organizationJsonLd(data.settings)]}>
@@ -149,6 +143,5 @@ const hasSns = [
         </h2>
       </div>
     </div>
-    {hasSns && <SnsLinks settings={data.settings} />}
   </section>
 </BaseLayout>

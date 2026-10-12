@@ -1010,10 +1010,6 @@ h1:focus {
   text-underline-offset: 5px;
 }
 
-.ctas + .sns {
-  margin-top: 24px;
-}
-
 .cta.join {
   border: 2px solid var(--ki);
   background: var(--tint-ki);
@@ -1095,58 +1091,37 @@ h1:focus {
   gap: 12px;
 }
 
-/* SNS */
-.sns {
+/* SNS（フッターだけ。アイコンだけを並べ、押せる範囲は 44px 以上。D-62・D-65） */
+.ftr .sns {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.sns a {
+.ftr .sns a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border: 1.5px solid var(--line);
-  border-radius: 50%;
-  background: var(--surface);
-  color: var(--ink);
+  width: 44px;
+  height: 44px;
+  color: var(--on-dark-2);
   text-decoration: none;
 }
 
-.sns svg {
+.ftr .sns li:first-child a {
+  margin-left: -11px;
+}
+
+.ftr .sns svg {
   flex: none;
 }
 
-/* フッターではアイコンだけを並べる（枠なし。押せる範囲は 44px 以上） */
-.ftr .sns-ftr {
-  gap: 8px;
-}
-
-.ftr .sns-ftr a {
-  width: 44px;
-  height: 44px;
-  margin-left: -11px;
-  border: 0;
-  background: none;
-  color: var(--on-dark-2);
-}
-
-.ftr .sns-ftr li + li a {
-  margin-left: 0;
-}
-
-.ftr .sns-ftr a:hover {
+.ftr .sns a:hover {
   color: var(--on-dark);
   text-decoration: none;
-}
-
-.sns a:hover {
-  border-color: var(--ink);
 }
 
 /* 問い合わせの案内 */

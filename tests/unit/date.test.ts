@@ -23,10 +23,11 @@ describe('formatPublishedOn', () => {
 });
 
 describe('formatEventDate（03 §6.4 の表）', () => {
-  const ev = (start: string, end: string | null, allDay = false) => ({
+  const ev = (start: string, end: string | null, allDay = false, timeTbd = false) => ({
     event_starts_at: start,
     event_ends_at: end,
     event_all_day: allDay,
+    event_time_tbd: timeTbd,
   });
   it('時刻あり・同日', () =>
     expect(formatEventDate(ev('2026-10-10T18:00:00+09:00', '2026-10-10T21:00:00+09:00'))).toBe(
@@ -48,6 +49,14 @@ describe('formatEventDate（03 §6.4 の表）', () => {
     expect(
       formatEventDate(ev('2026-10-10T00:00:00+09:00', '2026-10-12T00:00:00+09:00', true)),
     ).toBe('2026年10月10日（土）〜10月12日（月）'));
+  it('時間未定・1日（D-68）', () =>
+    expect(formatEventDate(ev('2026-11-22T00:00:00+09:00', null, false, true))).toBe(
+      '2026年11月22日（日）時間未定',
+    ));
+  it('時間未定・複数日（D-68）', () =>
+    expect(
+      formatEventDate(ev('2026-11-22T00:00:00+09:00', '2026-11-23T00:00:00+09:00', false, true)),
+    ).toBe('2026年11月22日（日）〜11月23日（月）時間未定'));
   it('UTC で前日でも日本時間の日付で表示する', () =>
     expect(formatEventDate(ev('2026-10-09T15:30:00Z', null))).toBe('2026年10月10日（土）0:30〜'));
 });

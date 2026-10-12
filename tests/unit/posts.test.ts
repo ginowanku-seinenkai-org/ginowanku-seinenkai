@@ -23,6 +23,7 @@ function post(id: number, kind: PublicPost['kind'], extra: Partial<PublicPost> =
     event_starts_at: null,
     event_ends_at: null,
     event_all_day: false,
+    event_time_tbd: false,
     event_place: null,
     published_on: '2026-10-01',
     updated_at: '2026-10-01T00:00:00Z',

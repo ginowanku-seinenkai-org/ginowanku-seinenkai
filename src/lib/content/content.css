@@ -114,3 +114,23 @@
   aspect-ratio: 16 / 9;
   border: 0;
 }
+
+/* TikTok・Instagram の埋め込み（D-70）。縦長の枠を中央に置き、下に元の投稿へのリンク */
+.content-body .sns-embed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.content-body .sns-embed iframe {
+  max-width: 325px;
+  min-height: 0;
+  aspect-ratio: 9 / 16;
+}
+
+.content-body .sns-instagram iframe {
+  max-width: 400px;
+  height: 600px;
+  aspect-ratio: auto;
+}

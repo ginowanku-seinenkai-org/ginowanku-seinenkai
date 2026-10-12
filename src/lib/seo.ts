@@ -114,14 +114,14 @@ export function eventJsonLd(
 ): Record<string, unknown> | null {
   if (post.kind !== 'event' || post.event_place === null || post.event_starts_at === null)
     return null;
+  const noTime = post.event_all_day || post.event_time_tbd;
   return {
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: post.title,
-    startDate: eventDatetime(post.event_starts_at, post.event_all_day),
-    ...(post.event_ends_at !== null
-      ? { endDate: eventDatetime(post.event_ends_at, post.event_all_day) }
-      : {}),
+    // 終日・時間未定は日付だけ（03 §12.1、D-68）
+    startDate: eventDatetime(post.event_starts_at, noTime),
+    ...(post.event_ends_at !== null ? { endDate: eventDatetime(post.event_ends_at, noTime) } : {}),
     eventStatus: 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {

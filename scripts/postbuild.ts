@@ -31,7 +31,7 @@ export function buildHeaders(supabaseUrl: string): string {
     "img-src 'self'",
     "font-src 'self'",
     `connect-src 'self' ${supabaseOrigin}`,
-    'frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com',
+    'frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.tiktok.com https://www.instagram.com',
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

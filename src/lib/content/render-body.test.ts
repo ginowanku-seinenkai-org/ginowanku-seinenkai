@@ -44,7 +44,7 @@ const ALLOWED_ATTRIBUTES: Record<string, readonly string[]> = {
   ul: [],
   ol: [],
   li: [],
-  figure: [],
+  figure: ['class'],
   img: ['src', 'srcset', 'sizes', 'width', 'height', 'alt', 'loading', 'decoding'],
   figcaption: [],
   iframe: [
@@ -99,9 +99,13 @@ describe('renderBody（fixtures）', () => {
           if (tag === 'a') expect(el.getAttribute('href')).toMatch(/^https?:/);
           if (tag === 'img') expect(photoSrcs.has(el.getAttribute('src') ?? '')).toBe(true);
           if (tag === 'iframe') {
+            // YouTube（youtube-nocookie.com）、TikTok・Instagram（D-70）の決まった形だけ
             expect(el.getAttribute('src')).toMatch(
-              /^https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}$/,
+              /^https:\/\/(www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]{11}|www\.tiktok\.com\/player\/v1\/[0-9]{8,25}\?rel=0|www\.instagram\.com\/(p|reel)\/[A-Za-z0-9_-]{5,40}\/embed\/)$/,
             );
+          }
+          if (tag === 'figure' && el.hasAttribute('class')) {
+            expect(el.getAttribute('class')).toMatch(/^sns-embed sns-(tiktok|instagram)$/);
           }
         }
       });

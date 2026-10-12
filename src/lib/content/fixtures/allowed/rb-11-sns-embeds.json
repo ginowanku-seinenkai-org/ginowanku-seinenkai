@@ -1,0 +1,41 @@
+{
+  "name": "rb-11-sns-embeds",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": "ginowanku.seinenkai",
+          "title": "道じゅねーの動画"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345679",
+          "author": "seinen_kai"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": "C8xR1nTSf3k",
+          "title": "練習の写真"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "reel",
+          "postId": "DA_b-12345",
+          "title": "  "
+        }
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><figure class=\"sns-embed sns-tiktok\"><iframe src=\"https://www.tiktok.com/player/v1/7123456789012345678?rel=0\" title=\"道じゅねーの動画\" width=\"325\" height=\"578\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"fullscreen\" allowfullscreen></iframe><figcaption><a href=\"https://www.tiktok.com/@ginowanku.seinenkai/video/7123456789012345678\" target=\"_blank\" rel=\"noopener noreferrer\">TikTokで見る</a></figcaption></figure><figure class=\"sns-embed sns-tiktok\"><iframe src=\"https://www.tiktok.com/player/v1/7123456789012345679?rel=0\" title=\"TikTok動画\" width=\"325\" height=\"578\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"fullscreen\" allowfullscreen></iframe><figcaption><a href=\"https://www.tiktok.com/@seinen_kai/video/7123456789012345679\" target=\"_blank\" rel=\"noopener noreferrer\">TikTokで見る</a></figcaption></figure><figure class=\"sns-embed sns-instagram\"><iframe src=\"https://www.instagram.com/p/C8xR1nTSf3k/embed/\" title=\"練習の写真\" width=\"400\" height=\"600\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"fullscreen\" allowfullscreen></iframe><figcaption><a href=\"https://www.instagram.com/p/C8xR1nTSf3k/\" target=\"_blank\" rel=\"noopener noreferrer\">Instagramで見る</a></figcaption></figure><figure class=\"sns-embed sns-instagram\"><iframe src=\"https://www.instagram.com/reel/DA_b-12345/embed/\" title=\"Instagramの投稿\" width=\"400\" height=\"600\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"fullscreen\" allowfullscreen></iframe><figcaption><a href=\"https://www.instagram.com/reel/DA_b-12345/\" target=\"_blank\" rel=\"noopener noreferrer\">Instagramで見る</a></figcaption></figure></div>"
+}

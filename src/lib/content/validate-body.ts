@@ -5,13 +5,19 @@
 export const MAX_BODY_BYTES = 100_000;
 /** 入れ子の深さの上限。超えた部分は出力しない（03 §5.3） */
 export const MAX_DEPTH = 20;
-/** YouTube の題名の上限（文字数。00 §2.1、D-52） */
+/** YouTube・TikTok・Instagram の題名の上限（文字数。00 §2.1、D-52、D-70） */
 export const MAX_YOUTUBE_TITLE = 100;
 /** 写真の説明文の上限（文字数。00 §2.1、D-52） */
 export const MAX_PHOTO_CAPTION = 120;
 
 export const PHOTO_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+/** TikTok の投稿の番号とアカウント名（D-70） */
+export const TIKTOK_ID_PATTERN = /^[0-9]{8,25}$/;
+export const TIKTOK_AUTHOR_PATTERN = /^[A-Za-z0-9._]{1,40}$/;
+/** Instagram の投稿の ID と種類（D-70） */
+export const INSTAGRAM_ID_PATTERN = /^[A-Za-z0-9_-]{5,40}$/;
+export const INSTAGRAM_KINDS: readonly string[] = ['p', 'reel'];
 
 /** 文字数（コードポイント単位） */
 export function charLength(value: string): number {
@@ -68,6 +74,8 @@ const NODE_KEYS: Record<string, { keys: readonly string[]; attrs: readonly strin
   text: { keys: ['type', 'text', 'marks'], attrs: [] },
   photo: { keys: ['type', 'attrs'], attrs: ['photoId', 'caption'] },
   youtube: { keys: ['type', 'attrs'], attrs: ['videoId', 'title'] },
+  tiktok: { keys: ['type', 'attrs'], attrs: ['videoId', 'author', 'title'] },
+  instagram: { keys: ['type', 'attrs'], attrs: ['kind', 'postId', 'title'] },
 };
 const MARK_ATTRS: Record<string, readonly string[]> = { bold: [], link: ['href'] };
 
@@ -131,7 +139,7 @@ function checkNode(node: unknown, path: string, depth: number, errors: BodyError
     if (typeof own(node, 'text') !== 'string') errors.push({ path, code: 'invalid_structure' });
     checkMarks(own(node, 'marks'), path, errors);
   }
-  if (type === 'youtube') {
+  if (type === 'youtube' || type === 'tiktok' || type === 'instagram') {
     const title = own(attrs, 'title');
     if (typeof title === 'string' && charLength(title.trim()) > MAX_YOUTUBE_TITLE) {
       errors.push({ path, code: 'title_too_long' });

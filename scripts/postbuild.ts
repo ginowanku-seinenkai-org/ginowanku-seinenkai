@@ -1,5 +1,5 @@
-// ビルド出力の検査（03 §12.3 の2〜5）。手順1の _headers の生成は feature/security-headers（00 §6 順18）で足す
-import { readFile, readdir } from 'node:fs/promises';
+// _headers の生成とビルド出力の検査（03 §12.3）
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { z } from 'zod';
 import { getEnv } from '../src/lib/env.ts';
@@ -16,6 +16,58 @@ export const TURNSTILE_TEST_KEYS = [
   '2x00000000000000000000BB',
   '3x00000000000000000000FF',
 ];
+
+/** Cloudflare Pages の _headers の上限（08 1-3） */
+export const MAX_HEADER_RULES = 100;
+export const MAX_HEADER_LINE = 2000;
+
+/** セキュリティヘッダー（03 §12.1）。CSP の connect-src に Supabase のオリジンを入れる */
+export function buildHeaders(supabaseUrl: string): string {
+  const supabaseOrigin = new URL(supabaseUrl).origin;
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' https://challenges.cloudflare.com",
+    "style-src 'self'",
+    "img-src 'self'",
+    "font-src 'self'",
+    `connect-src 'self' ${supabaseOrigin}`,
+    'frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com',
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    'upgrade-insecure-requests',
+  ].join('; ');
+  // Cache-Control は /* に書かない（同じヘッダーが複数の規則に当たると値がつながるため）
+  return [
+    '/*',
+    `  Content-Security-Policy: ${csp}`,
+    '  X-Frame-Options: DENY',
+    '  X-Content-Type-Options: nosniff',
+    '  Referrer-Policy: strict-origin-when-cross-origin',
+    '  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+    '  Strict-Transport-Security: max-age=31536000',
+    '',
+    '/_astro/*',
+    '  Cache-Control: public, max-age=31536000, immutable',
+    '',
+    '/photos/*',
+    '  Cache-Control: public, max-age=31536000, immutable',
+    '',
+  ].join('\n');
+}
+
+/** _headers の上限（規則100件、1行2,000文字）を超えていないか */
+export function checkHeaders(text: string): string[] {
+  const errors: string[] = [];
+  const rules = text.split('\n').filter((line) => line.startsWith('/')).length;
+  if (rules > MAX_HEADER_RULES)
+    errors.push(`_headers の規則が ${rules} 件で、上限 ${MAX_HEADER_RULES} 件を超えています`);
+  for (const line of text.split('\n'))
+    if (line.length > MAX_HEADER_LINE)
+      errors.push(`_headers に ${line.length} 文字の行があります（上限 ${MAX_HEADER_LINE}）`);
+  return errors;
+}
 
 async function listFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true, recursive: true });
@@ -39,14 +91,22 @@ export function findInlineViolations(html: string): string[] {
 export interface PostbuildOptions {
   root?: string;
   siteEnv?: string;
+  supabaseUrl?: string;
 }
 
 export async function postbuild({
   root = process.cwd(),
   siteEnv = getEnv().siteEnv,
+  supabaseUrl = getEnv().supabaseUrl,
 }: PostbuildOptions = {}) {
   const dist = join(root, 'dist');
   const errors: string[] = [];
+
+  // 1. _headers を生成する（Supabase の URL を CSP に入れるため、ビルドのたびに作る）
+  const headers = buildHeaders(supabaseUrl);
+  errors.push(...checkHeaders(headers));
+  await writeFile(join(dist, '_headers'), headers);
+
   const files = await listFiles(dist);
 
   for (const file of files.filter((f) => f.endsWith('.html'))) {

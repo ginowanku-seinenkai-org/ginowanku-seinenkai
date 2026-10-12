@@ -207,6 +207,21 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     }
   });
 
+  it('_headers：セキュリティヘッダーと Supabase のオリジン（03 §12.1）', () => {
+    const headers = read('_headers');
+    const origin = new URL(parseEnv(process.env).supabaseUrl).origin;
+    expect(headers).toContain(`connect-src 'self' ${origin}`);
+    for (const name of [
+      'Content-Security-Policy',
+      'X-Frame-Options: DENY',
+      'X-Content-Type-Options: nosniff',
+      'Referrer-Policy: strict-origin-when-cross-origin',
+      'Permissions-Policy',
+      'Strict-Transport-Security',
+    ])
+      expect(headers).toContain(name);
+  });
+
   it('個人の氏名を出さない：役員紹介の区画がない（D-41）', () => {
     for (const p of pages) expect(p.html).not.toContain('役員紹介');
   });

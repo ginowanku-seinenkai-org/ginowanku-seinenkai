@@ -58,7 +58,15 @@ const meta = buildMeta({
       <h2 id="upcoming-heading">次の行事</h2>
     </div>
     <p class="empty" data-upcoming-empty hidden={events.length > 0}>
-      {EMPTY.upcomingEvents}
+      {
+        // 「。」のあとに文が続くところで改行する（06 §5。D-74）
+        EMPTY.upcomingEvents.split(/(?<=。)(?=.)/u).map((s, i) => (
+          <>
+            {i > 0 && <br />}
+            {s}
+          </>
+        ))
+      }
     </p>
     {events.length > 0 && (
       <ul class="events" data-upcoming-list>

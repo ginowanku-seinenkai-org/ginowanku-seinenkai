@@ -11,7 +11,9 @@ export type BodyNode =
   | { type: 'hardBreak' }
   | { type: 'text'; text: string; marks?: BodyMark[] }
   | { type: 'photo'; attrs: { photoId: string; caption?: string } }
-  | { type: 'youtube'; attrs: { videoId: string; title?: string } };
+  | { type: 'youtube'; attrs: { videoId: string; title?: string } }
+  | { type: 'tiktok'; attrs: { videoId: string; author: string; title?: string } }
+  | { type: 'instagram'; attrs: { kind: 'p' | 'reel'; postId: string; title?: string } };
 
 export interface BodyDoc {
   type: 'doc';

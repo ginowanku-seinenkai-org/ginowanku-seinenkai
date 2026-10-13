@@ -1,0 +1,198 @@
+{
+  "name": "rb-34a-sns-bad-attrs",
+  "input": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "\"><script>alert(1)</script>",
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "javascript:alert(1)",
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "../../x",
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "1234567",
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "11111111111111111111111111",
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "",
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": null,
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": 12345678,
+          "author": "ok"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": "\"><b>"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": "a/b"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": ""
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": null
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "tv",
+          "postId": "C8xR1nTSf3k"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "P",
+          "postId": "C8xR1nTSf3k"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "",
+          "postId": "C8xR1nTSf3k"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": null,
+          "postId": "C8xR1nTSf3k"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "\"><x",
+          "postId": "C8xR1nTSf3k"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": "\"><script>"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": "abcd"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": "a/b"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": ""
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "p",
+          "postId": null
+        }
+      },
+      {
+        "type": "tiktok",
+        "attrs": {
+          "videoId": "7123456789012345678",
+          "author": "ok",
+          "src": "https://evil.example/",
+          "allow": "camera",
+          "title": "あああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ"
+        }
+      },
+      {
+        "type": "instagram",
+        "attrs": {
+          "kind": "reel",
+          "postId": "C8xR1nTSf3k",
+          "sandbox": "",
+          "src": "javascript:alert(1)",
+          "title": "<b>題名</b>\""
+        }
+      }
+    ]
+  },
+  "photos": {},
+  "expected": "<div class=\"content-body\"><figure class=\"sns-embed sns-tiktok\"><iframe src=\"https://www.tiktok.com/player/v1/7123456789012345678?rel=0\" title=\"ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ\" width=\"325\" height=\"578\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"fullscreen\" allowfullscreen></iframe><figcaption><a href=\"https://www.tiktok.com/@ok/video/7123456789012345678\" target=\"_blank\" rel=\"noopener noreferrer\">TikTokで見る</a></figcaption></figure><figure class=\"sns-embed sns-instagram\"><iframe src=\"https://www.instagram.com/reel/C8xR1nTSf3k/embed/\" title=\"&lt;b&gt;題名&lt;/b&gt;&quot;\" width=\"400\" height=\"600\" loading=\"lazy\" referrerpolicy=\"strict-origin-when-cross-origin\" allow=\"fullscreen\" allowfullscreen></iframe><figcaption><a href=\"https://www.instagram.com/reel/C8xR1nTSf3k/\" target=\"_blank\" rel=\"noopener noreferrer\">Instagramで見る</a></figcaption></figure></div>"
+}

@@ -79,6 +79,8 @@ export interface EventTime {
   event_starts_at: string | null;
   event_ends_at: string | null;
   event_all_day: boolean;
+  /** 時間未定（D-68）。表示は終日と同じ日付だけに「時間未定」を付ける */
+  event_time_tbd: boolean;
 }
 
 /** 行事の日時（03 §6.4 の表） */
@@ -90,15 +92,16 @@ export function formatEventDate(event: EventTime): string {
   const sameDay =
     end !== null && end.year === start.year && end.month === start.month && end.day === start.day;
 
-  if (event.event_all_day) {
-    return end === null || sameDay ? head : `${head}〜${md(end)}`;
+  if (event.event_all_day || event.event_time_tbd) {
+    const days = end === null || sameDay ? head : `${head}〜${md(end)}`;
+    return event.event_time_tbd ? `${days}時間未定` : days;
   }
   if (end === null) return `${head}${hm(start)}〜`;
   if (sameDay) return `${head}${hm(start)}〜${hm(end)}`;
   return `${head}${hm(start)}〜${md(end)}${hm(end)}`;
 }
 
-/** 行事の <time datetime>：終日は 'YYYY-MM-DD'、時刻ありは 'YYYY-MM-DDTHH:mm:ss+09:00' */
+/** 行事の <time datetime>：終日・時間未定（allDay に true を渡す）は 'YYYY-MM-DD'、時刻ありは 'YYYY-MM-DDTHH:mm:ss+09:00' */
 export function eventDatetime(iso: string, allDay: boolean): string {
   const p = jstParts(new Date(iso));
   const ymd = `${p.year}-${pad(p.month)}-${pad(p.day)}`;

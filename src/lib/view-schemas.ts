@@ -21,6 +21,7 @@ export const publicPostSchema = z.object({
   event_starts_at: timestamp.nullable(),
   event_ends_at: timestamp.nullable(),
   event_all_day: z.boolean(),
+  event_time_tbd: z.boolean(), // 時間未定（D-68）
   event_place: z.string().nullable(),
   published_on: ymd,
   updated_at: timestamp,
@@ -87,7 +88,7 @@ export type DataMeta = z.infer<typeof metaSchema>;
 /** ビューごとの取得する列（select('*') は使わない。03 §3.2） */
 export const VIEW_COLUMNS = {
   v_public_posts:
-    'id,kind,title,body,cover_photo_id,event_starts_at,event_ends_at,event_all_day,event_place,published_on,updated_at',
+    'id,kind,title,body,cover_photo_id,event_starts_at,event_ends_at,event_all_day,event_time_tbd,event_place,published_on,updated_at',
   v_public_post_photos: 'post_id,photo_id,sort_order',
   v_public_pages: 'key,title,lead,body,cover_photo_id,updated_at',
   v_public_site_settings:

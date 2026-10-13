@@ -6,8 +6,12 @@ import type { RenderContext } from './types.ts';
 import {
   MAX_DEPTH,
   MAX_PHOTO_CAPTION,
+  INSTAGRAM_ID_PATTERN,
+  INSTAGRAM_KINDS,
   MAX_YOUTUBE_TITLE,
   PHOTO_ID_PATTERN,
+  TIKTOK_AUTHOR_PATTERN,
+  TIKTOK_ID_PATTERN,
   VIDEO_ID_PATTERN,
   own,
   truncateChars,
@@ -67,6 +71,10 @@ function renderNode(node: unknown, ctx: RenderContext, depth: number): string {
       return renderPhoto(own(node, 'attrs'), ctx);
     case 'youtube':
       return renderYouTube(own(node, 'attrs'));
+    case 'tiktok':
+      return renderTikTok(own(node, 'attrs'));
+    case 'instagram':
+      return renderInstagram(own(node, 'attrs'));
     default:
       // 未知のノード：content が配列なら子だけを出し、なければ何も出さない
       return Array.isArray(content) ? children() : '';
@@ -133,6 +141,63 @@ function renderPhoto(attrs: unknown, ctx: RenderContext): string {
       ? ''
       : `<figcaption>${escapeHtml(truncateChars(trimmed, MAX_PHOTO_CAPTION))}</figcaption>`;
   return `<figure>${img}${figcaption}</figure>`;
+}
+
+/** 埋め込みの読み上げ名（title。空なら既定の名前、長ければ切り詰める） */
+function embedLabel(title: unknown, fallback: string): string {
+  const trimmed = typeof title === 'string' ? title.trim() : '';
+  return trimmed === '' ? fallback : truncateChars(trimmed, MAX_YOUTUBE_TITLE);
+}
+
+/** TikTok・Instagram の埋め込み（D-70）：iframe と、元の投稿へのリンク */
+function snsFigure(
+  name: string,
+  src: string,
+  label: string,
+  width: number,
+  height: number,
+  href: string,
+  linkText: string,
+): string {
+  return (
+    `<figure class="sns-embed sns-${name}">` +
+    `<iframe src="${src}" title="${escapeHtml(label)}" width="${width}" height="${height}" loading="lazy"` +
+    ` referrerpolicy="strict-origin-when-cross-origin" allow="fullscreen" allowfullscreen></iframe>` +
+    `<figcaption><a href="${href}" target="_blank" rel="noopener noreferrer">${linkText}</a></figcaption>` +
+    `</figure>`
+  );
+}
+
+function renderTikTok(attrs: unknown): string {
+  const videoId = own(attrs, 'videoId');
+  const author = own(attrs, 'author');
+  if (typeof videoId !== 'string' || !TIKTOK_ID_PATTERN.test(videoId)) return '';
+  if (typeof author !== 'string' || !TIKTOK_AUTHOR_PATTERN.test(author)) return '';
+  return snsFigure(
+    'tiktok',
+    `https://www.tiktok.com/player/v1/${videoId}?rel=0`,
+    embedLabel(own(attrs, 'title'), 'TikTok動画'),
+    325,
+    578,
+    `https://www.tiktok.com/@${author}/video/${videoId}`,
+    'TikTokで見る',
+  );
+}
+
+function renderInstagram(attrs: unknown): string {
+  const kind = own(attrs, 'kind');
+  const postId = own(attrs, 'postId');
+  if (typeof kind !== 'string' || !INSTAGRAM_KINDS.includes(kind)) return '';
+  if (typeof postId !== 'string' || !INSTAGRAM_ID_PATTERN.test(postId)) return '';
+  return snsFigure(
+    'instagram',
+    `https://www.instagram.com/${kind}/${postId}/embed/`,
+    embedLabel(own(attrs, 'title'), 'Instagramの投稿'),
+    400,
+    600,
+    `https://www.instagram.com/${kind}/${postId}/`,
+    'Instagramで見る',
+  );
 }
 
 function renderYouTube(attrs: unknown): string {

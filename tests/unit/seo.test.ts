@@ -76,6 +76,7 @@ describe('JSON-LD', () => {
       event_starts_at: '2026-10-10T09:00:00Z',
       event_ends_at: null,
       event_all_day: false,
+      event_time_tbd: false,
       event_place: '公民館',
       published_on: '2026-10-01',
       updated_at: '2026-10-01T00:00:00Z',
@@ -85,5 +86,18 @@ describe('JSON-LD', () => {
       url: 'https://ginowanku-seinenkai.com/news/1',
     });
     expect(eventJsonLd({ ...post, event_place: null }, '説明', null)).toBeNull();
+    // 時間未定は終日と同じく日付だけ（D-68）
+    expect(
+      eventJsonLd(
+        {
+          ...post,
+          event_starts_at: '2026-11-21T15:00:00Z',
+          event_ends_at: '2026-11-22T15:00:00Z',
+          event_time_tbd: true,
+        },
+        '説明',
+        null,
+      ),
+    ).toMatchObject({ startDate: '2026-11-22', endDate: '2026-11-23' });
   });
 });

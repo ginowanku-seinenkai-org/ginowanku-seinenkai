@@ -10,7 +10,7 @@ const { post } = Astro.props;
 ---
 
 {post.event_starts_at !== null && (
-  <time datetime={eventDatetime(post.event_starts_at, post.event_all_day)}>
+  <time datetime={eventDatetime(post.event_starts_at, post.event_all_day || post.event_time_tbd)}>
     {formatEventDate(post)}
   </time>
 )}

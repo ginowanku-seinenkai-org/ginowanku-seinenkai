@@ -25,6 +25,23 @@ const pages = htmlFiles.map((file) => {
   };
 });
 const NOINDEX_PAGES = new Set(['/contact/thanks', '/404']);
+
+// ビルドに使ったデータ（.data/。build:fixture では固定データ、build では本物のデータ）
+// 本物のデータでは記事や SNS の URL がまだない時期もあるので、「ある」ことはデータにあるときだけ求める
+const data = (name: string): unknown => JSON.parse(readFileSync(join(ROOT, '.data', name), 'utf8'));
+const dataPosts = data('posts.json') as {
+  kind: string;
+  event_starts_at: string | null;
+  event_place: string | null;
+}[];
+const dataSettings = data('site-settings.json') as Record<string, unknown>;
+const hasPosts = dataPosts.length > 0;
+const hasEventWithPlace = dataPosts.some(
+  (p) => p.kind === 'event' && p.event_starts_at !== null && p.event_place !== null,
+);
+const hasSns = ['instagram_url', 'facebook_url', 'tiktok_url'].some((k) =>
+  Boolean(dataSettings[k]),
+);
 const meta = (doc: Document, selector: string) =>
   doc.querySelector(selector)?.getAttribute('content') ?? null;
 const read = (name: string) => readFileSync(join(DIST, name), 'utf8');
@@ -101,7 +118,7 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
 
   it('UT-21 記事の詳細は1枚目の写真（カバー）、カバーのない記事は共通画像', () => {
     const details = pages.filter((p) => /^\/(news|activities)\/\d+$/.test(p.path));
-    expect(details.length).toBeGreaterThan(0);
+    expect(details.length > 0).toBe(hasPosts);
     for (const p of details) {
       const cover = p.doc.querySelector('img.cover')?.getAttribute('src');
       const og = meta(p.doc, 'meta[property="og:image"]');
@@ -116,7 +133,7 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       );
     expect(types(pageAt('/'))).toEqual(['Organization']);
     const events = pages.filter((p) => types(p).includes('Event'));
-    expect(events.length).toBeGreaterThan(0);
+    expect(events.length > 0).toBe(hasEventWithPlace);
     for (const p of events) expect(p.doc.querySelector('.evbox')).not.toBeNull();
   });
 
@@ -202,8 +219,9 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
   it('SNS のリンクはフッターにだけある（D-65）', () => {
     for (const p of pages) {
       const lists = Array.from(p.doc.querySelectorAll('ul[aria-label="公式SNS"]'));
-      expect(lists.length, p.path).toBe(1);
-      expect(lists[0]?.closest('footer'), p.path).not.toBeNull();
+      // SNS の URL が1つもなければ、リンクの並び自体を出さない
+      expect(lists.length, p.path).toBe(hasSns ? 1 : 0);
+      if (hasSns) expect(lists[0]?.closest('footer'), p.path).not.toBeNull();
     }
   });
 

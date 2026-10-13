@@ -14,6 +14,7 @@ const PAGES = [
   { path: '/contact', title: '演舞依頼・お問い合わせ｜宜野湾区青年会' },
   { path: '/contact/thanks', title: '送信完了｜宜野湾区青年会' },
   { path: '/privacy', title: 'プライバシーポリシー｜宜野湾区青年会' },
+  { path: '/site-policy', title: 'このサイトについて｜宜野湾区青年会' },
 ];
 
 test.describe('EP-01 全ページの表示', () => {

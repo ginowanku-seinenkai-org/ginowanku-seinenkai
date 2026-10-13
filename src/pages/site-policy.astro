@@ -1,0 +1,58 @@
+---
+// S12 このサイトについて（文面は 06 §4.8。03 §6.5。D-75）
+// プライバシーポリシーとは別の文書。文面を変えても PRIVACY_VERSION は変えない
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { DESCRIPTIONS } from '../lib/messages.ts';
+import { buildMeta } from '../lib/seo.ts';
+
+const meta = buildMeta({
+  name: 'このサイトについて',
+  path: '/site-policy',
+  description: DESCRIPTIONS.sitePolicy,
+});
+---
+
+<BaseLayout meta={meta}>
+  <PageHead title="このサイトについて" crumbs={[{ label: 'このサイトについて' }]} />
+  <div class="wrap narrow article policy">
+    <p>
+      宜野湾区青年会のホームページ（以下「このサイト」）をご利用いただくにあたってのご案内です。
+    </p>
+
+    <section>
+      <h2>著作権</h2>
+      <p>
+        このサイトの文章・写真・動画の著作権は、宜野湾区青年会または各権利者にあります。無断で転載・複製・改変しないでください。報道や紹介などで使いたいときは、
+        <a href="/contact">お問い合わせ</a>からご連絡ください。
+      </p>
+    </section>
+
+    <section>
+      <h2>写真に写っている方へ</h2>
+      <p>
+        載せている写真について、削除などのご希望があれば、<a href="/contact">お問い合わせ</a>
+        からご連絡ください。
+      </p>
+    </section>
+
+    <section>
+      <h2>載せている情報について</h2>
+      <p>
+        内容には注意していますが、行事の日時・場所などは変わることがあります。このサイトの情報を使ったことで生じた損害について、宜野湾区青年会は責任を負いません。
+      </p>
+    </section>
+
+    <section>
+      <h2>リンクについて</h2>
+      <p>
+        このサイトへのリンクは自由です（連絡は要りません）。リンク先や、埋め込んだ外部のサービス（YouTube・TikTok・Instagram）の内容については、宜野湾区青年会は責任を負いません。
+      </p>
+    </section>
+
+    <section>
+      <h2>変更について</h2>
+      <p>この内容は、予告なく変えることがあります。</p>
+    </section>
+  </div>
+</BaseLayout>

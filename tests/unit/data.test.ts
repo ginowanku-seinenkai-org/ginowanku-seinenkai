@@ -45,6 +45,26 @@ describe('readSiteData', () => {
     expect(data.photos.get(PHOTO_ID)?.alt).toBe('写真');
   });
 
+  it('曲目一覧は、行がない・本文が空なら null、本文があれば出す（03 S13、D-81）', async () => {
+    const withBody = (key: 'songs') => ({
+      ...rows.page(key),
+      body: {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: '曲' }] }],
+      },
+    });
+    for (const [pages, expected] of [
+      [[rows.page('about'), rows.page('join')], null],
+      [[rows.page('about'), rows.page('join'), rows.page('songs')], null],
+      [[rows.page('about'), rows.page('join'), withBody('songs')], 'songs'],
+    ] as const) {
+      const root = await tempDir();
+      await writeData(root, { 'pages.json': pages });
+      await writePhotos(root);
+      expect((await readSiteData(root)).pages.songs?.key ?? null).toBe(expected);
+    }
+  });
+
   it('.data/ が無ければ準備のコマンドを案内する', async () => {
     await expect(readSiteData(await tempDir())).rejects.toThrow('pnpm fetch-data');
   });

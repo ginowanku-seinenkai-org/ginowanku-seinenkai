@@ -1,15 +1,19 @@
 ---
 // ヘッダーとナビ（03 §6.2）。menu.ts が読み込まれるまではナビを開いたまま表示する
+import { loadSiteData } from '../lib/data.ts';
 import { SITE_NAME } from '../lib/messages.ts';
 
-export type NavKey = 'top' | 'about' | 'news' | 'activities' | 'join' | 'contact' | null;
+export type NavKey = 'top' | 'about' | 'songs' | 'news' | 'activities' | 'join' | 'contact' | null;
 interface Props {
   current: NavKey;
 }
 const { current } = Astro.props;
+// 曲目一覧は本文があるときだけ（03 S13、D-81）
+const { pages } = await loadSiteData();
 const items: { key: Exclude<NavKey, null>; href: string; label: string; cta?: boolean }[] = [
   { key: 'top', href: '/', label: 'トップ' },
-  { key: 'about', href: '/about', label: '青年会について' },
+  { key: 'about', href: '/about', label: '宜野湾区青年会について' },
+  ...(pages.songs ? [{ key: 'songs' as const, href: '/songs', label: '曲目一覧' }] : []),
   { key: 'news', href: '/news', label: 'お知らせ・行事' },
   { key: 'activities', href: '/activities', label: '活動記録' },
   { key: 'join', href: '/join', label: 'メンバー募集' },

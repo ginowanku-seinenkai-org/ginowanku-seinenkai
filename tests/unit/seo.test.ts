@@ -55,7 +55,6 @@ describe('JSON-LD', () => {
     expect(serializeJsonLd({ a: '</script>' })).toBe('{"a":"\\u003c/script>"}'));
   it('Organization の sameAs は null を除き、すべて null なら出さない', () => {
     const settings = {
-      contact_flow: null,
       instagram_url: 'https://www.instagram.com/x',
       facebook_url: null,
       tiktok_url: null,

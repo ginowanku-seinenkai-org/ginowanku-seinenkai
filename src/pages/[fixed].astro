@@ -1,0 +1,12 @@
+---
+// S13 曲目一覧（03 S13、D-81）。本文が空のうちは作らない（ナビにも出さない）
+import FixedPage from '../components/FixedPage.astro';
+import { loadSiteData } from '../lib/data.ts';
+
+export async function getStaticPaths() {
+  const data = await loadSiteData();
+  return data.pages.songs ? [{ params: { fixed: 'songs' } }] : [];
+}
+---
+
+<FixedPage pageKey="songs" />

@@ -36,7 +36,7 @@ export const publicPostPhotoSchema = z.object({
 export type PublicPostPhoto = z.infer<typeof publicPostPhotoSchema>;
 
 export const publicPageSchema = z.object({
-  key: z.enum(['about', 'join']),
+  key: z.enum(['about', 'join', 'songs']),
   title: z.string(),
   lead: z.string().nullable(),
   body: z.unknown(),

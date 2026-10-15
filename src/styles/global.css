@@ -243,7 +243,7 @@ h1:focus {
   .nav ul {
     align-items: center;
     justify-content: flex-end;
-    gap: 0 18px;
+    gap: 0 14px;
   }
 
   .nav a {

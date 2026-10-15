@@ -36,7 +36,8 @@ export function bodyToPlainText(doc: unknown): string {
 function hasContent(node: unknown, depth: number): boolean {
   if (depth > 20) return false;
   const type = own(node, 'type');
-  if (type === 'photo' || type === 'youtube') return true;
+  if (type === 'photo' || type === 'youtube' || type === 'tiktok' || type === 'instagram')
+    return true;
   if (type === 'text') {
     const text = own(node, 'text');
     return typeof text === 'string' && text.trim() !== '';

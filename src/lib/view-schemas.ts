@@ -46,6 +46,8 @@ export const publicPageSchema = z.object({
 export type PublicPage = z.infer<typeof publicPageSchema>;
 
 export const publicSiteSettingsSchema = z.object({
+  /** SNS で共有したときの共通の画像（D-85） */
+  og_photo_id: uuid.nullable(),
   instagram_url: z.string().nullable(),
   facebook_url: z.string().nullable(),
   tiktok_url: z.string().nullable(),
@@ -88,6 +90,6 @@ export const VIEW_COLUMNS = {
     'id,kind,title,body,cover_photo_id,event_starts_at,event_ends_at,event_all_day,event_time_tbd,event_place,published_on,updated_at',
   v_public_post_photos: 'post_id,photo_id,sort_order',
   v_public_pages: 'key,title,lead,body,cover_photo_id,updated_at',
-  v_public_site_settings: 'instagram_url,facebook_url,tiktok_url,join_age_label',
+  v_public_site_settings: 'instagram_url,facebook_url,tiktok_url,join_age_label,og_photo_id',
   v_public_photos: 'id,full_path,thumb_path,width,height,thumb_width,thumb_height,alt',
 } as const;

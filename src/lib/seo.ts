@@ -42,6 +42,22 @@ export function absoluteUrl(path: string): string {
   return `${SITE_ORIGIN}${clean === '' ? '/' : clean}`;
 }
 
+/**
+ * ページに自分の画像がないとき（共通の画像のまま）は、サイト設定の共通の画像に替える（03 §11、D-85）
+ */
+export function withSiteOgImage(meta: PageMeta, photo: PublicPhoto | undefined): PageMeta {
+  if (!photo || meta.ogImage.url !== DEFAULT_OG_IMAGE.url) return meta;
+  return {
+    ...meta,
+    ogImage: {
+      url: `${SITE_ORIGIN}/photos/${photo.id}/full.jpg`,
+      width: photo.width,
+      height: photo.height,
+      alt: photo.alt,
+    },
+  };
+}
+
 export function buildMeta(input: MetaInput): PageMeta {
   const name =
     input.name === null

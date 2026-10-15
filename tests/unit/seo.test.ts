@@ -7,6 +7,8 @@ import {
   eventJsonLd,
   organizationJsonLd,
   serializeJsonLd,
+  SITE_ORIGIN,
+  withSiteOgImage,
 } from '../../src/lib/seo.ts';
 import type { PublicPost } from '../../src/lib/view-schemas.ts';
 
@@ -55,6 +57,7 @@ describe('JSON-LD', () => {
     expect(serializeJsonLd({ a: '</script>' })).toBe('{"a":"\\u003c/script>"}'));
   it('Organization の sameAs は null を除き、すべて null なら出さない', () => {
     const settings = {
+      og_photo_id: null,
       instagram_url: 'https://www.instagram.com/x',
       facebook_url: null,
       tiktok_url: null,
@@ -96,5 +99,34 @@ describe('JSON-LD', () => {
         null,
       ),
     ).toMatchObject({ startDate: '2026-11-22', endDate: '2026-11-23' });
+  });
+});
+
+describe('withSiteOgImage（D-85）', () => {
+  const photo = {
+    id: '11111111-1111-4111-8111-111111111111',
+    full_path: 'x/full.jpg',
+    thumb_path: 'x/thumb.jpg',
+    width: 1600,
+    height: 900,
+    thumb_width: 480,
+    thumb_height: 270,
+    alt: '演舞の写真',
+  };
+  it('自分の画像がないページだけ、サイト設定の画像に替える', () => {
+    const plain = buildMeta({ name: 'x', path: '/x' });
+    expect(withSiteOgImage(plain, photo).ogImage).toEqual({
+      url: `${SITE_ORIGIN}/photos/${photo.id}/full.jpg`,
+      width: 1600,
+      height: 900,
+      alt: '演舞の写真',
+    });
+    expect(withSiteOgImage(plain, undefined)).toBe(plain);
+    const own = buildMeta({
+      name: 'x',
+      path: '/x',
+      image: { ...photo, id: '22222222-2222-4222-8222-222222222222' },
+    });
+    expect(withSiteOgImage(own, photo)).toBe(own);
   });
 });

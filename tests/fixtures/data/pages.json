@@ -1,7 +1,7 @@
 [
   {
     "key": "about",
-    "title": "青年会について",
+    "title": "宜野湾区青年会について",
     "lead": "宜野湾区の伝統のエイサーを受け継ぐ青年会です。",
     "body": {
       "type": "doc",
@@ -84,6 +84,39 @@
       ]
     },
     "cover_photo_id": "f1000005-0000-4000-8000-000000000005",
+    "updated_at": "2026-09-01T09:00:00+09:00"
+  },
+  {
+    "key": "songs",
+    "title": "曲目一覧",
+    "lead": "宜野湾区青年会が踊る演目の紹介です。",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 2
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "仲順流り"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "旧盆の道じゅねーで最初に踊る曲です。"
+            }
+          ]
+        }
+      ]
+    },
+    "cover_photo_id": null,
     "updated_at": "2026-09-01T09:00:00+09:00"
   },
   {

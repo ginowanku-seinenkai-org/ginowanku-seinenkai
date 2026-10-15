@@ -6,6 +6,7 @@ import type { RenderContext } from './content/types.ts';
 import { validateBody } from './content/validate-body.ts';
 import { photoSrc } from './posts.ts';
 import { SITE_ORIGIN } from './seo.ts';
+import { isEmptyBody } from './plain-text.ts';
 import {
   metaSchema,
   publicPageSchema,
@@ -28,7 +29,8 @@ export interface SiteData {
   posts: PublicPost[];
   /** sort_order 昇順 */
   postPhotos: Map<number, PublicPostPhoto[]>;
-  pages: Record<'about' | 'join', PublicPage>;
+  /** songs は本文が空なら null（ページもナビも作らない。03 S13、D-81） */
+  pages: Record<'about' | 'join', PublicPage> & { songs: PublicPage | null };
   settings: PublicSiteSettings;
   photos: Map<string, PublicPhoto>;
 }
@@ -66,6 +68,9 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
   const joinPage = pageRows.find((p) => p.key === 'join');
   if (about === undefined || joinPage === undefined)
     throw new Error('.data/pages.json に about と join がありません');
+  // 曲目一覧は行がなくても失敗しない（DB に行を足す前の反映のため。D-81）
+  const songsRow = pageRows.find((p) => p.key === 'songs');
+  const songs = songsRow && !isEmptyBody(songsRow.body) ? songsRow : null;
 
   const postPhotos = new Map<number, PublicPostPhoto[]>();
   for (const row of [...postPhotoRows].sort(
@@ -99,6 +104,7 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
     ...posts.map((p): [string, unknown] => [`記事${p.id}の本文`, p.body]),
     [`固定ページ about の本文`, about.body],
     [`固定ページ join の本文`, joinPage.body],
+    ...(songs ? [[`固定ページ songs の本文`, songs.body] as [string, unknown]] : []),
     ['サイト設定の依頼の流れ', settings.contact_flow],
   ];
   for (const [label, body] of bodies) {
@@ -116,7 +122,7 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
     today: meta.today,
     posts,
     postPhotos,
-    pages: { about, join: joinPage },
+    pages: { about, join: joinPage, songs },
     settings,
     photos,
   };

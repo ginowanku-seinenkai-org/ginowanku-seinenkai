@@ -1,5 +1,5 @@
 ---
-// 固定ページ（S02・S07）
+// 固定ページ（S02・S07・S13）
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CoverImage from './CoverImage.astro';
 import PageHead from './PageHead.astro';
@@ -9,11 +9,12 @@ import { DESCRIPTIONS } from '../lib/messages.ts';
 import { buildMeta, descriptionFromBody } from '../lib/seo.ts';
 
 interface Props {
-  pageKey: 'about' | 'join';
+  pageKey: 'about' | 'join' | 'songs';
 }
 const { pageKey } = Astro.props;
 const data = await loadSiteData();
 const page = data.pages[pageKey];
+if (page === null) throw new Error(`固定ページ ${pageKey} がありません`);
 const cover = page.cover_photo_id === null ? undefined : data.photos.get(page.cover_photo_id);
 const meta = buildMeta({
   name: page.title,

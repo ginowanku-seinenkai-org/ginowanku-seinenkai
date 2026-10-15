@@ -3,7 +3,8 @@ import { expect, expectNoA11yViolations, test } from './fixtures.ts';
 
 const PAGES = [
   { path: '/', title: '宜野湾区青年会｜沖縄県宜野湾市' },
-  { path: '/about', title: '青年会について｜宜野湾区青年会' },
+  { path: '/about', title: '宜野湾区青年会について｜宜野湾区青年会' },
+  { path: '/songs', title: '曲目一覧｜宜野湾区青年会' },
   { path: '/news', title: 'お知らせ・行事｜宜野湾区青年会' },
   { path: '/news/page/2', title: 'お知らせ・行事（2ページ目）｜宜野湾区青年会' },
   { path: '/news/category/event', title: '行事｜お知らせ・行事｜宜野湾区青年会' },
@@ -121,7 +122,24 @@ test('EP-04 ギャラリーの拡大表示（前へ・次へ・Esc で閉じて�
   await expect(first).toBeFocused();
 });
 
-test('EP-05 青年会について：本文があり、役員紹介の区画がない', async ({ page }) => {
+test('EP-05a 曲目一覧：本文があればナビの「宜野湾区青年会について」の次に出る（D-81）', async ({
+  page,
+}) => {
+  await page.goto('/songs');
+  await expect(page.locator('.content-body h2')).toHaveText('仲順流り');
+  const labels = await page
+    .getByRole('navigation', { name: 'メインメニュー' })
+    .getByRole('link')
+    .allTextContents();
+  expect(labels.slice(0, 3)).toEqual(['トップ', '宜野湾区青年会について', '曲目一覧']);
+  await expect(
+    page
+      .getByRole('navigation', { name: 'メインメニュー' })
+      .getByRole('link', { name: '曲目一覧' }),
+  ).toHaveAttribute('aria-current', 'page');
+});
+
+test('EP-05 宜野湾区青年会について：本文があり、役員紹介の区画がない', async ({ page }) => {
   await page.goto('/about');
   await expect(page.locator('.content-body h2')).toHaveText('宜野湾区青年会とは');
   await expect(page.getByText('役員紹介')).toHaveCount(0);

@@ -23,7 +23,7 @@ export const rows = {
     published_on: '2026-10-01',
     updated_at: '2026-10-01T00:00:00Z',
   },
-  page: (key: 'about' | 'join') => ({
+  page: (key: 'about' | 'join' | 'songs') => ({
     key,
     title: key,
     lead: null,

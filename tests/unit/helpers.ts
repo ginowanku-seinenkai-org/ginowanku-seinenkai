@@ -32,8 +32,6 @@ export const rows = {
     updated_at: '2026-10-01T00:00:00Z',
   }),
   settings: {
-    hero_photo_id: null,
-    hero_catch: null,
     contact_flow: { type: 'doc', content: [] },
     instagram_url: null,
     facebook_url: null,

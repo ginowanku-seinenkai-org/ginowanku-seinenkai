@@ -54,9 +54,11 @@ test.describe('EP-01 全ページの表示', () => {
   });
 });
 
-test('EP-02 トップ：メイン写真、お知らせ、次の行事、募集・依頼への導線', async ({ page }) => {
+test('EP-02 トップ：お知らせ、次の行事、募集・依頼への導線（メインの帯はない。D-83）', async ({
+  page,
+}) => {
   await page.goto('/');
-  await expect(page.locator('.hero-photo')).toHaveAttribute('alt', '道じゅねーの行列');
+  await expect(page.locator('.hero')).toHaveCount(0);
   await expect(page.locator('.news li')).toHaveCount(5);
   // 今日の行事は終了していない。昨日の行事は出ない
   const upcoming = page.locator('[data-upcoming-list] li:visible');

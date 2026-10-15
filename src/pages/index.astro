@@ -7,19 +7,10 @@ import PostCard from '../components/PostCard.astro';
 import { loadSiteData } from '../lib/data.ts';
 import { eventDateBox, formatPublishedOn } from '../lib/date.ts';
 import { DESCRIPTIONS, EMPTY, SITE_NAME } from '../lib/messages.ts';
-import {
-  activityPosts,
-  eventEndDate,
-  newsPosts,
-  photoSrc,
-  postUrl,
-  upcomingEvents,
-} from '../lib/posts.ts';
+import { activityPosts, eventEndDate, newsPosts, postUrl, upcomingEvents } from '../lib/posts.ts';
 import { buildMeta, organizationJsonLd } from '../lib/seo.ts';
 
 const data = await loadSiteData();
-const hero =
-  data.settings.hero_photo_id === null ? undefined : data.photos.get(data.settings.hero_photo_id);
 const events = upcomingEvents(data, 3);
 const news = newsPosts(data).slice(0, 5);
 const activities = activityPosts(data).slice(0, 3);
@@ -27,34 +18,13 @@ const meta = buildMeta({
   name: null,
   path: '/',
   description: DESCRIPTIONS.top,
-  image: hero ?? null,
+  image: null,
 });
 ---
 
 <BaseLayout meta={meta} current="top" jsonLd={[organizationJsonLd(data.settings)]}>
-  <!-- 主見出しは見せずに残す（ヘッダーのサイト名と重なるため）。帯は写真か一言があるときだけ（03 S01、D-82） -->
+  <!-- 主見出しは見せずに残す（ヘッダーのサイト名と重なるため。メインの帯はなくした。03 S01、D-82・D-83） -->
   <h1 class="visually-hidden">{SITE_NAME}</h1>
-  {(hero || data.settings.hero_catch) && (
-    <section class="hero">
-      {hero && (
-        <img
-          class="hero-photo"
-          src={photoSrc(hero, 'full')}
-          srcset={`${photoSrc(hero, 'thumb')} ${hero.thumb_width}w, ${photoSrc(hero, 'full')} ${hero.width}w`}
-          sizes="100vw"
-          width={hero.width}
-          height={hero.height}
-          alt={hero.alt}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-        />
-      )}
-      <div class="wrap hero-in">
-        {data.settings.hero_catch && <p class="catch">{data.settings.hero_catch}</p>}
-      </div>
-    </section>
-  )}
 
   <section class="wrap sec" aria-labelledby="upcoming-heading">
     <div class="sec-h">

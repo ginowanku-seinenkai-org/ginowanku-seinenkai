@@ -224,16 +224,16 @@ h1:focus {
 
 .menu-btn {
   display: none;
-  white-space: nowrap;
   align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 14px;
+  justify-content: center;
+  /* アイコンだけ（読み上げ名「メニュー」は残す。D-87） */
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 1.5px solid var(--on-dark);
   border-radius: 999px;
   background: transparent;
   color: var(--on-dark);
-  font: 500 14px var(--font-body);
   cursor: pointer;
 }
 

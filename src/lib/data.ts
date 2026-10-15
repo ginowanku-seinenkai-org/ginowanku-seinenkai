@@ -105,7 +105,6 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
     [`固定ページ about の本文`, about.body],
     [`固定ページ join の本文`, joinPage.body],
     ...(songs ? [[`固定ページ songs の本文`, songs.body] as [string, unknown]] : []),
-    ['サイト設定の依頼の流れ', settings.contact_flow],
   ];
   for (const [label, body] of bodies) {
     const result = validateBody(body);

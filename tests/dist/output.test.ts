@@ -116,13 +116,27 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     });
   });
 
-  it('UT-21 記事の詳細は1枚目の写真（カバー）、カバーのない記事は共通画像', () => {
+  // サイト設定の共通の画像（D-85）。無ければ共通の画像ファイル
+  const siteOg =
+    typeof dataSettings['og_photo_id'] === 'string'
+      ? `${ORIGIN}/photos/${dataSettings['og_photo_id']}/full.jpg`
+      : `${ORIGIN}/og-default.jpg`;
+
+  it('UT-21 記事の詳細は1枚目の写真（カバー）、カバーのない記事はサイト設定の共通の画像（D-85）', () => {
     const details = pages.filter((p) => /^\/(news|activities)\/\d+$/.test(p.path));
     expect(details.length > 0).toBe(hasPosts);
     for (const p of details) {
       const cover = p.doc.querySelector('img.cover')?.getAttribute('src');
       const og = meta(p.doc, 'meta[property="og:image"]');
-      expect(og).toBe(cover ? `${ORIGIN}${cover}` : `${ORIGIN}/og-default.jpg`);
+      expect(og).toBe(cover ? `${ORIGIN}${cover}` : siteOg);
+    }
+  });
+
+  it('UT-21 トップ・一覧はサイト設定の共通の画像（D-85）', () => {
+    for (const path of ['/', '/news', '/contact']) {
+      const p = pages.find((x) => x.path === path);
+      expect(p, path).toBeDefined();
+      if (p) expect(meta(p.doc, 'meta[property="og:image"]'), path).toBe(siteOg);
     }
   });
 

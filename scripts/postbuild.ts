@@ -21,17 +21,27 @@ export const TURNSTILE_TEST_KEYS = [
 export const MAX_HEADER_RULES = 100;
 export const MAX_HEADER_LINE = 2000;
 
+/**
+ * Google 翻訳の部品が書き込むインラインのスクリプトのハッシュ（03 §12.1、D-88、08 V-58）。
+ * 英語にならなくなったら、ブラウザのコンソールの CSP 違反に出る値に替える（運用手順書 §12）
+ */
+export const GOOGLE_TRANSLATE_SCRIPT_HASH = "'sha256-R6kjt5FwTd5vAw94Q08NLDZsSaGTzg4NsdIfKtECSp0='";
+const GOOGLE_TRANSLATE_SCRIPTS =
+  'https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com';
+
 /** セキュリティヘッダー（03 §12.1）。CSP の connect-src に Supabase のオリジンを入れる */
 export function buildHeaders(supabaseUrl: string): string {
   const supabaseOrigin = new URL(supabaseUrl).origin;
   const csp = [
     "default-src 'self'",
-    "script-src 'self' https://challenges.cloudflare.com",
-    "style-src 'self'",
-    "img-src 'self'",
+    `script-src 'self' https://challenges.cloudflare.com ${GOOGLE_TRANSLATE_SCRIPTS} ${GOOGLE_TRANSLATE_SCRIPT_HASH}`,
+    // 'unsafe-inline' は Google 翻訳の部品が要素に直接スタイルを書くためだけ（D-88）
+    "style-src 'self' 'unsafe-inline' https://www.gstatic.com",
+    "img-src 'self' https://www.gstatic.com https://fonts.gstatic.com https://www.google.com https://translate.google.com https://translate.googleapis.com",
     "font-src 'self'",
-    `connect-src 'self' ${supabaseOrigin}`,
-    'frame-src https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.tiktok.com https://www.instagram.com',
+    `connect-src 'self' ${supabaseOrigin} https://translate.googleapis.com https://translate-pa.googleapis.com`,
+    // 'self' は Google 翻訳の部品が自分のページを枠で開くため（D-88）
+    "frame-src 'self' https://challenges.cloudflare.com https://www.youtube-nocookie.com https://www.tiktok.com https://www.instagram.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

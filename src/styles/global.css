@@ -198,6 +198,42 @@ h1:focus {
   gap: 8px;
 }
 
+/* 日本語・英語の切り替えのボタン（D-88） */
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border: 1.5px solid var(--on-dark);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--on-dark);
+  font: 700 13px var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* Google 翻訳の帯・吹き出し・ハイライトを隠す（D-88） */
+body > .skiptranslate,
+iframe.skiptranslate,
+.goog-te-banner-frame,
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
 /* 表示の明るさのボタン（D-86） */
 .theme-btn {
   display: inline-flex;
@@ -311,10 +347,14 @@ h1:focus {
   }
 }
 
-/* PC ではボタンをナビの右に */
+/* PC ではボタンをナビの右に。ヘッダーだけ中身の幅を広げ、1行に収める（D-88 でボタンが増えたため） */
 @media (min-width: 768px) {
   .hdr-tools {
     order: 3;
+  }
+
+  .hdr-in {
+    max-width: 1280px;
   }
 }
 

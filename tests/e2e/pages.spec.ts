@@ -205,3 +205,33 @@ test('EP-17 表示の明るさ：端末の設定がダークなら最初から�
   );
   await expectNoA11yViolations(page);
 });
+
+test('EP-18 言葉の切り替え：英語を選んだときだけ Google の部品を読み込む（D-88）', async ({
+  page,
+  context,
+}) => {
+  // Google には出さない。部品の代わりに、呼ばれたことだけを記録する
+  const loaded: string[] = [];
+  await page.route(/https:\/\/translate\.google\.com\//, (route) => {
+    loaded.push(route.request().url());
+    return route.fulfill({
+      contentType: 'text/javascript',
+      body: "window.google={translate:{TranslateElement:function(o,id){document.documentElement.dataset.mockTranslate=o.includedLanguages+'/'+id}}};window.ginowankuTranslateInit();",
+    });
+  });
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'English' })).toBeVisible();
+  expect(loaded).toEqual([]);
+
+  await page.getByRole('button', { name: 'English' }).click();
+  await expect(page.getByRole('button', { name: '日本語' })).toBeVisible();
+  expect((await context.cookies()).find((c) => c.name === 'googtrans')?.value).toBe('/ja/en');
+  await expect(page.locator('html')).toHaveAttribute('data-mock-translate', 'en/google-translate');
+  expect(loaded).toHaveLength(1);
+  await expectNoA11yViolations(page);
+
+  await page.getByRole('button', { name: '日本語' }).click();
+  await expect(page.getByRole('button', { name: 'English' })).toBeVisible();
+  expect((await context.cookies()).find((c) => c.name === 'googtrans')).toBeUndefined();
+  expect(loaded).toHaveLength(1);
+});

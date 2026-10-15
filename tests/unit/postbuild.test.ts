@@ -1,6 +1,11 @@
 // postbuild の HTML の検査（03 §12.3 の2、07 UT-28）
 import { describe, expect, it } from 'vitest';
-import { buildHeaders, checkHeaders, findInlineViolations } from '../../scripts/postbuild.ts';
+import {
+  buildHeaders,
+  checkHeaders,
+  findInlineViolations,
+  GOOGLE_TRANSLATE_SCRIPT_HASH,
+} from '../../scripts/postbuild.ts';
 
 describe('findInlineViolations', () => {
   it('外部の script と JSON-LD は通す', () => {
@@ -26,10 +31,19 @@ describe('buildHeaders・checkHeaders（03 §12.1・§12.2）', () => {
   const text = buildHeaders('https://abcd1234.supabase.co/');
   it('CSP の connect-src に Supabase のオリジンだけを入れる', () => {
     const csp = text.split('\n').find((l) => l.includes('Content-Security-Policy')) ?? '';
-    expect(csp).toContain("connect-src 'self' https://abcd1234.supabase.co;");
-    expect(csp).toContain("script-src 'self' https://challenges.cloudflare.com;");
+    expect(csp).toContain(
+      "connect-src 'self' https://abcd1234.supabase.co https://translate.googleapis.com https://translate-pa.googleapis.com;",
+    );
     expect(csp).toContain("frame-ancestors 'none'");
-    expect(csp).not.toContain("'unsafe-inline'");
+  });
+  it('Google 翻訳の例外は決めたものだけ（D-88）：スクリプトはハッシュで、unsafe-inline はスタイルだけ', () => {
+    const csp = text.split('\n').find((l) => l.includes('Content-Security-Policy')) ?? '';
+    const directive = (name: string) =>
+      csp.split('; ').find((d) => d.trimStart().startsWith(`${name} `)) ?? '';
+    expect(directive('script-src')).toContain(GOOGLE_TRANSLATE_SCRIPT_HASH);
+    expect(directive('script-src')).not.toContain("'unsafe-inline'");
+    expect(directive('script-src')).not.toContain("'unsafe-eval'");
+    expect(directive('style-src')).toContain("'unsafe-inline'");
   });
   it('Cache-Control は /* に書かず、/_astro/* と /photos/* にだけ付ける', () => {
     const blocks = text.split('\n\n');

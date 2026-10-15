@@ -23,11 +23,34 @@ const items: { key: Exclude<NavKey, null>; href: string; label: string; cta?: bo
 
 <header class="hdr">
   <div class="wrap hdr-in" data-menu>
-    <a class="brand" href="/">
+    <!-- サイト名は固有の名前なので翻訳しない（D-88） -->
+    <a class="brand notranslate" href="/">
       <img class="brand-mark" src="/emblem.png" alt="" width="40" height="40" />
       {SITE_NAME}
     </a>
     <div class="hdr-tools">
+      <!-- 日本語・英語の切り替え（D-88）。ボタンの文字は翻訳させない -->
+      <button
+        class="lang-btn notranslate"
+        type="button"
+        aria-label="English"
+        data-lang-toggle
+        hidden
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 5h8M7 3v2M5 5c0 4 2 7 5 8M9 5c-.5 3-2.5 6-6 8"></path>
+            <path d="M13 21l4-10 4 10M14.5 17h5"></path>
+          </g>
+        </svg>
+        <span data-lang-text>EN</span>
+      </button>
       <!-- 表示の明るさ（D-86）。ライトのときは月、ダークのときは太陽 -->
       <button class="theme-btn" type="button" aria-pressed="false" data-theme-toggle hidden>
         <span class="visually-hidden">ダークモード</span>
@@ -83,4 +106,5 @@ const items: { key: Exclude<NavKey, null>; href: string; label: string; cta?: bo
 <script>
   import '../scripts/menu.ts';
   import '../scripts/theme.ts';
+  import '../scripts/translate.ts';
 </script>

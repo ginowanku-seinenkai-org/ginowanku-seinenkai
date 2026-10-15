@@ -32,26 +32,29 @@ const meta = buildMeta({
 ---
 
 <BaseLayout meta={meta} current="top" jsonLd={[organizationJsonLd(data.settings)]}>
-  <section class="hero">
-    {hero && (
-      <img
-        class="hero-photo"
-        src={photoSrc(hero, 'full')}
-        srcset={`${photoSrc(hero, 'thumb')} ${hero.thumb_width}w, ${photoSrc(hero, 'full')} ${hero.width}w`}
-        sizes="100vw"
-        width={hero.width}
-        height={hero.height}
-        alt={hero.alt}
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-      />
-    )}
-    <div class="wrap hero-in">
-      <h1>{SITE_NAME}</h1>
-      {data.settings.hero_catch && <p class="catch">{data.settings.hero_catch}</p>}
-    </div>
-  </section>
+  <!-- 主見出しは見せずに残す（ヘッダーのサイト名と重なるため）。帯は写真か一言があるときだけ（03 S01、D-82） -->
+  <h1 class="visually-hidden">{SITE_NAME}</h1>
+  {(hero || data.settings.hero_catch) && (
+    <section class="hero">
+      {hero && (
+        <img
+          class="hero-photo"
+          src={photoSrc(hero, 'full')}
+          srcset={`${photoSrc(hero, 'thumb')} ${hero.thumb_width}w, ${photoSrc(hero, 'full')} ${hero.width}w`}
+          sizes="100vw"
+          width={hero.width}
+          height={hero.height}
+          alt={hero.alt}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      )}
+      <div class="wrap hero-in">
+        {data.settings.hero_catch && <p class="catch">{data.settings.hero_catch}</p>}
+      </div>
+    </section>
+  )}
 
   <section class="wrap sec" aria-labelledby="upcoming-heading">
     <div class="sec-h">

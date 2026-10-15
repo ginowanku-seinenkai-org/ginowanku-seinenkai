@@ -45,6 +45,27 @@
   }
 }
 
+/* ボタンで選んだダーク（D-86） */
+:root[data-theme='dark'] {
+  --ai: #24376e;
+  --ai-deep: #0e1530;
+  --shu: #ff7458;
+  --ki: #f5c451;
+  --ground: #0f1424;
+  --surface: #171e33;
+  --ink: #eceff6;
+  --ink-2: #a6aec2;
+  --line: #2a3352;
+  --tint-ai: #1e2950;
+  --tint-shu: #3a1f1d;
+  --tint-ki: #3a3118;
+  --on-dark: #f4f6fb;
+  --on-dark-2: #b9c2da;
+  --on-shu: #1b0d0a;
+  --head: #eceff6;
+  --danger: #ff8f86;
+}
+
 *,
 *::before,
 *::after {
@@ -159,6 +180,7 @@ h1:focus {
   color: var(--on-dark);
   font-size: 18px;
   font-weight: 800;
+  white-space: nowrap;
   letter-spacing: 0.04em;
   text-decoration: none;
 }
@@ -170,8 +192,39 @@ h1:focus {
   height: 40px;
 }
 
+.hdr-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 表示の明るさのボタン（D-86） */
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid var(--on-dark);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--on-dark);
+  cursor: pointer;
+}
+
+.theme-btn .sun,
+:root[data-theme='dark'] .theme-btn .moon {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme-btn .sun {
+  display: block;
+}
+
 .menu-btn {
   display: none;
+  white-space: nowrap;
   align-items: center;
   gap: 8px;
   min-height: 44px;
@@ -250,11 +303,18 @@ h1:focus {
   .nav ul {
     align-items: center;
     justify-content: flex-end;
-    gap: 0 14px;
+    gap: 0 12px;
   }
 
   .nav a {
     white-space: nowrap;
+  }
+}
+
+/* PC ではボタンをナビの右に */
+@media (min-width: 768px) {
+  .hdr-tools {
+    order: 3;
   }
 }
 
@@ -1539,4 +1599,18 @@ textarea.inp.short {
 .ftr small {
   color: var(--on-dark-2);
   font-size: 12px;
+}
+
+/* 狭いスマホではサイト名を少し小さく（D-86 でボタンが増えたため） */
+@media (max-width: 400px) {
+  .brand {
+    font-size: 16px;
+  }
+}
+
+/* PC ではナビの文字を少し小さく（1行に収めるため。D-86） */
+@media (min-width: 768px) {
+  .nav a {
+    font-size: 13px;
+  }
 }

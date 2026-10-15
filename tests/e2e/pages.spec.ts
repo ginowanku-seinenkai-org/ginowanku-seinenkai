@@ -177,3 +177,31 @@ test('EP-13 スマホ表示：横スクロールが出ない、メニューが�
   await expect(button).toHaveAttribute('aria-expanded', 'false');
   await expect(button).toBeFocused();
 });
+
+test('EP-17 表示の明るさ：押すとダークになり、読み込み直しても続く（D-86）', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  const html = page.locator('html');
+  await expect(html).toHaveAttribute('data-theme', 'light');
+  const button = page.getByRole('button', { name: 'ダークモード' });
+  await expect(button).toHaveAttribute('aria-pressed', 'false');
+  await button.click();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expect(button).toHaveAttribute('aria-pressed', 'true');
+  await page.reload();
+  await expect(html).toHaveAttribute('data-theme', 'dark');
+  await expectNoA11yViolations(page);
+  await page.getByRole('button', { name: 'ダークモード' }).click();
+  await expect(html).toHaveAttribute('data-theme', 'light');
+});
+
+test('EP-17 表示の明るさ：端末の設定がダークなら最初からダーク（D-86）', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/about');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(page.getByRole('button', { name: 'ダークモード' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expectNoA11yViolations(page);
+});

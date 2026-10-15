@@ -23,3 +23,6 @@ playwright/.auth/
 test-results/
 playwright-report/
 .lighthouseci/
+
+# wrangler pages dev の作業用ファイル（手元だけ）
+.wrangler/

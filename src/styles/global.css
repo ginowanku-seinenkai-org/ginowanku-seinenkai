@@ -137,8 +137,9 @@ h1:focus {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  /* フッターと同じ紺（03 §6.2、D-82） */
+  background: var(--ai-deep);
+  border-bottom: 1px solid var(--ai-deep);
 }
 
 .hdr-in {
@@ -155,7 +156,7 @@ h1:focus {
   align-items: center;
   gap: 10px;
   min-height: 44px;
-  color: var(--head);
+  color: var(--on-dark);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -175,10 +176,10 @@ h1:focus {
   gap: 8px;
   min-height: 44px;
   padding: 0 14px;
-  border: 1.5px solid var(--ink);
+  border: 1.5px solid var(--on-dark);
   border-radius: 999px;
   background: transparent;
-  color: var(--ink);
+  color: var(--on-dark);
   font: 500 14px var(--font-body);
   cursor: pointer;
 }
@@ -213,14 +214,19 @@ h1:focus {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  color: var(--on-dark);
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
 }
 
+/* 今のページは黄の下線（紺の上で朱は読みにくいため。D-82） */
 .nav a[aria-current='page'] {
-  color: var(--shu);
   font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--ki);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 8px;
 }
 
 .nav li.cta a {
@@ -233,6 +239,7 @@ h1:focus {
 
 .nav li.cta a[aria-current='page'] {
   color: var(--on-shu);
+  text-decoration: none;
 }
 
 @media (min-width: 768px) {
@@ -267,8 +274,8 @@ h1:focus {
     right: 0;
     left: 0;
     display: block;
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
+    background: var(--ai-deep);
+    border-bottom: 1px solid var(--ai-deep);
     box-shadow: 0 12px 24px rgb(10 20 50 / 12%);
   }
 
@@ -282,7 +289,7 @@ h1:focus {
     justify-content: space-between;
     width: 100%;
     min-height: 52px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid rgb(255 255 255 / 15%);
     font-size: 16px;
   }
 
@@ -322,19 +329,13 @@ h1:focus {
   padding-block: 56px 64px;
 }
 
-.hero h1 {
-  margin: 0;
-  font-size: clamp(36px, 9vw, 68px);
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: 0.04em;
-}
-
 .hero .catch {
   margin: 0;
   color: var(--on-dark);
-  font-size: clamp(17px, 3.6vw, 22px);
-  font-weight: 700;
+  font-size: clamp(26px, 6.5vw, 44px);
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
 }
 
 @media (min-width: 768px) {

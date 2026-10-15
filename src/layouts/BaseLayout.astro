@@ -35,6 +35,8 @@ const trackEndpoint = `${env.supabaseUrl.replace(/\/$/, '')}/functions/v1/track`
 <!doctype html>
 <html lang="ja" data-site-env={env.siteEnv} data-track-endpoint={track ? trackEndpoint : undefined}>
   <head>
+    <!-- 表示の明るさを描く前に決める（D-86。インラインではなくファイルで読む） -->
+    <script is:inline src="/theme-init.js"></script>
     <SeoHead meta={pageMeta} robots={robots} />
     {jsonLd.map((item) => (
       <script is:inline type="application/ld+json" set:html={serializeJsonLd(item)} />

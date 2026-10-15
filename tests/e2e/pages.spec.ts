@@ -127,16 +127,14 @@ test('EP-05a 曲目一覧：本文があればナビの「宜野湾区青年会�
 }) => {
   await page.goto('/songs');
   await expect(page.locator('.content-body h2')).toHaveText('仲順流り');
-  const labels = await page
-    .getByRole('navigation', { name: 'メインメニュー' })
-    .getByRole('link')
-    .allTextContents();
-  expect(labels.slice(0, 3)).toEqual(['トップ', '宜野湾区青年会について', '曲目一覧']);
-  await expect(
-    page
-      .getByRole('navigation', { name: 'メインメニュー' })
-      .getByRole('link', { name: '曲目一覧' }),
-  ).toHaveAttribute('aria-current', 'page');
+  // スマホ幅ではナビがメニューの中に隠れているため、表示に関係なく並びを読む
+  const links = page.locator('#site-nav a');
+  expect((await links.allTextContents()).slice(0, 3)).toEqual([
+    'トップ',
+    '宜野湾区青年会について',
+    '曲目一覧',
+  ]);
+  await expect(links.nth(2)).toHaveAttribute('aria-current', 'page');
 });
 
 test('EP-05 宜野湾区青年会について：本文があり、役員紹介の区画がない', async ({ page }) => {

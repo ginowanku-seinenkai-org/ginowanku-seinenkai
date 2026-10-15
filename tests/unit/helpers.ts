@@ -32,6 +32,7 @@ export const rows = {
     updated_at: '2026-10-01T00:00:00Z',
   }),
   settings: {
+    og_photo_id: null,
     instagram_url: null,
     facebook_url: null,
     tiktok_url: null,

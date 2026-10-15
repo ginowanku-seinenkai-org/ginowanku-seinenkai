@@ -8,7 +8,7 @@ import SeoHead from '../components/SeoHead.astro';
 import TrackScript from '../components/TrackScript.astro';
 import { loadSiteData } from '../lib/data.ts';
 import { getEnv } from '../lib/env.ts';
-import { serializeJsonLd, type PageMeta } from '../lib/seo.ts';
+import { serializeJsonLd, withSiteOgImage, type PageMeta } from '../lib/seo.ts';
 
 interface Props {
   meta: PageMeta;
@@ -21,6 +21,10 @@ interface Props {
 }
 const { meta, current = null, noindex = false, track = true, jsonLd = [] } = Astro.props;
 const data = await loadSiteData();
+// SNS で共有したときの共通の画像（サイト設定。D-85）
+const ogPhoto =
+  data.settings.og_photo_id === null ? undefined : data.photos.get(data.settings.og_photo_id);
+const pageMeta = withSiteOgImage(meta, ogPhoto);
 const env = getEnv();
 // プレビュー環境はすべてのページを検索に載せない（D-20、03 §11.5）
 const robots = env.siteEnv === 'preview' ? 'noindex, nofollow' : noindex ? 'noindex' : null;
@@ -31,7 +35,7 @@ const trackEndpoint = `${env.supabaseUrl.replace(/\/$/, '')}/functions/v1/track`
 <!doctype html>
 <html lang="ja" data-site-env={env.siteEnv} data-track-endpoint={track ? trackEndpoint : undefined}>
   <head>
-    <SeoHead meta={meta} robots={robots} />
+    <SeoHead meta={pageMeta} robots={robots} />
     {jsonLd.map((item) => (
       <script is:inline type="application/ld+json" set:html={serializeJsonLd(item)} />
     ))}

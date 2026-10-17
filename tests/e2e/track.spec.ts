@@ -18,7 +18,15 @@ async function serveAsProduction(page: Page) {
     const html = (await response.text())
       .replace('data-site-env="local"', 'data-site-env="production"')
       .replace(/data-track-endpoint="[^"]*"/, `data-track-endpoint="${TRACK_URL}"`);
-    return route.fulfill({ response, body: html });
+    // 送り先を差し替えたので、CSP の connect-src にも足す（本番の CSP には本番の送り先が入っている）
+    const headers = { ...response.headers() };
+    const csp = headers['content-security-policy'];
+    if (csp)
+      headers['content-security-policy'] = csp.replace(
+        'connect-src',
+        `connect-src ${new URL(TRACK_URL).origin}`,
+      );
+    return route.fulfill({ response, body: html, headers });
   });
 }
 

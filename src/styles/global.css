@@ -19,6 +19,9 @@
   --on-shu: #ffffff;
   --head: #1d2d5a;
   --danger: #b3261e;
+  /* キーボードの焦点の枠と、入力欄の枠（背景との差 3:1 以上。WCAG 1.4.11・2.4.7） */
+  --focus: #1d2d5a;
+  --field-line: #8a91a3;
   --font-body:
     'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', Meiryo, sans-serif;
 }
@@ -42,6 +45,8 @@
     --on-shu: #1b0d0a;
     --head: #eceff6;
     --danger: #ff8f86;
+    --focus: #f5c451;
+    --field-line: #6b7594;
   }
 }
 
@@ -64,6 +69,8 @@
   --on-shu: #1b0d0a;
   --head: #eceff6;
   --danger: #ff8f86;
+  --focus: #f5c451;
+  --field-line: #6b7594;
 }
 
 *,
@@ -93,9 +100,18 @@ img {
 }
 
 :focus-visible {
-  outline: 3px solid var(--ki);
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/* 紺の地（ヘッダー・メニュー・ページ見出し・フッター・依頼の箱）では黄の枠にする */
+.hdr :focus-visible,
+.nav.open :focus-visible,
+.phead :focus-visible,
+.cta.req :focus-visible,
+.ftr :focus-visible {
+  outline-color: var(--ki);
 }
 
 main:focus,
@@ -1289,7 +1305,7 @@ body {
   width: 100%;
   min-height: 50px;
   padding: 12px 14px;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--field-line);
   border-radius: 10px;
   background: var(--surface);
   color: var(--ink);
@@ -1365,7 +1381,7 @@ textarea.inp.short {
   gap: 10px;
   min-height: 54px;
   padding: 0 16px;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--field-line);
   border-radius: 12px;
   background: var(--surface);
   font-weight: 700;

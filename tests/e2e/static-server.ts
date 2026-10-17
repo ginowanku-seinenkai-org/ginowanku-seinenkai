@@ -22,7 +22,7 @@ const TYPES: Record<string, string> = {
 
 /** `/*` の項目のヘッダー。手元は http なので、HSTS と upgrade-insecure-requests は外す */
 function commonHeaders(): Record<string, string> {
-  let text = '';
+  let text: string;
   try {
     text = readFileSync(join(DIST, '_headers'), 'utf8');
   } catch {

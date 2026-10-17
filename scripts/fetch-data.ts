@@ -7,6 +7,7 @@ import { todayJst } from '../src/lib/date.ts';
 import { getEnv } from '../src/lib/env.ts';
 import {
   VIEW_COLUMNS,
+  VIEW_ORDER,
   publicPageSchema,
   publicPhotoSchema,
   publicPostPhotoSchema,
@@ -37,7 +38,9 @@ export function supabaseViewReader(url: string, key: string): ViewReader {
   });
   return {
     async read(view, from, to) {
-      const { data, error } = await client.from(view).select(VIEW_COLUMNS[view]).range(from, to);
+      let query = client.from(view).select(VIEW_COLUMNS[view]);
+      for (const column of VIEW_ORDER[view]) query = query.order(column, { ascending: true });
+      const { data, error } = await query.range(from, to);
       if (error) throw new QueryError(`${view}：${error.message}`, error.code || undefined);
       return data ?? [];
     },

@@ -93,3 +93,15 @@ export const VIEW_COLUMNS = {
   v_public_site_settings: 'instagram_url,facebook_url,tiktok_url,join_age_label,og_photo_id',
   v_public_photos: 'id,full_path,thumb_path,width,height,thumb_width,thumb_height,alt',
 } as const;
+
+/**
+ * ページ分けで読むときの並び（行が一意に決まる列）。並びがないと、ページの境目で行が重なったり抜けたりしうる
+ * サイト設定は1行だけなので並べない
+ */
+export const VIEW_ORDER: Record<keyof typeof VIEW_COLUMNS, readonly string[]> = {
+  v_public_posts: ['id'],
+  v_public_post_photos: ['post_id', 'sort_order', 'photo_id'],
+  v_public_pages: ['key'],
+  v_public_site_settings: [],
+  v_public_photos: ['id'],
+};

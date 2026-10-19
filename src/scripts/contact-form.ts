@@ -7,6 +7,7 @@ import {
   isUnder18,
   labelOf,
   REQUIRED_BY_KIND,
+  thanksUrl,
   validate,
   type FieldName,
   type FormValues,
@@ -353,8 +354,8 @@ function setup(form: HTMLFormElement) {
     setSending(true);
     const outcome = await post(result.body);
     if (outcome.ok) {
-      // 送信内容は次のページに渡さない
-      location.assign('/contact/thanks');
+      // 送信内容は次のページに渡さない。受付番号だけを渡す（D-93）
+      location.assign(thanksUrl(outcome.refCode));
       return;
     }
     setSending(false);

@@ -161,7 +161,22 @@ export function isUnder18(raw: string): boolean {
 }
 
 export type SubmitResult =
-  { ok: true } | { ok: false; failure: SubmitFailure; fields?: Record<string, FieldReason> };
+  | { ok: true; refCode: string | null }
+  | { ok: false; failure: SubmitFailure; fields?: Record<string, FieldReason> };
+
+/** 受付番号の形（D-93。英数字6文字を3文字ずつ。0・O・1・I・L・U は使わない） */
+export const REF_CODE_PATTERN = /^[2-9A-HJKMNP-TV-Z]{3}-[2-9A-HJKMNP-TV-Z]{3}$/;
+
+/** 完了画面の URL。受付番号を ?ref= で渡す（入力内容は渡さない） */
+export function thanksUrl(refCode: string | null): string {
+  return refCode ? `/contact/thanks?ref=${refCode}` : '/contact/thanks';
+}
+
+/** 完了画面で出す受付番号。形が違うものは出さない */
+export function refCodeFromSearch(search: string): string | null {
+  const ref = new URLSearchParams(search).get('ref');
+  return ref && REF_CODE_PATTERN.test(ref) ? ref : null;
+}
 
 const REASONS = new Set<string>([
   'required',
@@ -175,9 +190,16 @@ const REASONS = new Set<string>([
 export function classifyResponse(status: number, body: unknown): SubmitResult {
   const data = (typeof body === 'object' && body !== null ? body : {}) as {
     ok?: unknown;
+    ref_code?: unknown;
     error?: { code?: unknown; fields?: unknown };
   };
-  if (status === 200 && data.ok === true) return { ok: true };
+  if (status === 200 && data.ok === true) {
+    const ref = data.ref_code;
+    return {
+      ok: true,
+      refCode: typeof ref === 'string' && REF_CODE_PATTERN.test(ref) ? ref : null,
+    };
+  }
   const code = data.error?.code;
   if (status === 400 && code === 'invalid_input') {
     const raw = data.error?.fields;

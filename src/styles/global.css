@@ -1670,3 +1670,21 @@ textarea.inp.short {
     font-size: 13px;
   }
 }
+
+/* 送信完了の受付番号（D-93） */
+.ref-box {
+  padding: 14px 16px;
+  border: 1.5px solid var(--field-line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.ref-code {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.ref-code strong {
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}

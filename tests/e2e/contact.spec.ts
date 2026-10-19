@@ -38,6 +38,10 @@ test('EP-07 問い合わせ：F-21 の文言と自動返信の注意がフォー
   await page.goto('/contact/thanks');
   await expect(page.getByText(/内容を確認のうえ、1週間以内にご連絡します。/)).toBeVisible();
   await expect(page.getByText(/届かない場合があります/)).toBeVisible();
+  // 受付番号がない・形が違うときは出さない（D-93）
+  await expect(page.getByText(/受付番号：/)).toBeHidden();
+  await page.goto('/contact/thanks?ref=%3Cb%3Ex%3C%2Fb%3E');
+  await expect(page.getByText(/受付番号：/)).toBeHidden();
 });
 
 test('EP-08 問い合わせ：種類の切り替え', async ({ page }) => {
@@ -88,7 +92,7 @@ test('EP-09 問い合わせ：送信成功（入力どおりの本文を送り�
   await page.route(SUBMIT, async (route) => {
     sent = route.request().postDataJSON() as Record<string, unknown>;
     headers = route.request().headers();
-    await json(route, 200, { ok: true });
+    await json(route, 200, { ok: true, ref_code: 'K7Q-3M9' });
   });
   await page.goto('/contact');
   await fillPerformance(page);
@@ -97,7 +101,9 @@ test('EP-09 問い合わせ：送信成功（入力どおりの本文を送り�
     await page.evaluate(() => (window as unknown as { __tsOptions?: unknown }).__tsOptions),
   ).toEqual({ sitekey: '1x00000000000000000000AA', action: 'inquiry', language: 'ja' });
   await form(page).getByRole('button', { name: '送信する' }).click();
-  await expect(page).toHaveURL(/\/contact\/thanks$/);
+  // 受付番号だけを URL で渡し、完了画面に出す（D-93）
+  await expect(page).toHaveURL(/\/contact\/thanks\?ref=K7Q-3M9$/);
+  await expect(page.getByText('受付番号：K7Q-3M9')).toBeVisible();
   expect(sent).toEqual({
     kind: 'performance',
     organization: '〇〇自治会',

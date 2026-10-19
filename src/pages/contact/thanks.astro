@@ -1,5 +1,5 @@
 ---
-// S09 送信完了（06 §4.2）。noindex、sitemap から除外
+// S09 送信完了（06 §4.2）。受付番号は URL の ?ref= から出す（D-93）。noindex、sitemap から除外
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import InstagramDmLink from '../../components/InstagramDmLink.astro';
 import PageHead from '../../components/PageHead.astro';
@@ -22,6 +22,14 @@ const meta = buildMeta({ name: '送信完了', path: '/contact/thanks' });
       <br />
       内容を確認のうえ、1週間以内にご連絡します。
     </p>
+    <div class="ref-box" data-ref-box hidden>
+      <p class="ref-code">
+        受付番号：<strong class="notranslate" data-ref-value></strong>
+      </p>
+      <p>
+        お問い合わせの追加や訂正のときは、この受付番号をお知らせください。自動返信メールにも書いています。
+      </p>
+    </div>
     <p>
       ご入力のメールアドレスに、受付確認の自動返信メールをお送りしました。迷惑メールのフォルダに入っている場合や、届かない場合があります。届いていなくても、お問い合わせは受け付けています。
     </p>
@@ -37,3 +45,7 @@ const meta = buildMeta({ name: '送信完了', path: '/contact/thanks' });
     </p>
   </div>
 </BaseLayout>
+
+<script>
+  import '../../scripts/thanks.ts';
+</script>

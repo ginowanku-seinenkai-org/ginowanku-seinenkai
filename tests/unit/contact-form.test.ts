@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   buildInput,
   classifyResponse,
+  refCodeFromSearch,
+  thanksUrl,
   fieldMessage,
   isUnder18,
   toAgeValue,
@@ -169,7 +171,24 @@ describe('classifyResponse（03 §8.5 の表）', () => {
     error: { code, message: code, ...extra },
     request_id: 'r',
   });
-  it('200 ok は成功', () => expect(classifyResponse(200, { ok: true })).toEqual({ ok: true }));
+  it('200 ok は成功。受付番号は形が合うときだけ受け取る（D-93）', () => {
+    expect(classifyResponse(200, { ok: true })).toEqual({ ok: true, refCode: null });
+    expect(classifyResponse(200, { ok: true, ref_code: 'K7Q-3M9' })).toEqual({
+      ok: true,
+      refCode: 'K7Q-3M9',
+    });
+    expect(classifyResponse(200, { ok: true, ref_code: '<b>x</b>' })).toEqual({
+      ok: true,
+      refCode: null,
+    });
+  });
+  it('完了画面の URL と受付番号の読み取り（D-93）', () => {
+    expect(thanksUrl('K7Q-3M9')).toBe('/contact/thanks?ref=K7Q-3M9');
+    expect(thanksUrl(null)).toBe('/contact/thanks');
+    expect(refCodeFromSearch('?ref=K7Q-3M9')).toBe('K7Q-3M9');
+    expect(refCodeFromSearch('?ref=%3Cscript%3E')).toBeNull();
+    expect(refCodeFromSearch('')).toBeNull();
+  });
   it('400 invalid_input は項目ごとの理由を返す。知らない理由は invalid', () =>
     expect(
       classifyResponse(

@@ -363,4 +363,11 @@ function setup(form: HTMLFormElement) {
     resetTurnstile();
     showFailure(outcome.failure, outcome.fields);
   });
+
+  // 送ったあと「戻る」でこのページがそのまま戻ってきたとき、送信中のまま押せなくならないようにする
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    setSending(false);
+    resetTurnstile();
+  });
 }

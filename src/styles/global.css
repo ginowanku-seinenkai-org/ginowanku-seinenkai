@@ -110,7 +110,8 @@ img {
 .nav.open :focus-visible,
 .phead :focus-visible,
 .cta.req :focus-visible,
-.ftr :focus-visible {
+.ftr :focus-visible,
+.lb :focus-visible {
   outline-color: var(--ki);
 }
 
@@ -1331,6 +1332,12 @@ textarea.inp.short {
   border-color: var(--ai);
   outline: none;
   box-shadow: 0 0 0 3px var(--tint-ai);
+}
+
+/* キーボードで入ったときは、どのテーマでも見える焦点の枠にする（WCAG 2.4.7） */
+.inp:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .inp[aria-invalid='true'] {

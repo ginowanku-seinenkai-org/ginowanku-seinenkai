@@ -10,6 +10,7 @@ import { loadSiteData } from '../lib/data.ts';
 import { getEnv } from '../lib/env.ts';
 import { serializeJsonLd, withSiteOgImage, type PageMeta } from '../lib/seo.ts';
 
+/** meta はページの title・OGP など、current はナビで今のページを示す項目、jsonLd はページの構造化データ */
 interface Props {
   meta: PageMeta;
   current?: NavKey;

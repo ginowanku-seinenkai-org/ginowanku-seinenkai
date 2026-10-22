@@ -4,15 +4,19 @@ import { DESCRIPTIONS, SITE_NAME } from './messages.ts';
 import { eventDatetime } from './date.ts';
 import type { PublicPhoto, PublicPost, PublicSiteSettings } from './view-schemas.ts';
 
+/** 本番のサイトのオリジン */
 export const SITE_ORIGIN = 'https://ginowanku-seinenkai.com';
+// ページに画像が無いときの共通の OGP 画像
 const DEFAULT_OG_IMAGE = {
   url: `${SITE_ORIGIN}/og-default.jpg`,
   width: 1200,
   height: 630,
   alt: SITE_NAME,
 };
+// 本文から作る description の文字数
 const DESCRIPTION_LENGTH = 120;
 
+/** buildMeta() に渡す、ページごとの値 */
 export interface MetaInput {
   /** ページの名前（トップは null） */
   name: string | null;
@@ -26,6 +30,7 @@ export interface MetaInput {
   noCanonical?: boolean;
 }
 
+/** <head> に出す title・description・canonical・OGP */
 export interface PageMeta {
   title: string;
   description: string | null;
@@ -36,7 +41,11 @@ export interface PageMeta {
   ogImage: { url: string; width: number; height: number; alt: string };
 }
 
-/** canonical などに使う絶対 URL（末尾スラッシュなし、.html なし。トップは /） */
+/**
+ * canonical などに使う絶対 URL を作る（末尾スラッシュなし、.html なし。トップは /）
+ * @param path サイト内のパス
+ * @returns 絶対 URL
+ */
 export function absoluteUrl(path: string): string {
   const clean = path.replace(/\.html$/, '').replace(/\/+$/, '');
   return `${SITE_ORIGIN}${clean === '' ? '/' : clean}`;
@@ -44,6 +53,9 @@ export function absoluteUrl(path: string): string {
 
 /**
  * ページに自分の画像がないとき（共通の画像のまま）は、サイト設定の共通の画像に替える（03 §11、D-85）
+ * @param meta buildMeta() で作った値
+ * @param photo サイト設定の共通の画像（無ければ undefined）
+ * @returns 画像を替えた値。替えないときは meta のまま
  */
 export function withSiteOgImage(meta: PageMeta, photo: PublicPhoto | undefined): PageMeta {
   if (!photo || meta.ogImage.url !== DEFAULT_OG_IMAGE.url) return meta;
@@ -58,6 +70,11 @@ export function withSiteOgImage(meta: PageMeta, photo: PublicPhoto | undefined):
   };
 }
 
+/**
+ * ページの title・description・canonical・OGP を作る（03 §11）
+ * @param input ページの名前・パス・説明・画像など
+ * @returns <head> に出す値
+ */
 export function buildMeta(input: MetaInput): PageMeta {
   const name =
     input.name === null
@@ -86,7 +103,12 @@ export function buildMeta(input: MetaInput): PageMeta {
   };
 }
 
-/** 本文の先頭120文字（超えたら「…」）。空なら fallback（03 §11.1） */
+/**
+ * 本文から description を作る。先頭120文字（超えたら「…」）。空なら fallback（03 §11.1）
+ * @param body 本文（TipTap の JSON）
+ * @param fallback 本文が空のときの文
+ * @returns description
+ */
 export function descriptionFromBody(body: unknown, fallback: string): string {
   const text = bodyToPlainText(body);
   if (text === '') return fallback;
@@ -96,11 +118,20 @@ export function descriptionFromBody(body: unknown, fallback: string): string {
     : text;
 }
 
-/** JSON-LD を埋め込める文字列にする（< を < に置き換える。03 §11.6） */
+/**
+ * JSON-LD を <script> に埋め込める文字列にする（< を \u003c に置き換える。03 §11.6）
+ * @param value JSON-LD の値
+ * @returns JSON の文字列
+ */
 export function serializeJsonLd(value: unknown): string {
   return JSON.stringify(value).replace(/</g, '\\u003c');
 }
 
+/**
+ * 会の Organization の JSON-LD を作る（03 §11.6）。SNS の URL があれば sameAs に入れる
+ * @param settings サイト設定
+ * @returns JSON-LD の値
+ */
 export function organizationJsonLd(settings: PublicSiteSettings): Record<string, unknown> {
   const sameAs = [settings.instagram_url, settings.facebook_url, settings.tiktok_url].filter(
     (u): u is string => u !== null,
@@ -122,7 +153,13 @@ export function organizationJsonLd(settings: PublicSiteSettings): Record<string,
   };
 }
 
-/** 行事の詳細の Event。場所や開始日時がなければ null（03 §11.6） */
+/**
+ * 行事の詳細の Event の JSON-LD を作る（03 §11.6）
+ * @param post 記事
+ * @param description ページの description
+ * @param cover 表紙の写真（無ければ null）
+ * @returns JSON-LD の値。行事でない、場所や開始日時がなければ null
+ */
 export function eventJsonLd(
   post: PublicPost,
   description: string,

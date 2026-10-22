@@ -3,6 +3,10 @@
 import FixedPage from '../components/FixedPage.astro';
 import { loadSiteData } from '../lib/data.ts';
 
+/**
+ * 作る固定ページを決める。曲目一覧（songs）は本文があるときだけ作る
+ * @returns ページのパラメーター（songs が無ければ空）
+ */
 export async function getStaticPaths() {
   const data = await loadSiteData();
   return data.pages.songs ? [{ params: { fixed: 'songs' } }] : [];

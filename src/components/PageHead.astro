@@ -2,6 +2,7 @@
 // トップ以外のページ見出し（パンくず・h1・リード）
 import Breadcrumb from './Breadcrumb.astro';
 
+/** title：h1。crumbs：パンくずの項目。lead：リード（無ければ出さない） */
 interface Props {
   title: string;
   crumbs: { label: string; href?: string }[];

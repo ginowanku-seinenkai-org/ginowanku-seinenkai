@@ -19,6 +19,7 @@ export const TURNSTILE_TEST_KEYS = [
 
 /** Cloudflare Pages の _headers の上限（08 1-3） */
 export const MAX_HEADER_RULES = 100;
+/** _headers の1行の文字数の上限（08 1-3） */
 export const MAX_HEADER_LINE = 2000;
 
 /**
@@ -26,10 +27,15 @@ export const MAX_HEADER_LINE = 2000;
  * 英語にならなくなったら、ブラウザのコンソールの CSP 違反に出る値に替える（運用手順書 §12）
  */
 export const GOOGLE_TRANSLATE_SCRIPT_HASH = "'sha256-R6kjt5FwTd5vAw94Q08NLDZsSaGTzg4NsdIfKtECSp0='";
+// Google 翻訳の部品のスクリプトのオリジン（D-88）
 const GOOGLE_TRANSLATE_SCRIPTS =
   'https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com';
 
-/** セキュリティヘッダー（03 §12.1）。CSP の connect-src に Supabase のオリジンを入れる */
+/**
+ * _headers の中身を作る。セキュリティヘッダー（03 §12.1）と、/_astro/*・/photos/* の Cache-Control
+ * @param supabaseUrl Supabase の URL（オリジンを CSP の connect-src に入れる）
+ * @returns _headers の中身
+ */
 export function buildHeaders(supabaseUrl: string): string {
   const supabaseOrigin = new URL(supabaseUrl).origin;
   const csp = [
@@ -67,7 +73,11 @@ export function buildHeaders(supabaseUrl: string): string {
   ].join('\n');
 }
 
-/** _headers の上限（規則100件、1行2,000文字）を超えていないか */
+/**
+ * _headers の上限（規則100件、1行2,000文字）を超えていないか確かめる
+ * @param text _headers の中身
+ * @returns 見つかった問題の文。無ければ空
+ */
 export function checkHeaders(text: string): string[] {
   const errors: string[] = [];
   const rules = text.split('\n').filter((line) => line.startsWith('/')).length;
@@ -79,12 +89,21 @@ export function checkHeaders(text: string): string[] {
   return errors;
 }
 
+/**
+ * ディレクトリの下のファイルをすべて挙げる（サブディレクトリも含む）
+ * @param dir ディレクトリのパス
+ * @returns ファイルのパスの一覧
+ */
 async function listFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true, recursive: true });
   return entries.filter((e) => e.isFile()).map((e) => join(e.parentPath, e.name));
 }
 
-/** CSP 違反のもと：src の無い <script>（JSON-LD を除く）、<style>、style= 属性、on…= 属性 */
+/**
+ * CSP 違反のもとを探す：src の無い <script>（JSON-LD を除く）、<style>、style= 属性、on…= 属性
+ * @param html ページの HTML
+ * @returns 見つかったものの説明。無ければ空
+ */
 export function findInlineViolations(html: string): string[] {
   const found: string[] = [];
   for (const match of html.matchAll(/<script\b([^>]*)>/gi)) {
@@ -98,12 +117,19 @@ export function findInlineViolations(html: string): string[] {
   return found;
 }
 
+/** postbuild() の引数。省略すると環境変数とカレントディレクトリを使う */
 export interface PostbuildOptions {
   root?: string;
   siteEnv?: string;
   supabaseUrl?: string;
 }
 
+/**
+ * _headers を作り、ビルド出力を検査する（03 §12.3）
+ * インラインのスクリプトなど、本番のテスト用キー、ファイル数、写真の数、本番の固定データの使用を確かめる
+ * @param options リポジトリのルート、サイトの環境、Supabase の URL
+ * @throws 1つでも問題があったとき（問題をまとめて出す）
+ */
 export async function postbuild({
   root = process.cwd(),
   siteEnv = getEnv().siteEnv,

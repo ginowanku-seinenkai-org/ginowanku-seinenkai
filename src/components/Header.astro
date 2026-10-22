@@ -3,7 +3,9 @@
 import { loadSiteData } from '../lib/data.ts';
 import { SITE_NAME } from '../lib/messages.ts';
 
+/** ナビの項目（どれでもないページは null） */
 export type NavKey = 'top' | 'about' | 'songs' | 'news' | 'activities' | 'join' | 'contact' | null;
+/** current：今のページのナビの項目（aria-current を付ける）。どれでもなければ null */
 interface Props {
   current: NavKey;
 }

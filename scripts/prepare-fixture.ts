@@ -3,8 +3,10 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
+// リポジトリのルート
 const root = resolve(import.meta.dirname, '..');
 
+// コピーする固定データ（コピー元 → コピー先）
 const copies = [
   { from: 'tests/fixtures/data', to: '.data' },
   { from: 'tests/fixtures/photos', to: 'public/photos' },

@@ -14,6 +14,7 @@ import {
 } from '../lib/messages.ts';
 import { PRIVACY_VERSION } from '../lib/privacy.ts';
 
+/** instagramUrl：送れないときの案内のリンク先（無ければ null）。joinAgeLabel：入会の対象の年齢の表示 */
 interface Props {
   instagramUrl: string | null;
   joinAgeLabel: string;

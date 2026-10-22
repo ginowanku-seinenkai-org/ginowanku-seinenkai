@@ -21,6 +21,7 @@ import {
   type PublicSiteSettings,
 } from './view-schemas.ts';
 
+/** ビルドで使う公開用のデータ一式（.data/ を検証したもの） */
 export interface SiteData {
   source: 'supabase' | 'fixture';
   /** meta.json の today（日本時間 'YYYY-MM-DD'） */
@@ -35,8 +36,16 @@ export interface SiteData {
   photos: Map<string, PublicPhoto>;
 }
 
+// 読めないときに添える案内
 const HINT = '先に `pnpm fetch-data`（固定データなら `pnpm build:fixture`）を実行してください';
 
+/**
+ * .data/ の JSON ファイルを読む
+ * @param dir .data/ のパス
+ * @param name ファイル名
+ * @returns 読んだ値（形はまだ確かめていない）
+ * @throws ファイルが無い、または JSON として読めないとき
+ */
 async function readJson(dir: string, name: string): Promise<unknown> {
   try {
     return JSON.parse(await readFile(join(dir, name), 'utf8')) as unknown;
@@ -45,11 +54,23 @@ async function readJson(dir: string, name: string): Promise<unknown> {
   }
 }
 
+/**
+ * 記事を新しい順に並べる比較関数：published_on の降順、同じなら id の降順
+ * @param a 比べる記事
+ * @param b 比べる記事
+ * @returns sort に渡す比較の値
+ */
 export function comparePosts(a: PublicPost, b: PublicPost): number {
   if (a.published_on !== b.published_on) return a.published_on < b.published_on ? 1 : -1;
   return b.id - a.id;
 }
 
+/**
+ * .data/ を読んで検証し、SiteData を作る（03 §3.6）。本文の決まりの違反は警告だけ出す
+ * @param root リポジトリのルート（.data/ と public/photos/ の親）
+ * @returns 検証したデータ
+ * @throws ファイルが読めない、列の形が違う、about・join が無い、写真ファイルが欠けているとき
+ */
 export async function readSiteData(root: string = process.cwd()): Promise<SiteData> {
   const dir = join(root, '.data');
   const meta = metaSchema.parse(await readJson(dir, 'meta.json'));
@@ -127,18 +148,33 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
   };
 }
 
+// 読み込み中・読み込み済みのデータ（1回だけ読むため）
 let loading: Promise<SiteData> | undefined;
 
-/** 1回のビルドで1回だけ読む（03 §3.6） */
+/**
+ * サイトのデータを読む。1回のビルドで1回だけ読む（03 §3.6）
+ * @returns 検証したデータ
+ * @throws readSiteData() と同じ
+ */
 export function loadSiteData(): Promise<SiteData> {
   loading ??= readSiteData();
   return loading;
 }
 
-/** renderBody() に渡す ctx（03 §5.1）。写真が公開用ビューに無ければ警告を出して null を返す（ビルドは止めない） */
+/**
+ * renderBody() に渡す ctx を作る（03 §5.1）。写真が公開用ビューに無ければ警告を出して null を返す（ビルドは止めない）
+ * @param data サイトのデータ
+ * @param label 警告に出す、どの本文か（例：記事12の本文）
+ * @returns renderBody() の ctx
+ */
 export function renderContext(data: SiteData, label: string): RenderContext {
   return {
     siteOrigin: SITE_ORIGIN,
+    /**
+     * 写真の ID から、本文の写真の出力に使う値を返す
+     * @param photoId 写真の ID
+     * @returns 表示用の値。公開用ビューに無ければ null
+     */
     resolvePhoto(photoId) {
       const photo = data.photos.get(photoId);
       if (photo === undefined) {

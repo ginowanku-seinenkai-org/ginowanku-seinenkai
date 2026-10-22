@@ -5,6 +5,10 @@ import PostDetail from '../../components/PostDetail.astro';
 import { loadSiteData } from '../../lib/data.ts';
 import type { PublicPost } from '../../lib/view-schemas.ts';
 
+/**
+ * 活動記録以外の記事ごとにページを作る
+ * @returns 記事の ID のパラメーターと、記事を props に入れたもの
+ */
 export const getStaticPaths = (async () => {
   const data = await loadSiteData();
   return data.posts

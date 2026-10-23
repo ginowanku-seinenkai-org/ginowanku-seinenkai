@@ -11,6 +11,7 @@ import { KIND_LABELS, newsPosts, pageUrl, paginate } from '../lib/posts.ts';
 import { buildMeta } from '../lib/seo.ts';
 import type { NewsKind } from '../lib/view-schemas.ts';
 
+/** kind：種類（すべてなら null）。page：表示するページ番号（1から） */
 interface Props {
   kind: NewsKind | null;
   page: number;

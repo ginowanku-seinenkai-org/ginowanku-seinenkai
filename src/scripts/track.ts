@@ -1,10 +1,12 @@
 // アクセス計測（03 §9）。ページの読み込みごとに1回、sendBeacon で送る。結果は見ない
 import { buildTrackPayload, shouldTrack } from '../lib/track.ts';
 
+// GPC（globalPrivacyControl）は型に無いので足す
 interface PrivacyNavigator extends Navigator {
   globalPrivacyControl?: boolean;
 }
 
+/** 計測を送る。送らない条件（03 §9.3）に当てはまれば何もしない。失敗しても何もしない */
 function send() {
   const root = document.documentElement.dataset;
   const endpoint = root['trackEndpoint'];

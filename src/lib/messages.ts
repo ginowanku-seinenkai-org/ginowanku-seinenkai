@@ -1,5 +1,6 @@
 // 画面の固定文言（文面の正は 06 §4。変えるときは 06 を先に直す）
 
+/** サイトの名前（会の名前） */
 export const SITE_NAME = '宜野湾区青年会';
 
 /** meta description の固定文（06 §4.5） */
@@ -42,6 +43,7 @@ export const CONTACT_NOTICE = {
 
 /** 問い合わせの種類（06 §4.1） */
 export type InquiryKind = 'performance' | 'join' | 'other';
+/** 問い合わせの種類の選択肢（値と表示名） */
 export const INQUIRY_KINDS: readonly { value: InquiryKind; label: string }[] = [
   { value: 'performance', label: '演舞依頼' },
   { value: 'join', label: '入会希望' },
@@ -98,7 +100,7 @@ export const CONTACT_FIELDS = {
   message: {
     label: { performance: '備考', join: '自由記入', other: 'お問い合わせ内容' },
     placeholder: {
-      performance: '例：駐車場の有無、謝礼の予定など',
+      performance: '例：駐車場の有無など',
       join: '例：経験はありませんが興味があります',
       other: 'お問い合わせの内容を書いてください',
     },
@@ -168,6 +170,7 @@ export const CONTACT_ERRORS = {
 /** 送信失敗・回数制限（06 §4.3）。本文の「InstagramのDM」はリンクにする */
 export type SubmitFailure =
   'invalid' | 'turnstile' | 'rate_limited' | 'busy' | 'server' | 'network' | 'timeout';
+/** 送信失敗の場面ごとの見出しと本文 */
 export const SUBMIT_FAILURES: Record<SubmitFailure, { heading: string; body: string }> = {
   invalid: {
     heading: '入力内容を確認してください',

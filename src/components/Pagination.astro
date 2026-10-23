@@ -2,6 +2,7 @@
 // ページ送り（03 §6.2）。1ページしかなければ出さない
 import { pageUrl } from '../lib/posts.ts';
 
+/** base：一覧の1ページ目のパス。currentPage：今のページ。lastPage：最後のページ */
 interface Props {
   base: string;
   currentPage: number;

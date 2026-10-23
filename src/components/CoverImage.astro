@@ -3,6 +3,7 @@
 import { photoSrc } from '../lib/posts.ts';
 import type { PublicPhoto } from '../lib/view-schemas.ts';
 
+/** photo：カバー写真。無ければ何も出さない */
 interface Props {
   photo: PublicPhoto | undefined;
 }

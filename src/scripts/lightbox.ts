@@ -9,6 +9,10 @@ if (gallery && dialog && typeof dialog.showModal === 'function') {
   let index = 0;
   let opener: HTMLAnchorElement | undefined;
 
+  /**
+   * i 番目の写真を拡大表示に出す（端を越えたら反対の端へ回る）
+   * @param i 写真の番号（範囲の外でもよい）
+   */
   const show = (i: number) => {
     index = (i + links.length) % links.length;
     const link = links[index];

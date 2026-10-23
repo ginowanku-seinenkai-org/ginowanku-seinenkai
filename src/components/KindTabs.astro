@@ -2,6 +2,7 @@
 // /news 系の上部の絞り込み（03 §6.2）
 import type { NewsKind } from '../lib/view-schemas.ts';
 
+/** current：今の種類。すべてなら null */
 interface Props {
   current: NewsKind | null;
 }

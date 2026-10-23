@@ -3,6 +3,7 @@
 import type { PageMeta } from '../lib/seo.ts';
 import { SITE_NAME } from '../lib/messages.ts';
 
+/** meta：title・description・OGP など。robots：robots の meta の値（出さないなら null） */
 interface Props {
   meta: PageMeta;
   robots: string | null;

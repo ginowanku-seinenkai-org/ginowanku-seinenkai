@@ -3,6 +3,7 @@
 import { eventDatetime, formatEventDate } from '../lib/date.ts';
 import type { PublicPost } from '../lib/view-schemas.ts';
 
+/** post：記事。開始日時が無ければ何も出さない */
 interface Props {
   post: PublicPost;
 }

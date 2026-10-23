@@ -11,9 +11,14 @@ export const FIELD_REASONS = [
   "invalid_format",
   "invalid",
 ] as const;
+/** 入力エラーの理由コード */
 export type FieldReason = (typeof FIELD_REASONS)[number];
 
-/** 改行・タブ以外の制御文字を含むか（U+0000〜U+001F と U+007F） */
+/**
+ * 改行・タブ以外の制御文字を含むか（U+0000〜U+001F と U+007F）
+ * @param s 調べる文字列
+ * @returns 含めば true
+ */
 const hasControlChars = (s: string) =>
   Array.from(s).some((ch) => {
     const code = ch.codePointAt(0) ?? 0;
@@ -23,17 +28,34 @@ const hasControlChars = (s: string) =>
 // 01 の inquiries.email の check と同じ形
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-/** 文字数（コードポイント数。Postgres の char_length と一致） */
+/**
+ * 文字数（コードポイント数。Postgres の char_length と一致）
+ * @param s 数える文字列
+ * @returns 文字数
+ */
 const length = (s: string) => Array.from(s).length;
 
+/**
+ * 項目が送られていないか（undefined か null）
+ * @param input 項目の値
+ * @returns 送られていなければ true
+ */
 const missing = (input: unknown) => input === undefined || input === null;
 
+/**
+ * 文字列の項目の土台。無ければ required、文字列でなければ invalid にする
+ * @returns 文字列の Zod スキーマ
+ */
 const str = () =>
   z.string({
     error: (issue) => (missing(issue.input) ? "required" : "invalid"),
   });
 
-/** 前後の空白を除き、改行を \n にそろえる。1行の項目は改行を許さない */
+/**
+ * 前後の空白を除き、改行を \n にそろえる。制御文字を含むか、1行の項目に改行があれば invalid_format
+ * @param multiline 改行を許す項目なら true
+ * @returns 整えた文字列を返す Zod スキーマ
+ */
 const cleaned = (multiline: boolean) =>
   str()
     .transform((s) => s.replace(/\r\n?/g, "\n").trim())
@@ -43,6 +65,12 @@ const cleaned = (multiline: boolean) =>
       }
     });
 
+/**
+ * 文字数の範囲を確かめる superRefine の関数を作る。短ければ required、長ければ too_long
+ * @param min 最小の文字数
+ * @param max 最大の文字数
+ * @returns superRefine に渡す関数
+ */
 const withLength =
   (min: number, max: number) => (s: string, ctx: z.RefinementCtx) => {
     const n = length(s);
@@ -50,17 +78,29 @@ const withLength =
     else if (n > max) ctx.addIssue({ code: "custom", message: "too_long" });
   };
 
-/** 必須の文字列 */
+/**
+ * 必須の文字列
+ * @param min 最小の文字数（1 なら空を required にする）
+ * @param max 最大の文字数
+ * @param multiline 改行を許す項目なら true
+ * @returns 整えた文字列を返す Zod スキーマ
+ */
 const text = (min: number, max: number, multiline = false) =>
   cleaned(multiline).superRefine(withLength(min, max));
 
-/** 任意の文字列。空文字は undefined（保存は null。02 §4.2） */
+/**
+ * 任意の文字列。空文字は undefined（保存は null。02 §4.2）
+ * @param max 最大の文字数
+ * @param multiline 改行を許す項目なら true
+ * @returns 整えた文字列か undefined を返す Zod スキーマ
+ */
 const optionalText = (max: number, multiline = false) =>
   cleaned(multiline)
     .superRefine(withLength(0, max))
     .transform((s) => (s === "" ? undefined : s))
     .optional();
 
+/** メールアドレス：必須、254文字まで、EMAIL_PATTERN の形 */
 const email = text(1, 254).superRefine((s, ctx) => {
   if (s !== "" && length(s) <= 254 && !EMAIL_PATTERN.test(s)) {
     ctx.addIssue({ code: "custom", message: "invalid_format" });
@@ -79,6 +119,7 @@ const phone = cleaned(false)
   .transform((s) => (s === "" ? undefined : s))
   .optional();
 
+// 3つの種類に共通の項目
 const common = {
   name: text(1, 50),
   email,
@@ -95,7 +136,10 @@ const common = {
     .optional(),
 };
 
-// z.object は既定で知らない項目を捨てる（種類に合わない項目も捨てる。02 §4.2）
+/**
+ * 問い合わせの入力のスキーマ。kind（performance・join・other）で項目が変わる
+ * z.object は既定で知らない項目を捨てる（種類に合わない項目も捨てる。02 §4.2）
+ */
 export const inquirySchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("performance"),
@@ -133,9 +177,14 @@ export const inquirySchema = z.discriminatedUnion("kind", [
     : "invalid"),
 });
 
+/** 入力チェックを通ったあとの問い合わせの値 */
 export type InquiryInput = z.infer<typeof inquirySchema>;
 
-/** Zod の問題を `{ 項目名: 理由コード }` にする（02 §2.4、D-34）。項目ごとに最初の理由だけ */
+/**
+ * Zod の問題を `{ 項目名: 理由コード }` にする（02 §2.4、D-34）。項目ごとに最初の理由だけ
+ * @param issues Zod の safeParse が返した問題の一覧
+ * @returns 項目名ごとの理由コード。項目名が無い問題は kind にまとめる
+ */
 export function toFieldReasons(
   issues: readonly z.core.$ZodIssue[],
 ): Record<string, FieldReason> {
@@ -161,6 +210,7 @@ export interface InquirySchemaCase {
   expect?: Record<string, unknown>;
 }
 
+/** 共通のケース表の中身（07 UT-04）。fields は期待する理由コード、expect は通ったときに期待する値 */
 export const INQUIRY_SCHEMA_CASES: InquirySchemaCase[] =
   ((): InquirySchemaCase[] => {
     const base = {

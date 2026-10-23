@@ -17,6 +17,7 @@ import {
   truncateChars,
 } from './validate-body.ts';
 
+// HTML でエスケープする文字と置き換え先
 const ESCAPES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -25,10 +26,22 @@ const ESCAPES: Record<string, string> = {
   "'": '&#39;',
 };
 
+/**
+ * 文字と属性値に使えるように、& < > " ' をエスケープする
+ * @param value エスケープする文字列
+ * @returns エスケープした文字列
+ */
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ESCAPES[c] ?? c);
 }
 
+/**
+ * 本文（TipTap の JSON）を HTML にする（00 §2.1・§2.2、03 §5.3）
+ * 許可した要素だけを出し、知らないノードや形の違う値は出さない。途中で例外が起きても空文字を返す
+ * @param doc 本文（形は分からないものとして扱う）
+ * @param ctx 写真の解決と自サイトのオリジン
+ * @returns `<div class="content-body">` で囲んだ HTML。doc でなければ空文字
+ */
 export function renderBody(doc: unknown, ctx: RenderContext): string {
   try {
     if (own(doc, 'type') !== 'doc') return '';
@@ -38,6 +51,13 @@ export function renderBody(doc: unknown, ctx: RenderContext): string {
   }
 }
 
+/**
+ * 子ノードの配列を順に HTML にする
+ * @param content ノードの content
+ * @param ctx 写真の解決と自サイトのオリジン
+ * @param depth 子ノードの入れ子の深さ。MAX_DEPTH を超えたら出さない
+ * @returns つなげた HTML。配列でなければ空文字
+ */
 function renderChildren(content: unknown, ctx: RenderContext, depth: number): string {
   if (!Array.isArray(content) || depth > MAX_DEPTH) return '';
   let html = '';
@@ -45,9 +65,20 @@ function renderChildren(content: unknown, ctx: RenderContext, depth: number): st
   return html;
 }
 
+/**
+ * ノード1つを HTML にする
+ * @param node 変換するノード
+ * @param ctx 写真の解決と自サイトのオリジン
+ * @param depth このノードの入れ子の深さ
+ * @returns ノードの HTML。出さないノードは空文字
+ */
 function renderNode(node: unknown, ctx: RenderContext, depth: number): string {
   const type = own(node, 'type');
   const content = own(node, 'content');
+  /**
+   * このノードの子を HTML にする（深さを1つ増やす）
+   * @returns 子の HTML
+   */
   const children = () => renderChildren(content, ctx, depth + 1);
 
   switch (type) {
@@ -81,7 +112,11 @@ function renderNode(node: unknown, ctx: RenderContext, depth: number): string {
   }
 }
 
-// 中身が空、または空白の文字だけの段落は出さない
+/**
+ * 段落が空かを調べる。中身が空、または空白の文字だけの段落は出さない
+ * @param content 段落の content
+ * @returns 出さない段落なら true
+ */
 function isBlankParagraph(content: unknown): boolean {
   if (!Array.isArray(content)) return true;
   return content.every((child) => {
@@ -91,6 +126,12 @@ function isBlankParagraph(content: unknown): boolean {
   });
 }
 
+/**
+ * 文字のノードをエスケープし、太字とリンクの飾りを付ける
+ * @param node 文字のノード
+ * @param ctx 自サイトのオリジン（リンクの判定に使う）
+ * @returns 文字の HTML。text が文字列でなければ空文字
+ */
 function renderText(node: unknown, ctx: RenderContext): string {
   const text = own(node, 'text');
   if (typeof text !== 'string') return '';
@@ -107,6 +148,13 @@ function renderText(node: unknown, ctx: RenderContext): string {
   return html;
 }
 
+/**
+ * 文字をリンクで包む。外部のリンクは新しいタブで開き、noopener noreferrer を付ける
+ * @param inner 包む HTML（エスケープ済み）
+ * @param href リンク先。http・https の URL 以外ならリンクにしない
+ * @param ctx 自サイトのオリジン（内部リンクの判定に使う）
+ * @returns リンクの HTML。リンクにしないときは inner のまま
+ */
 function wrapLink(inner: string, href: unknown, ctx: RenderContext): string {
   if (typeof href !== 'string') return inner;
   let url: URL;
@@ -121,6 +169,12 @@ function wrapLink(inner: string, href: unknown, ctx: RenderContext): string {
   return `<a href="${escaped}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
 }
 
+/**
+ * 写真のノードを `<figure>` にする。説明文があれば `<figcaption>` を付ける
+ * @param attrs 写真のノードの attrs（photoId・caption）
+ * @param ctx 写真の ID から表示用の値を返す関数
+ * @returns 写真の HTML。ID の形が違う、または写真が見つからなければ空文字
+ */
 function renderPhoto(attrs: unknown, ctx: RenderContext): string {
   const photoId = own(attrs, 'photoId');
   if (typeof photoId !== 'string' || !PHOTO_ID_PATTERN.test(photoId)) return '';
@@ -143,13 +197,28 @@ function renderPhoto(attrs: unknown, ctx: RenderContext): string {
   return `<figure>${img}${figcaption}</figure>`;
 }
 
-/** 埋め込みの読み上げ名（title。空なら既定の名前、長ければ切り詰める） */
+/**
+ * 埋め込みの読み上げ名（title）を決める。空なら既定の名前、長ければ切り詰める
+ * @param title ノードの title
+ * @param fallback title が空のときの名前
+ * @returns 読み上げ名（エスケープ前）
+ */
 function embedLabel(title: unknown, fallback: string): string {
   const trimmed = typeof title === 'string' ? title.trim() : '';
   return trimmed === '' ? fallback : truncateChars(trimmed, MAX_YOUTUBE_TITLE);
 }
 
-/** TikTok・Instagram の埋め込み（D-70）：iframe と、元の投稿へのリンク */
+/**
+ * TikTok・Instagram の埋め込み（D-70）：iframe と、元の投稿へのリンクを `<figure>` にまとめる
+ * @param name サービス名（class の `sns-<name>` に使う）
+ * @param src iframe の URL（形を確かめた ID から作ったもの）
+ * @param label iframe の読み上げ名（エスケープ前）
+ * @param width iframe の幅
+ * @param height iframe の高さ
+ * @param href 元の投稿の URL（形を確かめた ID から作ったもの）
+ * @param linkText 元の投稿へのリンクの文字
+ * @returns 埋め込みの HTML
+ */
 function snsFigure(
   name: string,
   src: string,
@@ -168,6 +237,11 @@ function snsFigure(
   );
 }
 
+/**
+ * TikTok のノードを埋め込みにする（D-70）
+ * @param attrs TikTok のノードの attrs（videoId・author・title）
+ * @returns 埋め込みの HTML。番号かアカウント名の形が違えば空文字
+ */
 function renderTikTok(attrs: unknown): string {
   const videoId = own(attrs, 'videoId');
   const author = own(attrs, 'author');
@@ -184,6 +258,11 @@ function renderTikTok(attrs: unknown): string {
   );
 }
 
+/**
+ * Instagram のノードを埋め込みにする（D-70）
+ * @param attrs Instagram のノードの attrs（kind・postId・title）
+ * @returns 埋め込みの HTML。種類か ID の形が違えば空文字
+ */
 function renderInstagram(attrs: unknown): string {
   const kind = own(attrs, 'kind');
   const postId = own(attrs, 'postId');
@@ -200,6 +279,11 @@ function renderInstagram(attrs: unknown): string {
   );
 }
 
+/**
+ * YouTube のノードを youtube-nocookie.com の iframe にする（D-52）
+ * @param attrs YouTube のノードの attrs（videoId・title）
+ * @returns iframe の HTML。動画 ID の形が違えば空文字
+ */
 function renderYouTube(attrs: unknown): string {
   const videoId = own(attrs, 'videoId');
   if (typeof videoId !== 'string' || !VIDEO_ID_PATTERN.test(videoId)) return '';

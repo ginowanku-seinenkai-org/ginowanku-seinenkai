@@ -3,6 +3,11 @@
 
 import { INSTAGRAM_ID_PATTERN, TIKTOK_AUTHOR_PATTERN, TIKTOK_ID_PATTERN } from './validate-body.ts';
 
+/**
+ * 文字列を http・https の URL として読む
+ * @param input 利用者が貼り付けた URL（前後の空白は無視する）
+ * @returns 読めた URL。読めない、または http・https 以外なら null
+ */
 function parseUrl(input: string): URL | null {
   try {
     const url = new URL(input.trim());
@@ -12,9 +17,15 @@ function parseUrl(input: string): URL | null {
   }
 }
 
+// TikTok の投稿として受け付けるホスト名
 const TIKTOK_HOSTS = new Set(['tiktok.com', 'www.tiktok.com', 'm.tiktok.com']);
 
-/** `https://www.tiktok.com/@アカウント名/video/番号`（`photo` も可）。短縮 URL（vt.tiktok.com など）は null */
+/**
+ * TikTok の投稿の URL から埋め込みの属性を取り出す（D-70）
+ * 形は `https://www.tiktok.com/@アカウント名/video/番号`（`photo` も可）。短縮 URL（vt.tiktok.com など）は null
+ * @param input 利用者が貼り付けた URL
+ * @returns 投稿の番号とアカウント名。形が違うときは null
+ */
 export function parseTikTokUrl(input: string): { videoId: string; author: string } | null {
   const url = parseUrl(input);
   if (!url || !TIKTOK_HOSTS.has(url.hostname)) return null;
@@ -26,9 +37,15 @@ export function parseTikTokUrl(input: string): { videoId: string; author: string
     : null;
 }
 
+// Instagram の投稿として受け付けるホスト名
 const INSTAGRAM_HOSTS = new Set(['instagram.com', 'www.instagram.com', 'm.instagram.com']);
 
-/** `/p/ID`、`/reel/ID`、`/reels/ID`、`/アカウント名/p/ID`、`/アカウント名/reel/ID` */
+/**
+ * Instagram の投稿の URL から埋め込みの属性を取り出す（D-70）
+ * 形は `/p/ID`、`/reel/ID`、`/reels/ID`、`/アカウント名/p/ID`、`/アカウント名/reel/ID`（`reels` は `reel` にそろえる）
+ * @param input 利用者が貼り付けた URL
+ * @returns 投稿の種類（p・reel）と ID。形が違うときは null
+ */
 export function parseInstagramUrl(input: string): { kind: 'p' | 'reel'; postId: string } | null {
   const url = parseUrl(input);
   if (!url || !INSTAGRAM_HOSTS.has(url.hostname)) return null;

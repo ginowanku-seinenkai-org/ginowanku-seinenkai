@@ -1,7 +1,7 @@
 ---
 // フッターの SNS へのリンク（トップには出さない。D-65）。サービスのアイコンで示し、名前は読み上げ用に持つ（D-62、06 §4.7）
 // アイコンは Simple Icons（CC0）をビルド時に SVG として埋め込む。外部リンクは新しいタブで開く（03 §5.3 と同じ属性）
-import { siFacebook, siInstagram, siTiktok, type SimpleIcon } from 'simple-icons';
+import { siInstagram, siTiktok, type SimpleIcon } from 'simple-icons';
 import type { PublicSiteSettings } from '../lib/view-schemas.ts';
 
 /** settings：サイト設定（SNS の URL） */
@@ -11,7 +11,6 @@ interface Props {
 const { settings } = Astro.props;
 const links = [
   { label: 'Instagram', url: settings.instagram_url, icon: siInstagram },
-  { label: 'Facebook', url: settings.facebook_url, icon: siFacebook },
   { label: 'TikTok', url: settings.tiktok_url, icon: siTiktok },
 ].filter((l): l is { label: string; url: string; icon: SimpleIcon } => l.url !== null);
 const size = 22;

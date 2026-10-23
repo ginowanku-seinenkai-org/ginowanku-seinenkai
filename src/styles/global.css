@@ -742,7 +742,7 @@ body {
   justify-self: start;
 }
 
-/* 行事の記事だけ、表題の下に演舞日を添える（先頭の日付は掲載日。D-120） */
+/* 行事の記事だけ、表題の下に演舞日時を添える（先頭の日付は掲載日。D-120） */
 .news .news-ev {
   grid-column: 3;
   color: var(--ink-2);

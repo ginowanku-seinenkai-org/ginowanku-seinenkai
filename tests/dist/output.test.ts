@@ -237,14 +237,14 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     }
   });
 
-  it('日付の名前：記事の詳細は「掲載日」、トップのお知らせの行事は「演舞日」を添える（D-120）', () => {
+  it('日付の名前：記事の詳細は「掲載日」、トップのお知らせの行事は「演舞日時」を添える（D-120）', () => {
     for (const p of pages.filter((x) => /^\/(news|activities)\/\d+$/.test(x.path)))
       expect(p.doc.querySelector('.phead .meta')?.textContent, p.path).toContain('掲載日');
     const items = Array.from(pageAt('/').doc.querySelectorAll('ul.news > li'));
     for (const li of items) {
       const isEvent = li.querySelector('.kind')?.textContent?.includes('行事') ?? false;
       expect(li.querySelector('.news-ev') !== null, li.textContent ?? '').toBe(isEvent);
-      if (isEvent) expect(li.querySelector('.news-ev')?.textContent).toContain('演舞日');
+      if (isEvent) expect(li.querySelector('.news-ev')?.textContent).toContain('演舞日時');
     }
   });
 

@@ -11,7 +11,7 @@ import { renderBody } from '../lib/content/render-body.ts';
 import { loadSiteData, renderContext } from '../lib/data.ts';
 import { formatPublishedOn } from '../lib/date.ts';
 import { eventEndDate, isEnded, postUrl } from '../lib/posts.ts';
-import { DESCRIPTIONS } from '../lib/messages.ts';
+import { DATE_LABELS, DESCRIPTIONS } from '../lib/messages.ts';
 import { buildMeta, descriptionFromBody, eventJsonLd } from '../lib/seo.ts';
 import type { PublicPhoto, PublicPost } from '../lib/view-schemas.ts';
 
@@ -49,7 +49,10 @@ const html = renderBody(post.body, renderContext(data, `記事${post.id}の本�
   >
     <div class="meta" slot="before-title">
       {!isActivity && <KindLabel kind={post.kind} />}
-      <time datetime={post.published_on}>{formatPublishedOn(post.published_on)}</time>
+      <span>
+        {DATE_LABELS.published}{' '}
+        <time datetime={post.published_on}>{formatPublishedOn(post.published_on)}</time>
+      </span>
     </div>
   </PageHead>
   <article class="wrap narrow article">

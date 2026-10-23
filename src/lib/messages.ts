@@ -15,6 +15,7 @@ export const DESCRIPTIONS = {
   activities: '宜野湾区青年会のエイサーの演舞や地域の行事など、活動の記録です。',
   contact:
     '宜野湾区青年会への演舞依頼、入会希望、その他のお問い合わせを受け付けています。1週間以内に返信します。',
+  officers: '宜野湾区青年会の役員（会長・副会長など）の紹介です。',
   privacy: '宜野湾区青年会のホームページでお預かりする個人情報の取り扱いについてご案内します。',
   sitePolicy:
     '宜野湾区青年会のホームページの著作権、写真の掲載、リンクなど、ご利用にあたってのご案内です。',
@@ -33,6 +34,18 @@ export const EMPTY = {
   news: '記事はまだありません。',
   newsCategory: 'このカテゴリの記事はまだありません。',
   activities: '活動記録はまだありません。',
+  officers: '役員の紹介は準備中です。',
+} as const;
+
+/** 役員紹介のページ（D-121） */
+export const OFFICERS_PAGE = {
+  title: '役員紹介',
+  /**
+   * 年度を添えたリードの文を作る
+   * @param termLabel 年度の表示（例：令和8年度）
+   * @returns リードの文
+   */
+  lead: (termLabel: string) => `${termLabel}の役員です。`,
 } as const;
 
 /** 問い合わせフォーム上部の案内（06 §4.1） */

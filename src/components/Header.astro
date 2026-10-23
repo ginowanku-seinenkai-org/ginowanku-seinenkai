@@ -4,7 +4,8 @@ import { loadSiteData } from '../lib/data.ts';
 import { SITE_NAME } from '../lib/messages.ts';
 
 /** ナビの項目（どれでもないページは null） */
-export type NavKey = 'top' | 'about' | 'songs' | 'news' | 'activities' | 'join' | 'contact' | null;
+export type NavKey =
+  'top' | 'about' | 'officers' | 'songs' | 'news' | 'activities' | 'join' | 'contact' | null;
 /** current：今のページのナビの項目（aria-current を付ける）。どれでもなければ null */
 interface Props {
   current: NavKey;
@@ -16,6 +17,8 @@ const items: { key: Exclude<NavKey, null>; href: string; label: string; cta?: bo
   { key: 'top', href: '/', label: 'トップ' },
   { key: 'about', href: '/about', label: '宜野湾区青年会について' },
   ...(pages.songs ? [{ key: 'songs' as const, href: '/songs', label: '曲目一覧' }] : []),
+  // 役員紹介は曲目一覧の次（曲目一覧が無ければ「宜野湾区青年会について」の次。D-81、D-121）
+  { key: 'officers', href: '/officers', label: '役員紹介' },
   { key: 'news', href: '/news', label: 'お知らせ・行事' },
   { key: 'activities', href: '/activities', label: '活動記録' },
   { key: 'join', href: '/join', label: 'メンバー募集' },

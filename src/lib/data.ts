@@ -9,11 +9,13 @@ import { SITE_ORIGIN } from './seo.ts';
 import { isEmptyBody } from './plain-text.ts';
 import {
   metaSchema,
+  publicOfficerSchema,
   publicPageSchema,
   publicPhotoSchema,
   publicPostPhotoSchema,
   publicPostSchema,
   publicSiteSettingsSchema,
+  type PublicOfficer,
   type PublicPage,
   type PublicPhoto,
   type PublicPost,
@@ -33,6 +35,8 @@ export interface SiteData {
   /** songs は本文が空なら null（ページもナビも作らない。03 S13、D-81） */
   pages: Record<'about' | 'join', PublicPage> & { songs: PublicPage | null };
   settings: PublicSiteSettings;
+  /** 役員の役職と氏名。sort_order 昇順（D-121） */
+  officers: PublicOfficer[];
   photos: Map<string, PublicPhoto>;
 }
 
@@ -66,6 +70,16 @@ export function comparePosts(a: PublicPost, b: PublicPost): number {
 }
 
 /**
+ * 役員を表示の順に並べる比較関数：sort_order の昇順（D-121）
+ * @param a 比べる役員
+ * @param b 比べる役員
+ * @returns sort に渡す比較の値
+ */
+export function compareOfficers(a: PublicOfficer, b: PublicOfficer): number {
+  return a.sort_order - b.sort_order;
+}
+
+/**
  * .data/ を読んで検証し、SiteData を作る（03 §3.6）。本文の決まりの違反は警告だけ出す
  * @param root リポジトリのルート（.data/ と public/photos/ の親）
  * @returns 検証したデータ
@@ -83,6 +97,10 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
     .parse(await readJson(dir, 'post-photos.json'));
   const pageRows = z.array(publicPageSchema).parse(await readJson(dir, 'pages.json'));
   const settings = publicSiteSettingsSchema.parse(await readJson(dir, 'site-settings.json'));
+  const officers = z
+    .array(publicOfficerSchema)
+    .parse(await readJson(dir, 'officers.json'))
+    .sort(compareOfficers);
   const photoRows = z.array(publicPhotoSchema).parse(await readJson(dir, 'photos.json'));
 
   const about = pageRows.find((p) => p.key === 'about');
@@ -144,6 +162,7 @@ export async function readSiteData(root: string = process.cwd()): Promise<SiteDa
     postPhotos,
     pages: { about, join: joinPage, songs },
     settings,
+    officers,
     photos,
   };
 }

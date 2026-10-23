@@ -13,6 +13,7 @@ function reader(data: Partial<Record<View, unknown[]>>, calls: string[] = []): V
     v_public_post_photos: [],
     v_public_pages: [rows.page('about'), rows.page('join')],
     v_public_site_settings: [rows.settings],
+    v_public_officers: [rows.officer(2, '副会長', '宜野湾 二郎'), rows.officer(1)],
     v_public_photos: [rows.photo()],
     ...data,
   };
@@ -27,7 +28,7 @@ function reader(data: Partial<Record<View, unknown[]>>, calls: string[] = []): V
 const noSleep = async () => {};
 
 describe('fetchData', () => {
-  it('.data/ に7つのファイルを書き、photo-ids.txt は昇順・各行 LF', async () => {
+  it('.data/ に8つのファイルを書き、photo-ids.txt は昇順・各行 LF', async () => {
     const root = await tempDir();
     const ids = [
       'ffffffff-0000-4000-8000-000000000000',
@@ -42,6 +43,7 @@ describe('fetchData', () => {
     });
     expect((await readdir(join(root, '.data'))).sort()).toEqual([
       'meta.json',
+      'officers.json',
       'pages.json',
       'photo-ids.txt',
       'photos.json',
@@ -60,6 +62,11 @@ describe('fetchData', () => {
       fetched_at: '2026-10-09T15:00:00.000Z',
       today: '2026-10-10',
     });
+    // 役員は sort_order の昇順（D-121）
+    const officers = JSON.parse(await readFile(join(root, '.data', 'officers.json'), 'utf8')) as {
+      sort_order: number;
+    }[];
+    expect(officers.map((o) => o.sort_order)).toEqual([1, 2]);
   });
 
   it('1,000件ずつ繰り返し、1,000件未満で終える', async () => {

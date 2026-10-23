@@ -41,6 +41,7 @@ function data(posts: PublicPost[], today = '2026-10-10'): SiteData {
     postPhotos: new Map(),
     pages: {} as SiteData['pages'],
     settings: {} as SiteData['settings'],
+    officers: [],
     photos: new Map(),
   };
 }

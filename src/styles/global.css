@@ -1620,6 +1620,16 @@ textarea.inp.short {
   margin: 0 0 12px;
 }
 
+/* 目次は本文の見出し・リストの余白を受けない（目次の番号はリストの番号だけ） */
+.policy .toc h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.policy .toc ol {
+  margin: 0;
+}
+
 /* フッター */
 .ftr {
   background: var(--ai-deep);

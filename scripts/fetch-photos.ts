@@ -5,20 +5,33 @@ import { createClient } from '@supabase/supabase-js';
 import { getEnv } from '../src/lib/env.ts';
 import { isMain, withRetry } from './retry.ts';
 
+// 写真1枚ごとのファイル、1ファイルの容量の上限、同時に取得する数
 const FILES = ['full.jpg', 'thumb.jpg'] as const;
 const MAX_BYTES = 2_000_000;
 const CONCURRENCY = 4;
 
 /** fetch-photos が使う Storage の機能だけ（テストで差し替える） */
 export interface PhotoDownloader {
+  /**
+   * Storage のファイルを取得する
+   * @param path photos バケットの中のパス（例：<ID>/full.jpg）
+   * @returns ファイルの中身
+   */
   download(path: string): Promise<Uint8Array>;
 }
 
+/**
+ * Supabase Storage の photos バケットから取得する PhotoDownloader を作る。セッションは保存しない
+ * @param url Supabase の URL
+ * @param key publishable キー
+ * @returns PhotoDownloader
+ */
 export function supabasePhotoDownloader(url: string, key: string): PhotoDownloader {
   const client = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   return {
+    /** 取得できない・中身が無いときは例外にする */
     async download(path) {
       const { data, error } = await client.storage.from('photos').download(path);
       if (error || data === null)
@@ -28,13 +41,23 @@ export function supabasePhotoDownloader(url: string, key: string): PhotoDownload
   };
 }
 
+/**
+ * ファイルがあるかを調べる
+ * @param path ファイルのパス
+ * @returns あれば true
+ */
 const exists = (path: string) =>
   access(path).then(
     () => true,
     () => false,
   );
 
-/** JPEG の印（FF D8 FF）と容量を確かめる */
+/**
+ * JPEG の印（FF D8 FF）と容量を確かめる
+ * @param path エラーに出すファイルのパス
+ * @param bytes ファイルの中身
+ * @throws JPEG でない、または MAX_BYTES を超えるとき
+ */
 export function checkJpeg(path: string, bytes: Uint8Array): void {
   if (bytes.length < 3 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) {
     throw new Error(`${path}：JPEG ではありません`);
@@ -43,6 +66,7 @@ export function checkJpeg(path: string, bytes: Uint8Array): void {
     throw new Error(`${path}：${MAX_BYTES}バイトを超えています（${bytes.length}バイト）`);
 }
 
+/** fetchPhotos() の引数。downloader 以外はテストで差し替える */
 export interface FetchPhotosOptions {
   downloader: PhotoDownloader;
   root?: string;
@@ -50,6 +74,12 @@ export interface FetchPhotosOptions {
   log?: (message: string) => void;
 }
 
+/**
+ * .data/photo-ids.txt の写真を取り込み、public/photos/ に置く（03 §4）
+ * .cache/photos/ にある写真は取得せずに使い、一覧にない写真はキャッシュから消す
+ * @param options 写真を取得する関数、リポジトリのルート、待つ関数、ログの出し先
+ * @throws photo-ids.txt が無い、または1枚でも取得・確認に失敗したとき（public/photos/ は変えない）
+ */
 export async function fetchPhotos({
   downloader,
   root = process.cwd(),
@@ -70,6 +100,7 @@ export async function fetchPhotos({
   let cached = 0;
   const failures: string[] = [];
   const queue = [...ids];
+  /** queue から写真の ID を順に取り出し、キャッシュに無ければ取得する（CONCURRENCY 個を同時に動かす） */
   const worker = async () => {
     for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
       const dir = join(cacheDir, id);

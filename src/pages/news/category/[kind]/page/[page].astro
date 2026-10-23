@@ -1,10 +1,15 @@
 ---
+// S03 お知らせ・行事の種類別の一覧の2ページ目以降（03 §6.1）
 import type { GetStaticPaths } from 'astro';
 import NewsListPage from '../../../../../components/NewsListPage.astro';
 import { loadSiteData } from '../../../../../lib/data.ts';
 import { newsPosts, paginate } from '../../../../../lib/posts.ts';
 import { NEWS_KINDS, type NewsKind } from '../../../../../lib/view-schemas.ts';
 
+/**
+ * 種類ごとに一覧の2ページ目以降を作る
+ * @returns 種類とページ番号のパラメーター
+ */
 export const getStaticPaths = (async () => {
   const data = await loadSiteData();
   return NEWS_KINDS.flatMap((kind) =>

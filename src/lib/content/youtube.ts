@@ -3,8 +3,14 @@
 
 import { VIDEO_ID_PATTERN } from './validate-body.ts';
 
+// 動画 ID を探す YouTube のホスト名（youtu.be は別に扱う）
 const YOUTUBE_HOSTS = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com']);
 
+/**
+ * YouTube の URL（watch・shorts・embed・youtu.be）から動画 ID を取り出す（00 §2.2）
+ * @param input 利用者が貼り付けた URL（前後の空白は無視する）
+ * @returns 11文字の動画 ID。YouTube の URL でない、または ID の形が違うときは null
+ */
 export function parseYouTubeId(input: string): string | null {
   let url: URL;
   try {

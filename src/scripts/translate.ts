@@ -15,9 +15,15 @@ declare global {
   }
 }
 
+/**
+ * 英語を選んでいるかを Cookie で調べる
+ * @returns 英語なら true
+ */
 const isEnglish = () => document.cookie.split('; ').some((c) => c === `${COOKIE}=${ENGLISH}`);
 
-/** Google はホスト名と「.ホスト名」の両方に付けるので、どちらも消す */
+/**
+ * 言葉の Cookie を消して日本語に戻す。Google はホスト名と「.ホスト名」の両方に付けるので、どちらも消す
+ */
 function clearCookie() {
   const host = location.hostname;
   for (const domain of ['', `; domain=${host}`, `; domain=.${host}`]) {
@@ -43,6 +49,7 @@ if (english) {
   holder.id = 'google-translate';
   holder.hidden = true;
   document.body.append(holder);
+  /** Google 翻訳の部品を作る（読み込んだスクリプトが cb= で呼ぶ） */
   window.ginowankuTranslateInit = () => {
     if (!window.google) return;
     new window.google.translate.TranslateElement(

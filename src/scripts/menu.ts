@@ -7,6 +7,10 @@ if (container && button && nav) {
   container.classList.add('js-menu');
   button.hidden = false;
 
+  /**
+   * メニューを開く・閉じる
+   * @param open 開くなら true
+   */
   const setOpen = (open: boolean) => {
     button.setAttribute('aria-expanded', String(open));
     nav.classList.toggle('open', open);

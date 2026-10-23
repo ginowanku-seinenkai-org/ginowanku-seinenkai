@@ -2,6 +2,7 @@
 const root = document.documentElement;
 const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
 
+/** ボタンの押した状態（aria-pressed）を今の明るさに合わせる */
 const sync = () => {
   const dark = root.dataset['theme'] === 'dark';
   for (const button of buttons) button.setAttribute('aria-pressed', String(dark));

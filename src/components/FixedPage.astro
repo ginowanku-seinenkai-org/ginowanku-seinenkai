@@ -8,6 +8,7 @@ import { loadSiteData, renderContext } from '../lib/data.ts';
 import { DESCRIPTIONS } from '../lib/messages.ts';
 import { buildMeta, descriptionFromBody } from '../lib/seo.ts';
 
+/** pageKey：表示する固定ページ（songs は本文があるときだけ呼ぶ） */
 interface Props {
   pageKey: 'about' | 'join' | 'songs';
 }

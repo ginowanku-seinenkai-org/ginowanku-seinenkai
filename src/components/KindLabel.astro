@@ -1,7 +1,9 @@
 ---
+// 記事の種類のラベル（お知らせ・行事・募集・活動記録）
 import { KIND_LABELS } from '../lib/posts.ts';
 import type { PostKind } from '../lib/view-schemas.ts';
 
+/** kind：記事の種類 */
 interface Props {
   kind: PostKind;
 }

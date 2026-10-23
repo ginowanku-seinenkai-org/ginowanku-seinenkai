@@ -25,6 +25,7 @@ import {
   type SubmitFailure,
 } from '../lib/messages.ts';
 
+// 使う Turnstile の関数（window.turnstile）
 interface TurnstileApi {
   render: (container: HTMLElement, options: Record<string, unknown>) => string;
   reset: (widgetId: string) => void;
@@ -35,10 +36,13 @@ declare global {
   }
 }
 
+// Turnstile のスクリプト（render を呼ぶまで表示しない）
 const TURNSTILE_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 /** 10秒で「時間がかかっています」、70秒で打ち切り（D-34、03 §8.5） */
 const SLOW_MS = 10_000;
+/** 送信を打ち切るまでの時間 */
 const TIMEOUT_MS = 70_000;
+// 画面で入力するすべての項目（誤りの表示の順）
 const ALL_FIELDS: readonly FieldName[] = [
   'organization',
   'name',
@@ -55,13 +59,28 @@ const ALL_FIELDS: readonly FieldName[] = [
 const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
 if (form) setup(form);
 
+/**
+ * 問い合わせフォームに動きを付ける：種類の切り替え、入力の検証と誤りの表示、Turnstile、送信
+ * 設定はフォームの data-* 属性（preview・joinAgeLabel・privacyVersion・sitekey・endpoint・instagramUrl）から読む
+ * @param form 問い合わせフォーム（[data-contact-form]）
+ */
 function setup(form: HTMLFormElement) {
   const config = form.dataset;
   const preview = config['preview'] === 'true';
   const joinAgeLabel = config['joinAgeLabel'] ?? '';
   const privacyVersion = config['privacyVersion'] ?? '';
 
+  /**
+   * フォームの中の要素を探す
+   * @param selector CSS セレクター
+   * @returns 見つかった要素。無ければ null
+   */
   const $ = <T extends Element>(selector: string) => form.querySelector<T>(selector);
+  /**
+   * 項目の入力欄（#f-<名前>）を取り出す
+   * @param name 項目名
+   * @returns 入力欄
+   */
   const input = (name: string) =>
     $<HTMLInputElement | HTMLTextAreaElement>(`#f-${name}`) as
       HTMLInputElement | HTMLTextAreaElement;
@@ -80,6 +99,10 @@ function setup(form: HTMLFormElement) {
   let attempted = false;
 
   // ---- 種類の切り替え（03 §8.1） ----
+  /**
+   * 種類を切り替える。種類に合う項目だけを出し、ほかは隠して送らない。必須・任意の印、ラベル、例、案内も種類に合わせる
+   * @param next 選んだ種類。未選択なら null（種類の後ろの項目をすべて隠す）
+   */
   function setKind(next: InquiryKind | null) {
     kind = next;
     ($<HTMLElement>('[data-after-kind]') as HTMLElement).hidden = next === null;
@@ -112,6 +135,11 @@ function setup(form: HTMLFormElement) {
     if (attempted) showFieldErrors(currentErrors());
   }
 
+  /**
+   * 要素の文字を替える（要素が無ければ何もしない）
+   * @param selector CSS セレクター
+   * @param text 入れる文字
+   */
   function setText(selector: string, text: string) {
     const el = $<HTMLElement>(selector);
     if (el) el.textContent = text;
@@ -139,6 +167,10 @@ function setup(form: HTMLFormElement) {
   });
 
   // ---- 入力の読み取りと検証 ----
+  /**
+   * フォームの今の入力を読む。選んだ種類の項目だけを読む
+   * @returns フォームの値
+   */
   function readValues(): FormValues {
     const fields: FormValues['fields'] = {};
     if (kind) for (const name of FIELDS_BY_KIND[kind]) fields[name] = input(name).value;
@@ -150,12 +182,20 @@ function setup(form: HTMLFormElement) {
     };
   }
 
+  /**
+   * 今の入力の誤りを求める
+   * @returns 項目ごとの理由コード。誤りが無ければ空
+   */
   function currentErrors(): Record<string, FieldReason> {
     const result = validate(readValues(), privacyVersion, token);
     return result.ok ? {} : result.fields;
   }
 
-  /** 各項目の下に誤りを出す（03 §13.3）。only を渡したときはその項目だけ更新する */
+  /**
+   * 各項目の下に誤りを出す（03 §13.3）。誤りのある入力欄には aria-invalid を付ける
+   * @param fields 項目ごとの理由コード（無い項目は誤りを消す）
+   * @param only 渡したときはその項目だけ更新する
+   */
   function showFieldErrors(fields: Record<string, FieldReason>, only?: string) {
     const names = only ? [only] : ['kind', 'privacy_agreed', ...ALL_FIELDS];
     for (const name of names) {
@@ -183,6 +223,7 @@ function setup(form: HTMLFormElement) {
   // 最初の送信のあとは、項目ごとに blur と input で検証し直す
   for (const name of [...ALL_FIELDS, 'privacy_agreed']) {
     const control = input(name);
+    /** 最初の送信のあとだけ、この項目の誤りを出し直す */
     const recheck = () => {
       if (attempted) showFieldErrors(currentErrors(), name);
     };
@@ -192,6 +233,11 @@ function setup(form: HTMLFormElement) {
   }
 
   // ---- フォーム上部のまとめ（03 §13.3、06 §4.1・§4.3） ----
+  /**
+   * 要素に文を入れる。文の中の「InstagramのDM」は Instagram へのリンクにする（URL が無ければ文字のまま）
+   * @param el 文を入れる要素
+   * @param text 入れる文
+   */
   function fillWithInstagramLink(el: HTMLElement, text: string) {
     el.replaceChildren();
     const at = text.indexOf(INSTAGRAM_DM);
@@ -214,6 +260,12 @@ function setup(form: HTMLFormElement) {
     el.append(text.slice(at + INSTAGRAM_DM.length));
   }
 
+  /**
+   * フォーム上部のまとめを出し、そこへフォーカスを移す。誤りのある項目へのリンクを並べる
+   * @param heading 見出し
+   * @param body 本文。無ければ null
+   * @param fields 項目ごとの理由コード（リンクを並べる項目）
+   */
   function showSummary(heading: string, body: string | null, fields: Record<string, FieldReason>) {
     ($<HTMLElement>('[data-summary-heading]') as HTMLElement).textContent = heading;
     const bodyEl = $<HTMLElement>('[data-summary-body]') as HTMLElement;
@@ -242,17 +294,23 @@ function setup(form: HTMLFormElement) {
     summary.focus();
   }
 
+  /** フォーム上部のまとめを隠す */
   function hideSummary() {
     summary.hidden = true;
   }
 
   // ---- Turnstile（03 §8.5。プレビューでは読み込まない。§8.6） ----
   const turnstileError = $<HTMLElement>('#f-turnstile-e') as HTMLElement;
+  /**
+   * Turnstile の下に案内を出す
+   * @param message 出す文。null なら消す
+   */
   function showTurnstileError(message: string | null) {
     turnstileError.textContent = message ?? '';
     turnstileError.hidden = message === null;
   }
 
+  /** Turnstile を表示する（読み込み前・表示済みなら何もしない）。取れたトークンを token に入れる */
   function renderTurnstile() {
     if (!window.turnstile || widgetId !== null) return;
     widgetId = window.turnstile.render(turnstileBox, {
@@ -277,6 +335,7 @@ function setup(form: HTMLFormElement) {
     });
   }
 
+  /** トークンを捨て、Turnstile をやり直す（トークンは1回しか使えないため） */
   function resetTurnstile() {
     token = null;
     if (window.turnstile && widgetId !== null) window.turnstile.reset(widgetId);
@@ -292,6 +351,10 @@ function setup(form: HTMLFormElement) {
   }
 
   // ---- 送信（03 §8.5） ----
+  /**
+   * 送信中の表示に切り替える（ボタンを押せなくし、送信中の案内を出す）
+   * @param on 送信中なら true
+   */
   function setSending(on: boolean) {
     sending = on;
     submit.disabled = on || preview;
@@ -302,6 +365,11 @@ function setup(form: HTMLFormElement) {
     status.textContent = on ? CONTACT_STATE.sendingStatus : '';
   }
 
+  /**
+   * submit-inquiry に送る。10秒で「時間がかかっています」を出し、70秒で打ち切る（03 §8.5）
+   * @param body 入力チェックを通った送る値
+   * @returns 送信の結果。通信できなければ network、打ち切ったら timeout
+   */
   async function post(body: Record<string, unknown>): Promise<SubmitResult> {
     const controller = new AbortController();
     const slow = window.setTimeout(() => {
@@ -326,6 +394,11 @@ function setup(form: HTMLFormElement) {
     }
   }
 
+  /**
+   * 送信の失敗を出す（06 §4.3）。入力の誤りなら各項目の誤りも出す
+   * @param failure 失敗の場面
+   * @param fields 入力の誤りのときの、項目ごとの理由コード
+   */
   function showFailure(failure: SubmitFailure, fields: Record<string, FieldReason> = {}) {
     const { heading, body } = SUBMIT_FAILURES[failure];
     if (failure === 'invalid') showFieldErrors(fields);

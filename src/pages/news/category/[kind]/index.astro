@@ -1,8 +1,13 @@
 ---
+// S03 お知らせ・行事の種類別の一覧の1ページ目
 import type { GetStaticPaths } from 'astro';
 import NewsListPage from '../../../../components/NewsListPage.astro';
 import { NEWS_KINDS, type NewsKind } from '../../../../lib/view-schemas.ts';
 
+/**
+ * 種類（お知らせ・行事・募集）ごとに一覧の1ページ目を作る
+ * @returns 種類のパラメーター
+ */
 export const getStaticPaths = (() =>
   NEWS_KINDS.map((kind) => ({ params: { kind } }))) satisfies GetStaticPaths;
 

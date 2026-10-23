@@ -3,6 +3,10 @@ import type { APIRoute } from 'astro';
 import { getEnv } from '../lib/env.ts';
 import { SITE_ORIGIN } from '../lib/seo.ts';
 
+/**
+ * robots.txt を返す
+ * @returns 本番は Allow と Sitemap、それ以外は Disallow のテキスト
+ */
 export const GET: APIRoute = () => {
   const body =
     getEnv().siteEnv === 'production'

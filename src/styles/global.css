@@ -960,6 +960,40 @@ body {
   display: none;
 }
 
+/* 役員紹介（D-121）。役職と氏名を1行ずつ並べる。名前が長ければ折り返す */
+.officer-list {
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.officer-row {
+  display: grid;
+  grid-template-columns: minmax(5em, 10em) minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 14px 20px;
+}
+
+.officer-row + .officer-row {
+  border-top: 1px solid var(--line);
+}
+
+.officer-row dt {
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.officer-row dd {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .cover {
   display: block;
   width: 100%;

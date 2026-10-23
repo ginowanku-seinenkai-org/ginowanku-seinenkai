@@ -36,7 +36,13 @@ export const rows = {
     instagram_url: null,
     tiktok_url: null,
     join_age_label: '高校生以上',
+    officer_term_label: null,
   },
+  officer: (sort_order: number, role = '会長', name = '宜野湾 一郎') => ({
+    role,
+    name,
+    sort_order,
+  }),
   photo: (id: string = PHOTO_ID) => ({
     id,
     full_path: `${id}/full.jpg`,

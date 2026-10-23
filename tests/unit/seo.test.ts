@@ -61,6 +61,7 @@ describe('JSON-LD', () => {
       instagram_url: 'https://www.instagram.com/x',
       tiktok_url: null,
       join_age_label: '高校生以上',
+      officer_term_label: null,
     };
     expect(organizationJsonLd(settings)['sameAs']).toEqual(['https://www.instagram.com/x']);
     expect(organizationJsonLd({ ...settings, instagram_url: null })).not.toHaveProperty('sameAs');

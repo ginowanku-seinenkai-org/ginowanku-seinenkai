@@ -8,6 +8,7 @@ import { getEnv } from '../src/lib/env.ts';
 import {
   VIEW_COLUMNS,
   VIEW_ORDER,
+  publicOfficerSchema,
   publicPageSchema,
   publicPhotoSchema,
   publicPostPhotoSchema,
@@ -136,6 +137,10 @@ export async function fetchData({
   const settingsRows = z
     .array(publicSiteSettingsSchema)
     .parse(await readAll(reader, 'v_public_site_settings', sleep));
+  const officers = z
+    .array(publicOfficerSchema)
+    .parse(await readAll(reader, 'v_public_officers', sleep))
+    .sort((a, b) => a.sort_order - b.sort_order);
   const photos = z
     .array(publicPhotoSchema)
     .parse(await readAll(reader, 'v_public_photos', sleep))
@@ -167,6 +172,7 @@ export async function fetchData({
   await write('post-photos.json', postPhotos);
   await write('pages.json', pages);
   await write('site-settings.json', settings);
+  await write('officers.json', officers);
   await write('photos.json', photos);
   await writeFile(join(tmp, 'photo-ids.txt'), photos.map((p) => `${p.id}\n`).join(''), 'utf8');
   await write('meta.json', {
@@ -178,7 +184,7 @@ export async function fetchData({
   await rename(tmp, dest);
 
   log(
-    `fetch-data：記事 ${posts.length}件、ギャラリー ${postPhotos.length}件、固定ページ ${pages.length}件、写真 ${photos.length}件`,
+    `fetch-data：記事 ${posts.length}件、ギャラリー ${postPhotos.length}件、固定ページ ${pages.length}件、役員 ${officers.length}件、写真 ${photos.length}件`,
   );
 }
 

@@ -7,6 +7,7 @@ const form = (page: Page) => page.locator('[data-contact-form]');
 const field = (page: Page, label: string | RegExp) => form(page).getByLabel(label);
 const summary = (page: Page) => form(page).locator('[data-summary]');
 const errorOf = (page: Page, name: string) => form(page).locator(`#f-${name}-e`);
+const gender = (page: Page) => form(page).getByRole('group', { name: /^性別/ });
 
 async function fillPerformance(page: Page) {
   await page.getByRole('radio', { name: '演舞依頼' }).check();
@@ -59,6 +60,7 @@ test('EP-08 問い合わせ：種類の切り替え', async ({ page }) => {
   await expect(field(page, /^希望日時/)).toBeVisible();
   await expect(field(page, /^備考/)).toBeVisible();
   await expect(field(page, /^年齢/)).toBeHidden();
+  await expect(gender(page)).toBeHidden();
 
   await page.getByRole('radio', { name: 'その他' }).check();
   await expect(org.locator('[data-badge]')).toHaveText('任意');
@@ -69,9 +71,22 @@ test('EP-08 問い合わせ：種類の切り替え', async ({ page }) => {
   await expect(field(page, /^お問い合わせ内容/)).toBeVisible();
   await expect(form(page).locator('[data-field="message"] [data-badge]')).toHaveText('必須');
   await expect(field(page, /^希望日時/)).toBeHidden();
+  await expect(gender(page)).toBeHidden();
 
   await page.getByRole('radio', { name: '入会希望' }).check();
   await expect(field(page, /^団体名/)).toBeHidden();
+  // 性別は入会希望だけ。任意で、選択肢の行全体を押せる（44px 以上。D-118）
+  await expect(gender(page)).toBeVisible();
+  await expect(gender(page).locator('[data-badge]')).toHaveText('任意');
+  await expect(gender(page).getByRole('radio')).toHaveCount(3);
+  for (const name of ['男性', '女性', '回答しない']) {
+    const radio = gender(page).getByRole('radio', { name });
+    await expect(radio).not.toBeChecked();
+    const row = await gender(page).locator('label', { hasText: name }).boundingBox();
+    expect(row?.height).toBeGreaterThanOrEqual(44);
+  }
+  await gender(page).getByText('回答しない').click();
+  await expect(gender(page).getByRole('radio', { name: '回答しない' })).toBeChecked();
   await expect(form(page).getByText('入会の対象は高校生以上です。').first()).toBeVisible();
   await field(page, /^年齢/).fill('16');
   await expect(
@@ -140,6 +155,7 @@ test('EP-09 問い合わせ：その他で団体名を入れたとき・入会�
   await page.goto('/contact?kind=join');
   await field(page, /^お名前/).fill('宜野湾 次郎');
   await field(page, /^年齢/).fill('１７');
+  await gender(page).getByRole('radio', { name: '女性' }).check();
   await field(page, /^メールアドレス/).fill('jiro@example.com');
   await form(page).getByRole('checkbox').check();
   await form(page).getByRole('button', { name: '送信する' }).click();
@@ -150,7 +166,8 @@ test('EP-09 問い合わせ：その他で団体名を入れたとき・入会�
     organization: '〇〇会',
     message: '衣装について',
   });
-  expect(bodies[1]).toMatchObject({ kind: 'join', age: 17 });
+  expect(bodies[0]).not.toHaveProperty('gender');
+  expect(bodies[1]).toMatchObject({ kind: 'join', age: 17, gender: 'female' });
   expect(bodies[1]).not.toHaveProperty('organization');
 });
 

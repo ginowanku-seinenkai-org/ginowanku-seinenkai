@@ -1,0 +1,39 @@
+---
+// 役員紹介（D-121）。役職と氏名を並び順で出す。氏名は本人の同意を得て載せる。写真は出さない
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHead from '../components/PageHead.astro';
+import { loadSiteData } from '../lib/data.ts';
+import { DESCRIPTIONS, EMPTY, OFFICERS_PAGE } from '../lib/messages.ts';
+import { buildMeta } from '../lib/seo.ts';
+
+const data = await loadSiteData();
+const { officers } = data;
+const termLabel = data.settings.officer_term_label;
+const meta = buildMeta({
+  name: OFFICERS_PAGE.title,
+  path: '/officers',
+  description: DESCRIPTIONS.officers,
+});
+---
+
+<BaseLayout meta={meta} current="officers">
+  <PageHead
+    title={OFFICERS_PAGE.title}
+    crumbs={[{ label: OFFICERS_PAGE.title }]}
+    lead={termLabel === null ? null : OFFICERS_PAGE.lead(termLabel)}
+  />
+  <div class="wrap narrow article">
+    {officers.length === 0 ? (
+      <p class="empty">{EMPTY.officers}</p>
+    ) : (
+      <dl class="officer-list">
+        {officers.map((officer) => (
+          <div class="officer-row">
+            <dt>{officer.role}</dt>
+            <dd>{officer.name}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
+  </div>
+</BaseLayout>

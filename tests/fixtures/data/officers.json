@@ -1,0 +1,6 @@
+[
+  { "role": "会長", "name": "宜野湾 一郎", "sort_order": 1 },
+  { "role": "副会長", "name": "宜野湾 二郎", "sort_order": 2 },
+  { "role": "書記", "name": "宜野湾 花子", "sort_order": 3 },
+  { "role": "会計", "name": "宜野湾 三郎", "sort_order": 4 }
+]

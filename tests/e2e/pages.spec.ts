@@ -1,17 +1,23 @@
 // 公開サイトの画面（07 §6.2：EP-01〜EP-06、EP-13）。フォームは feature/inquiry-form、計測は feature/analytics で足す
 import { expect, expectNoA11yViolations, test } from './fixtures.ts';
 
-const PAGES = [
+// nav：ナビで今のページを示す項目（aria-current="page"）。無ければ確かめない
+const PAGES: { path: string; title: string; nav?: string }[] = [
   { path: '/', title: '宜野湾区青年会｜沖縄県宜野湾市' },
-  { path: '/about', title: '宜野湾区青年会について｜宜野湾区青年会' },
-  { path: '/songs', title: '曲目一覧｜宜野湾区青年会' },
+  {
+    path: '/about',
+    title: '宜野湾区青年会について｜宜野湾区青年会',
+    nav: '宜野湾区青年会について',
+  },
+  { path: '/officers', title: '役員紹介｜宜野湾区青年会', nav: '役員紹介' },
+  { path: '/songs', title: '曲目一覧｜宜野湾区青年会', nav: '曲目一覧' },
   { path: '/news', title: 'お知らせ・行事｜宜野湾区青年会' },
   { path: '/news/page/2', title: 'お知らせ・行事（2ページ目）｜宜野湾区青年会' },
   { path: '/news/category/event', title: '行事｜お知らせ・行事｜宜野湾区青年会' },
   { path: '/news/15', title: '夏まつりでエイサー演舞｜宜野湾区青年会' },
   { path: '/activities', title: '活動記録｜宜野湾区青年会' },
   { path: '/activities/19', title: '夏まつりの演舞｜宜野湾区青年会' },
-  { path: '/join', title: 'メンバー募集｜宜野湾区青年会' },
+  { path: '/join', title: 'メンバー募集｜宜野湾区青年会', nav: 'メンバー募集' },
   { path: '/contact', title: '演舞依頼・お問い合わせ｜宜野湾区青年会' },
   { path: '/contact/thanks', title: '送信完了｜宜野湾区青年会' },
   { path: '/privacy', title: 'プライバシーポリシー｜宜野湾区青年会' },
@@ -19,7 +25,7 @@ const PAGES = [
 ];
 
 test.describe('EP-01 全ページの表示', () => {
-  for (const { path, title } of PAGES) {
+  for (const { path, title, nav } of PAGES) {
     test(path, async ({ page, consoleErrors }) => {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
@@ -30,6 +36,8 @@ test.describe('EP-01 全ページの表示', () => {
       await expect(page.locator('footer.ftr')).toBeVisible();
       if (path !== '/')
         await expect(page.getByRole('navigation', { name: 'パンくずリスト' })).toBeVisible();
+      if (nav !== undefined)
+        await expect(page.locator('#site-nav a[aria-current="page"]')).toHaveText(nav);
       // フッターの SNS（固定データは Instagram があり、TikTok は null。Facebook は出さない。D-116）
       const footer = page.locator('footer.ftr');
       await expect(footer.getByRole('link', { name: /Instagram/ })).toHaveAttribute(
@@ -124,25 +132,48 @@ test('EP-04 ギャラリーの拡大表示（前へ・次へ・Esc で閉じて�
   await expect(first).toBeFocused();
 });
 
-test('EP-05a 曲目一覧：本文があればナビの「宜野湾区青年会について」の次に出る（D-81）', async ({
+test('EP-05a 曲目一覧：本文があればナビの「宜野湾区青年会について」の次に出る（D-81）。役員紹介はその次（D-121）', async ({
   page,
 }) => {
   await page.goto('/songs');
   await expect(page.locator('.content-body h2')).toHaveText('仲順流り');
   // スマホ幅ではナビがメニューの中に隠れているため、表示に関係なく並びを読む
   const links = page.locator('#site-nav a');
-  expect((await links.allTextContents()).slice(0, 3)).toEqual([
+  expect((await links.allTextContents()).slice(0, 4)).toEqual([
     'トップ',
     '宜野湾区青年会について',
     '曲目一覧',
+    '役員紹介',
   ]);
   await expect(links.nth(2)).toHaveAttribute('aria-current', 'page');
 });
 
-test('EP-05 宜野湾区青年会について：本文があり、役員紹介の区画がない', async ({ page }) => {
+test('EP-05 宜野湾区青年会について：本文があり、役員の氏名は出さない（D-121）', async ({
+  page,
+}) => {
   await page.goto('/about');
   await expect(page.locator('.content-body h2')).toHaveText('宜野湾区青年会とは');
-  await expect(page.getByText('役員紹介')).toHaveCount(0);
+  await expect(page.getByText('宜野湾 一郎')).toHaveCount(0);
+});
+
+test('EP-05b 役員紹介：年度のリードと、役職・氏名を並び順で出す（D-121）', async ({ page }) => {
+  await page.goto('/officers');
+  await expect(page.locator('.phead .lead')).toHaveText('令和8年度の役員です。');
+  const list = page.locator('dl.officer-list');
+  await expect(list.locator('dt')).toHaveText(['会長', '副会長', '書記', '会計']);
+  await expect(list.locator('dd')).toHaveText([
+    '宜野湾 一郎',
+    '宜野湾 二郎',
+    '宜野湾 花子',
+    '宜野湾 三郎',
+  ]);
+  // 写真は出さない
+  await expect(page.locator('main img')).toHaveCount(0);
+  // フッターからも行ける
+  await expect(page.locator('footer.ftr').getByRole('link', { name: '役員紹介' })).toHaveAttribute(
+    'href',
+    '/officers',
+  );
 });
 
 test('EP-06 メンバー募集：対象年齢の表示（F-19）', async ({ page }) => {

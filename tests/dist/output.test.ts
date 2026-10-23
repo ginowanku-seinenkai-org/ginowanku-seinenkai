@@ -35,6 +35,10 @@ const dataPosts = data('posts.json') as {
   event_place: string | null;
 }[];
 const dataSettings = data('site-settings.json') as Record<string, unknown>;
+// 役員（D-121）。並び順は sort_order の昇順
+const dataOfficers = (data('officers.json') as { role: string; name: string; sort_order: number }[])
+  .slice()
+  .sort((a, b) => a.sort_order - b.sort_order);
 const hasPosts = dataPosts.length > 0;
 const hasEventWithPlace = dataPosts.some(
   (p) => p.kind === 'event' && p.event_starts_at !== null && p.event_place !== null,
@@ -263,8 +267,25 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       expect(headers).toContain(name);
   });
 
-  it('個人の氏名を出さない：役員紹介の区画がない（D-41）', () => {
-    for (const p of pages) expect(p.html).not.toContain('役員紹介');
+  it('役員紹介：役職と氏名を並び順で出し、年度があればリードに添える（D-121）', () => {
+    const { doc } = pageAt('/officers');
+    const rows = Array.from(doc.querySelectorAll('dl.officer-list > div')).map((row) => [
+      row.querySelector('dt')?.textContent?.trim(),
+      row.querySelector('dd')?.textContent?.trim(),
+    ]);
+    expect(rows).toEqual(dataOfficers.map((o) => [o.role, o.name]));
+    const lead = doc.querySelector('.phead .lead')?.textContent?.trim() ?? null;
+    const label = dataSettings['officer_term_label'];
+    expect(lead).toBe(typeof label === 'string' ? `${label}の役員です。` : null);
+    if (dataOfficers.length === 0)
+      expect(doc.querySelector('.empty')?.textContent).toBe('役員の紹介は準備中です。');
+  });
+
+  it('役員の氏名は /officers にだけ出る（D-121）', () => {
+    for (const p of pages) {
+      if (p.path === '/officers') continue;
+      for (const o of dataOfficers) expect(p.html, `${p.path}：${o.name}`).not.toContain(o.name);
+    }
   });
 
   it('写真は .data/photos.json の件数だけ配置されている', () => {

@@ -1,5 +1,5 @@
 // data.ts（03 §3.6）
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { readSiteData } from '../../src/lib/data.ts';
@@ -21,6 +21,10 @@ async function writeData(root: string, overrides: Record<string, unknown> = {}) 
     ],
     'pages.json': [rows.page('about'), rows.page('join')],
     'site-settings.json': rows.settings,
+    'officers.json': [
+      rows.officer(2, '副会長', '宜野湾 二郎'),
+      rows.officer(1, '会長', '宜野湾 一郎'),
+    ],
     'photos.json': [rows.photo()],
     ...overrides,
   };
@@ -43,6 +47,33 @@ describe('readSiteData', () => {
     expect(data.posts.map((p) => p.id)).toEqual([2, 3, 1]);
     expect(data.postPhotos.get(1)?.map((r) => r.sort_order)).toEqual([0, 1]);
     expect(data.photos.get(PHOTO_ID)?.alt).toBe('写真');
+  });
+
+  it('役員は sort_order の昇順に並べ、年度の表示はサイト設定から読む（D-121）', async () => {
+    const root = await tempDir();
+    await writeData(root, {
+      'site-settings.json': { ...rows.settings, officer_term_label: '令和8年度' },
+    });
+    await writePhotos(root);
+    const data = await readSiteData(root);
+    expect(data.officers.map((o) => [o.role, o.name])).toEqual([
+      ['会長', '宜野湾 一郎'],
+      ['副会長', '宜野湾 二郎'],
+    ]);
+    expect(data.settings.officer_term_label).toBe('令和8年度');
+  });
+
+  it('役員が0人でも読める。officers.json が無ければ失敗する（D-121）', async () => {
+    const root = await tempDir();
+    await writeData(root, { 'officers.json': [] });
+    await writePhotos(root);
+    expect((await readSiteData(root)).officers).toEqual([]);
+
+    const missing = await tempDir();
+    await writeData(missing);
+    await writePhotos(missing);
+    await rm(join(missing, '.data', 'officers.json'));
+    await expect(readSiteData(missing)).rejects.toThrow('officers.json');
   });
 
   it('曲目一覧は、行がない・本文が空なら null、本文があれば出す（03 S13、D-81）', async () => {

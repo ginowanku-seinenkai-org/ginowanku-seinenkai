@@ -63,9 +63,20 @@ export const publicSiteSettingsSchema = z.object({
   instagram_url: z.string().nullable(),
   tiktok_url: z.string().nullable(),
   join_age_label: z.string(),
+  /** 役員紹介の年度の表示（例：令和8年度）。無ければ null（D-121） */
+  officer_term_label: z.string().nullable(),
 });
 /** サイト設定 */
 export type PublicSiteSettings = z.infer<typeof publicSiteSettingsSchema>;
+
+/** v_public_officers の行（役員の役職と氏名。本人の同意を得て載せる。D-121） */
+export const publicOfficerSchema = z.object({
+  role: z.string(),
+  name: z.string(),
+  sort_order: z.number().int(),
+});
+/** 役員の役職と氏名 */
+export type PublicOfficer = z.infer<typeof publicOfficerSchema>;
 
 /** v_public_photos の行（公開してよい写真）。パスの形と長辺の上限も確かめる */
 export const publicPhotoSchema = z
@@ -106,7 +117,8 @@ export const VIEW_COLUMNS = {
     'id,kind,title,body,cover_photo_id,event_starts_at,event_ends_at,event_all_day,event_time_tbd,event_place,published_on,updated_at',
   v_public_post_photos: 'post_id,photo_id,sort_order',
   v_public_pages: 'key,title,lead,body,cover_photo_id,updated_at',
-  v_public_site_settings: 'instagram_url,tiktok_url,join_age_label,og_photo_id',
+  v_public_site_settings: 'instagram_url,tiktok_url,join_age_label,og_photo_id,officer_term_label',
+  v_public_officers: 'role,name,sort_order',
   v_public_photos: 'id,full_path,thumb_path,width,height,thumb_width,thumb_height,alt',
 } as const;
 
@@ -119,5 +131,6 @@ export const VIEW_ORDER: Record<keyof typeof VIEW_COLUMNS, readonly string[]> = 
   v_public_post_photos: ['post_id', 'sort_order', 'photo_id'],
   v_public_pages: ['key'],
   v_public_site_settings: [],
+  v_public_officers: ['sort_order', 'role', 'name'],
   v_public_photos: ['id'],
 };

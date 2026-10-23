@@ -6,7 +6,7 @@ import KindLabel from '../components/KindLabel.astro';
 import PostCard from '../components/PostCard.astro';
 import { loadSiteData } from '../lib/data.ts';
 import { eventDateBox, formatPublishedOn } from '../lib/date.ts';
-import { DESCRIPTIONS, EMPTY, SITE_NAME } from '../lib/messages.ts';
+import { DATE_LABELS, DESCRIPTIONS, EMPTY, SITE_NAME } from '../lib/messages.ts';
 import { activityPosts, eventEndDate, newsPosts, postUrl, upcomingEvents } from '../lib/posts.ts';
 import { buildMeta, organizationJsonLd } from '../lib/seo.ts';
 
@@ -85,6 +85,11 @@ const meta = buildMeta({
               <time datetime={post.published_on}>{formatPublishedOn(post.published_on)}</time>
               <KindLabel kind={post.kind} />
               <span class="t">{post.title}</span>
+              {post.kind === 'event' && post.event_starts_at !== null && (
+                <span class="news-ev">
+                  {DATE_LABELS.event} <EventDate post={post} />
+                </span>
+              )}
             </a>
           </li>
         ))}

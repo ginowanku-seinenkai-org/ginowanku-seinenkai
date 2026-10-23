@@ -742,6 +742,13 @@ body {
   justify-self: start;
 }
 
+/* 行事の記事だけ、表題の下に演舞日時を添える（先頭の日付は掲載日。D-120） */
+.news .news-ev {
+  grid-column: 3;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
 .news a:hover .t {
   text-decoration: underline;
   text-decoration-color: var(--shu);
@@ -753,7 +760,8 @@ body {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .news .t {
+  .news .t,
+  .news .news-ev {
     grid-column: 1 / -1;
   }
 }

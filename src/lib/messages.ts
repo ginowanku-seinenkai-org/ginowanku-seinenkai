@@ -71,6 +71,14 @@ export const CONTACT_FIELDS = {
     hint: (joinAgeLabel: string) =>
       `入会の対象は${joinAgeLabel}です。18歳未満の方は、保護者の方にもご確認ください。`,
   },
+  gender: {
+    label: '性別',
+    options: [
+      { value: 'male', label: '男性' },
+      { value: 'female', label: '女性' },
+      { value: 'no_answer', label: '回答しない' },
+    ],
+  },
   email: {
     label: 'メールアドレス',
     placeholder: '例：example@example.com',
@@ -101,7 +109,7 @@ export const CONTACT_FIELDS = {
     label: { performance: '備考', join: '自由記入', other: 'お問い合わせ内容' },
     placeholder: {
       performance: '例：駐車場の有無など',
-      join: '例：経験はありませんが興味があります',
+      join: '例：経験はありませんが興味があります／女性ですがパーランクーをやってみたい',
       other: 'お問い合わせの内容を書いてください',
     },
   },

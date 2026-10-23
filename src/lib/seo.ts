@@ -133,7 +133,7 @@ export function serializeJsonLd(value: unknown): string {
  * @returns JSON-LD の値
  */
 export function organizationJsonLd(settings: PublicSiteSettings): Record<string, unknown> {
-  const sameAs = [settings.instagram_url, settings.facebook_url, settings.tiktok_url].filter(
+  const sameAs = [settings.instagram_url, settings.tiktok_url].filter(
     (u): u is string => u !== null,
   );
   return {

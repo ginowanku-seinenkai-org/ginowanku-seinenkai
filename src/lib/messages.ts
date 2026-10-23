@@ -100,7 +100,7 @@ export const CONTACT_FIELDS = {
   message: {
     label: { performance: '備考', join: '自由記入', other: 'お問い合わせ内容' },
     placeholder: {
-      performance: '例：駐車場の有無、謝礼の予定など',
+      performance: '例：駐車場の有無など',
       join: '例：経験はありませんが興味があります',
       other: 'お問い合わせの内容を書いてください',
     },

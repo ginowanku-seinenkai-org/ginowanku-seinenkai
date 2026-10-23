@@ -34,7 +34,6 @@ export const rows = {
   settings: {
     og_photo_id: null,
     instagram_url: null,
-    facebook_url: null,
     tiktok_url: null,
     join_age_label: '高校生以上',
   },

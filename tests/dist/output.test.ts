@@ -39,9 +39,7 @@ const hasPosts = dataPosts.length > 0;
 const hasEventWithPlace = dataPosts.some(
   (p) => p.kind === 'event' && p.event_starts_at !== null && p.event_place !== null,
 );
-const hasSns = ['instagram_url', 'facebook_url', 'tiktok_url'].some((k) =>
-  Boolean(dataSettings[k]),
-);
+const hasSns = ['instagram_url', 'tiktok_url'].some((k) => Boolean(dataSettings[k]));
 const meta = (doc: Document, selector: string) =>
   doc.querySelector(selector)?.getAttribute('content') ?? null;
 const read = (name: string) => readFileSync(join(DIST, name), 'utf8');

@@ -30,13 +30,13 @@ test.describe('EP-01 全ページの表示', () => {
       await expect(page.locator('footer.ftr')).toBeVisible();
       if (path !== '/')
         await expect(page.getByRole('navigation', { name: 'パンくずリスト' })).toBeVisible();
-      // フッターの SNS（固定データは Instagram・Facebook があり、TikTok は null）
+      // フッターの SNS（固定データは Instagram があり、TikTok は null。Facebook は出さない。D-116）
       const footer = page.locator('footer.ftr');
       await expect(footer.getByRole('link', { name: /Instagram/ })).toHaveAttribute(
         'href',
         'https://www.instagram.com/example',
       );
-      await expect(footer.getByRole('link', { name: /Facebook/ })).toBeVisible();
+      await expect(footer.getByRole('link', { name: /Facebook/ })).toHaveCount(0);
       await expect(footer.getByRole('link', { name: /TikTok/ })).toHaveCount(0);
       await expectNoA11yViolations(page);
       expect(consoleErrors).toEqual([]);

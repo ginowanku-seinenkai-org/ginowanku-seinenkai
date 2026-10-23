@@ -59,7 +59,6 @@ describe('JSON-LD', () => {
     const settings = {
       og_photo_id: null,
       instagram_url: 'https://www.instagram.com/x',
-      facebook_url: null,
       tiktok_url: null,
       join_age_label: '高校生以上',
     };

@@ -119,6 +119,11 @@ const phone = cleaned(false)
   .transform((s) => (s === "" ? undefined : s))
   .optional();
 
+/** 入会希望の性別の値（任意。D-118）。male 男性、female 女性、no_answer 回答しない */
+export const GENDERS = ["male", "female", "no_answer"] as const;
+/** 入会希望の性別 */
+export type Gender = (typeof GENDERS)[number];
+
 // 3つの種類に共通の項目
 const common = {
   name: text(1, 50),
@@ -161,6 +166,10 @@ export const inquirySchema = z.discriminatedUnion("kind", [
       .int({ error: "invalid" })
       .min(15, { error: "out_of_range" })
       .max(99, { error: "out_of_range" }),
+    // 任意。選ばなければ null（D-118）
+    gender: z.enum(GENDERS, { error: "invalid" }).nullish().transform((v) =>
+      v ?? null
+    ),
     message: optionalText(2000, true),
   }),
   z.object({
@@ -345,6 +354,26 @@ export const INQUIRY_SCHEMA_CASES: InquirySchemaCase[] =
         name: "年齢が小数",
         input: { ...join, age: 19.5 },
         fields: { age: "invalid" },
+      },
+      {
+        name: "入会希望：性別は任意（選ばなければ null）",
+        input: join,
+        expect: { gender: null },
+      },
+      {
+        name: "入会希望：性別を選ぶ",
+        input: { ...join, gender: "female" },
+        expect: { gender: "female" },
+      },
+      {
+        name: "入会希望：性別が決まった値でない",
+        input: { ...join, gender: "x" },
+        fields: { gender: "invalid" },
+      },
+      {
+        name: "演舞依頼では性別を捨てる",
+        input: { ...performance, gender: "male" },
+        expect: { gender: undefined },
       },
       {
         name: "入会希望では団体名を捨てる",

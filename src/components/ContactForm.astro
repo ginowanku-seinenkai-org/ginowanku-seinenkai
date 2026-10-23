@@ -103,6 +103,23 @@ const endpoint = `${env.supabaseUrl.replace(/\/$/, '')}/functions/v1/submit-inqu
       />
       <p class="hint age-note" aria-live="polite" data-age-note></p>
     </div>
+    <fieldset class="fld" data-kind-only="join" data-field="gender" aria-describedby="f-gender-e">
+      <legend class="lbl">
+        <span data-label>{F.gender.label}</span>
+        <span class="opt" data-badge>
+          任意
+        </span>
+      </legend>
+      <div class="kinds">
+        {F.gender.options.map((g) => (
+          <label>
+            <input type="radio" name="gender" value={g.value} id={`f-gender-${g.value}`} />
+            {g.label}
+          </label>
+        ))}
+      </div>
+      <p class="err" id="f-gender-e" hidden></p>
+    </fieldset>
     <ContactField
       name="email"
       label={F.email.label}

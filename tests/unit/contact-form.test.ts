@@ -75,6 +75,19 @@ describe('buildInput（03 §10.2）', () => {
     expect(input['age']).toBe(18);
     expect(input).not.toHaveProperty('organization');
   });
+  it('入会希望では選んだ性別を送り、ほかの種類では送らない（D-118）', () => {
+    const join: FormValues = {
+      ...performance,
+      kind: 'join',
+      fields: { ...performance.fields, age: '20', gender: 'female' },
+    };
+    expect(buildInput(join, VERSION, 'tok')['gender']).toBe('female');
+    expect(
+      buildInput({ ...join, fields: { ...join.fields, gender: '' } }, VERSION, 'tok'),
+    ).not.toHaveProperty('gender');
+    for (const kind of ['performance', 'other'] as const)
+      expect(buildInput({ ...join, kind }, VERSION, 'tok')).not.toHaveProperty('gender');
+  });
   it('おとり項目は入力があるときだけ送る', () => {
     expect(buildInput(performance, VERSION, 'tok')).not.toHaveProperty('website');
     expect(buildInput({ ...performance, website: 'x' }, VERSION, 'tok')['website']).toBe('x');
@@ -119,6 +132,25 @@ describe('validate（共有の入力チェック。03 §8.4）', () => {
       },
     });
   });
+  it('入会希望の性別は任意（選ばなければ null、決まった値でなければ invalid。D-118）', () => {
+    const join: FormValues = {
+      ...performance,
+      kind: 'join',
+      fields: { name: '宜野湾 次郎', age: '17', email: 'jiro@example.com', gender: '' },
+    };
+    const none = validate(join, VERSION, 'tok');
+    expect(none.ok && none.body['gender']).toBeNull();
+    const chosen = validate(
+      { ...join, fields: { ...join.fields, gender: 'no_answer' } },
+      VERSION,
+      'tok',
+    );
+    expect(chosen.ok && chosen.body['gender']).toBe('no_answer');
+    expect(validate({ ...join, fields: { ...join.fields, gender: 'x' } }, VERSION, 'tok')).toEqual({
+      ok: false,
+      fields: { gender: 'invalid' },
+    });
+  });
   it('画面にない項目（おとり項目）の誤りは出さずに送る', () => {
     const result = validate({ ...performance, website: 'x'.repeat(201) }, VERSION, 'tok');
     expect(result.ok).toBe(true);
@@ -159,6 +191,10 @@ describe('fieldMessage（03 §8.4 の対応表、06 §4.1）', () => {
   });
   it('それ以外は汎用の文', () =>
     expect(fieldMessage('name', 'invalid_format', ctx)).toBe('担当者名の内容を確認してください。'));
+  it('性別の誤りは汎用の文（D-118）', () =>
+    expect(fieldMessage('gender', 'invalid', { ...ctx, kind: 'join' })).toBe(
+      '性別の内容を確認してください。',
+    ));
   it('画面にない項目は項目に出さない', () => {
     for (const name of ['turnstile_token', 'privacy_version', 'website'])
       expect(fieldMessage(name, 'required', ctx)).toBeNull();

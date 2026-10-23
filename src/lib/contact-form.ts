@@ -13,6 +13,7 @@ export type FieldName =
   | 'organization'
   | 'name'
   | 'age'
+  | 'gender'
   | 'email'
   | 'phone'
   | 'preferred_datetime'
@@ -34,9 +35,12 @@ export const FIELDS_BY_KIND: Record<InquiryKind, readonly FieldName[]> = {
     'performance_length',
     'message',
   ],
-  join: ['name', 'age', 'email', 'phone', 'message'],
+  join: ['name', 'age', 'gender', 'email', 'phone', 'message'],
   other: ['organization', 'name', 'email', 'phone', 'message'],
 };
+
+/** 選択肢から選ぶ項目（ラジオボタン。値は選んだものの value、未選択なら空。性別は D-118） */
+export const CHOICE_FIELDS: ReadonlySet<FieldName> = new Set(['gender']);
 
 /** 種類ごとの必須（ラベルの「必須」「任意」の切り替えに使う。検証はスキーマが行う） */
 export const REQUIRED_BY_KIND: Record<InquiryKind, readonly FieldName[]> = {

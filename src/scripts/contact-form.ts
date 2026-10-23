@@ -1,8 +1,10 @@
 // 問い合わせフォームの動き（03 §8.1〜§8.6、§13.3）。入力の組み立て・検証・応答の判定は src/lib/contact-form.ts
 import {
+  CHOICE_FIELDS,
   classifyResponse,
   FIELDS_BY_KIND,
   fieldMessage,
+  isFieldName,
   isInquiryKind,
   isUnder18,
   labelOf,
@@ -47,6 +49,7 @@ const ALL_FIELDS: readonly FieldName[] = [
   'organization',
   'name',
   'age',
+  'gender',
   'email',
   'phone',
   'preferred_datetime',
@@ -84,7 +87,23 @@ function setup(form: HTMLFormElement) {
   const input = (name: string) =>
     $<HTMLInputElement | HTMLTextAreaElement>(`#f-${name}`) as
       HTMLInputElement | HTMLTextAreaElement;
-  const kindRadios = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="kind"]'));
+  /**
+   * 選択肢から選ぶ項目のラジオボタンを取り出す
+   * @param name 項目名
+   * @returns その項目のラジオボタン（画面の順）
+   */
+  const radios = (name: string) =>
+    Array.from(form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+  /**
+   * 項目の今の値を読む。選択肢の項目は選んだものの value（未選択なら空）
+   * @param name 項目名
+   * @returns 入力の値
+   */
+  const valueOf = (name: FieldName) =>
+    CHOICE_FIELDS.has(name)
+      ? (radios(name).find((r) => r.checked)?.value ?? '')
+      : input(name).value;
+  const kindRadios = radios('kind');
   const privacy = input('privacy_agreed') as HTMLInputElement;
   const submit = $<HTMLButtonElement>('[data-submit]') as HTMLButtonElement;
   const status = $<HTMLElement>('[data-status]') as HTMLElement;
@@ -173,7 +192,7 @@ function setup(form: HTMLFormElement) {
    */
   function readValues(): FormValues {
     const fields: FormValues['fields'] = {};
-    if (kind) for (const name of FIELDS_BY_KIND[kind]) fields[name] = input(name).value;
+    if (kind) for (const name of FIELDS_BY_KIND[kind]) fields[name] = valueOf(name);
     return {
       kind,
       fields,
@@ -208,11 +227,12 @@ function setup(form: HTMLFormElement) {
           : fieldMessage(name, reason, {
               kind,
               joinAgeLabel,
-              value: name === 'kind' || name === 'privacy_agreed' ? '' : input(name).value,
+              value: isFieldName(name) ? valueOf(name) : '',
             });
       error.textContent = message ?? '';
       error.hidden = message === null;
-      const control = name === 'kind' ? null : $<HTMLElement>(`#f-${name}`);
+      // ラジオボタンの項目（種類・性別）は、まとまり（fieldset）の説明で誤りを伝える
+      const control = $<HTMLElement>(`#f-${name}`);
       if (control) {
         if (message) control.setAttribute('aria-invalid', 'true');
         else control.removeAttribute('aria-invalid');
@@ -222,14 +242,16 @@ function setup(form: HTMLFormElement) {
 
   // 最初の送信のあとは、項目ごとに blur と input で検証し直す
   for (const name of [...ALL_FIELDS, 'privacy_agreed']) {
-    const control = input(name);
+    const controls = isFieldName(name) && CHOICE_FIELDS.has(name) ? radios(name) : [input(name)];
     /** 最初の送信のあとだけ、この項目の誤りを出し直す */
     const recheck = () => {
       if (attempted) showFieldErrors(currentErrors(), name);
     };
-    control.addEventListener('blur', recheck);
-    control.addEventListener('input', recheck);
-    control.addEventListener('change', recheck);
+    for (const control of controls) {
+      control.addEventListener('blur', recheck);
+      control.addEventListener('input', recheck);
+      control.addEventListener('change', recheck);
+    }
   }
 
   // ---- フォーム上部のまとめ（03 §13.3、06 §4.1・§4.3） ----
@@ -278,13 +300,17 @@ function setup(form: HTMLFormElement) {
       if (!message || message.hidden || fields[name] === undefined) continue;
       const item = document.createElement('li');
       const link = document.createElement('a');
-      link.href =
-        name === 'kind' ? `#f-kind-${kindRadios[0]?.value ?? 'performance'}` : `#f-${name}`;
+      // ラジオボタンの項目は最初の選択肢へ移る
+      const first =
+        name === 'kind' || (isFieldName(name) && CHOICE_FIELDS.has(name))
+          ? radios(name)[0]
+          : undefined;
+      link.href = first ? `#${first.id}` : `#f-${name}`;
       link.textContent = message.textContent ?? '';
       link.addEventListener('click', (event) => {
         event.preventDefault();
-        const target = name === 'kind' ? kindRadios[0] : input(name);
-        target?.focus();
+        const target = first ?? input(name);
+        target.focus();
       });
       item.append(link);
       list.append(item);

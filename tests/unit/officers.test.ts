@@ -33,27 +33,22 @@ describe('役員紹介', () => {
     expect(publicOfficerSchema.safeParse(withoutPhoto).success).toBe(false);
   });
 
-  it('呼び名とひと言は文字列か null。列が無い行は受け付けない（D-124）', () => {
+  it('ひと言は文字列か null。列が無い行は受け付けない（D-124、D-125）', () => {
     expect(
       publicOfficerSchema.safeParse(
-        rows.officer(1, '会長', '宜野湾 一郎', null, 'いっちゃん', 'よろしくお願いします。'),
+        rows.officer(1, '会長', '宜野湾 一郎', null, 'よろしくお願いします。'),
       ).success,
     ).toBe(true);
-    expect(
-      publicOfficerSchema.safeParse(rows.officer(1, '書記', '宜野湾 花子', null, null, 'よろしく'))
-        .success,
-    ).toBe(true);
-    expect(publicOfficerSchema.safeParse({ ...rows.officer(1), nickname: 1 }).success).toBe(false);
+    expect(publicOfficerSchema.safeParse(rows.officer(1, '書記', '宜野湾 花子')).success).toBe(
+      true,
+    );
     expect(publicOfficerSchema.safeParse({ ...rows.officer(1), message: 1 }).success).toBe(false);
-    const withoutNickname: Record<string, unknown> = { ...rows.officer(1) };
-    delete withoutNickname['nickname'];
     const withoutMessage: Record<string, unknown> = { ...rows.officer(1) };
     delete withoutMessage['message'];
-    expect(publicOfficerSchema.safeParse(withoutNickname).success).toBe(false);
     expect(publicOfficerSchema.safeParse(withoutMessage).success).toBe(false);
   });
 
-  it('v_public_officers から読む列は、スキーマの列と同じ（D-124）', () => {
+  it('v_public_officers から読む列は、スキーマの列と同じ（D-124、D-125）', () => {
     expect(VIEW_COLUMNS.v_public_officers.split(',')).toEqual(
       Object.keys(publicOfficerSchema.shape),
     );

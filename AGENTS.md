@@ -54,7 +54,7 @@
 
 ## 5. 守ること
 
-- 個人の氏名をサイトに出さない。例外は「役員紹介」（`/officers`）の役員の役職と氏名だけで、本人の同意を得て載せる（D-121）。写真の代替テキストにも氏名を書かない
+- 個人の氏名をサイトに出さない。例外は「役員紹介」（`/officers`）の役員の役職・氏名・写真だけで、本人の同意を得て載せる（D-121、D-122）。写真の代替テキストにも氏名を書かない
 - Supabase に接続するのは `scripts/fetch-data.ts` と `scripts/fetch-photos.ts` だけ。読むのは公開用のビューだけで、publishable キー以外を使わない
 - 秘密の値は GitHub Secrets に置き、コードやログに出さない。公開してよい値だけを `PUBLIC_` で始まる環境変数にする（00 §8）
 - 管理画面のリポジトリと共有するファイルは同じ内容に保つ：`src/lib/content/` はこのリポジトリが正、`src/lib/inquiry-schema.ts` は管理画面の `supabase/functions/_shared/inquiry-schema.ts` が正（00 §2.2）。変えるときは両方を直す

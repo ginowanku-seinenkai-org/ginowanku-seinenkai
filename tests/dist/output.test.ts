@@ -35,10 +35,20 @@ const dataPosts = data('posts.json') as {
   event_place: string | null;
 }[];
 const dataSettings = data('site-settings.json') as Record<string, unknown>;
-// 役員（D-121）。並び順は sort_order の昇順
-const dataOfficers = (data('officers.json') as { role: string; name: string; sort_order: number }[])
+// 役員（D-121、D-122、D-124）。並び順は sort_order の昇順
+const dataOfficers = (
+  data('officers.json') as {
+    role: string;
+    name: string;
+    sort_order: number;
+    photo_id: string | null;
+    nickname: string | null;
+    message: string | null;
+  }[]
+)
   .slice()
   .sort((a, b) => a.sort_order - b.sort_order);
+const dataPhotoIds = new Set((data('photos.json') as { id: string }[]).map((p) => p.id));
 const hasPosts = dataPosts.length > 0;
 const hasEventWithPlace = dataPosts.some(
   (p) => p.kind === 'event' && p.event_starts_at !== null && p.event_place !== null,
@@ -87,7 +97,10 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
         expect(img.getAttribute('width'), img.outerHTML).toMatch(/^\d+$/);
         expect(img.getAttribute('height'), img.outerHTML).toMatch(/^\d+$/);
       }
-      for (const img of Array.from(doc.querySelectorAll('main img:not(.lb-img)'))) {
+      // 役員の写真は装飾として alt="" を明示する（すぐ隣に役職と氏名がある。D-122）
+      for (const img of Array.from(
+        doc.querySelectorAll('main img:not(.lb-img):not(.officer-photo)'),
+      )) {
         expect(img.getAttribute('alt'), img.outerHTML).not.toBe('');
       }
     });
@@ -267,18 +280,79 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       expect(headers).toContain(name);
   });
 
-  it('役員紹介：役職と氏名を並び順で出し、年度があればリードに添える（D-121）', () => {
+  it('役員紹介：役職と氏名のカードを並び順で出し、年度があればリードに添える（D-121、D-122）', () => {
     const { doc } = pageAt('/officers');
-    const rows = Array.from(doc.querySelectorAll('dl.officer-list > div')).map((row) => [
-      row.querySelector('dt')?.textContent?.trim(),
-      row.querySelector('dd')?.textContent?.trim(),
-    ]);
-    expect(rows).toEqual(dataOfficers.map((o) => [o.role, o.name]));
+    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
+    expect(
+      cards.map((card) => [
+        card.querySelector(':scope > p.officer-role')?.textContent?.trim(),
+        card.querySelector(':scope > p.officer-name')?.textContent?.trim(),
+      ]),
+    ).toEqual(dataOfficers.map((o) => [o.role, o.name]));
     const lead = doc.querySelector('.phead .lead')?.textContent?.trim() ?? null;
     const label = dataSettings['officer_term_label'];
     expect(lead).toBe(typeof label === 'string' ? `${label}の役員です。` : null);
     if (dataOfficers.length === 0)
       expect(doc.querySelector('.empty')?.textContent).toBe('役員の紹介は準備中です。');
+  });
+
+  it('役員紹介の写真：写真があれば幅・高さと空の alt の画像、無ければ氏名の最初の1文字の枠（D-122）', () => {
+    const { doc } = pageAt('/officers');
+    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
+    expect(cards.length).toBe(dataOfficers.length);
+    dataOfficers.forEach((officer, i) => {
+      const card = cards[i];
+      if (card === undefined) throw new Error(`${officer.role} のカードがありません`);
+      // 写真か枠のどちらかが1つ、役職より前にある
+      expect(card.firstElementChild?.classList.contains('officer-photo'), officer.role).toBe(true);
+      expect(card.querySelectorAll('.officer-photo').length, officer.role).toBe(1);
+      const img = card.querySelector('img.officer-photo');
+      if (officer.photo_id !== null && dataPhotoIds.has(officer.photo_id)) {
+        expect(img, officer.role).not.toBeNull();
+        expect(img?.getAttribute('src')).toBe(`/photos/${officer.photo_id}/thumb.jpg`);
+        expect(img?.getAttribute('srcset')).toContain(`/photos/${officer.photo_id}/full.jpg`);
+        expect(img?.getAttribute('width')).toMatch(/^\d+$/);
+        expect(img?.getAttribute('height')).toMatch(/^\d+$/);
+        expect(img?.getAttribute('alt')).toBe('');
+      } else {
+        expect(img, officer.role).toBeNull();
+        const box = card.querySelector('div.officer-photo.officer-initial');
+        expect(box?.getAttribute('aria-hidden'), officer.role).toBe('true');
+        expect(box?.textContent?.trim()).toBe(Array.from(officer.name.trim())[0] ?? '');
+      }
+    });
+    // 代替テキストに氏名を書かない
+    for (const img of Array.from(doc.querySelectorAll('img')))
+      for (const o of dataOfficers) expect(img.getAttribute('alt') ?? '').not.toContain(o.name);
+  });
+
+  it('役員紹介の呼び名とひと言：あるときだけ、その役員のカードの氏名の後に出す（D-124）', () => {
+    const { doc } = pageAt('/officers');
+    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
+    expect(cards.length).toBe(dataOfficers.length);
+    dataOfficers.forEach((officer, i) => {
+      const card = cards[i];
+      if (card === undefined) throw new Error(`${officer.role} のカードがありません`);
+      const nickname = card.querySelectorAll(':scope > p.officer-nickname');
+      const message = card.querySelectorAll(':scope > p.officer-message');
+      expect(nickname.length, officer.role).toBe(officer.nickname === null ? 0 : 1);
+      expect(message.length, officer.role).toBe(officer.message === null ? 0 : 1);
+      if (officer.nickname !== null)
+        expect(nickname[0]?.textContent?.trim()).toBe(`（${officer.nickname}）`);
+      if (officer.message !== null) expect(message[0]?.textContent?.trim()).toBe(officer.message);
+      // 並びは 写真 → 役職 → 氏名 → 呼び名 → ひと言
+      const order = Array.from(card.children)
+        .slice(1)
+        .map((el) => el.className);
+      expect(order, officer.role).toEqual(
+        [
+          'officer-role',
+          'officer-name',
+          officer.nickname === null ? null : 'officer-nickname',
+          officer.message === null ? null : 'officer-message',
+        ].filter((c) => c !== null),
+      );
+    });
   });
 
   it('役員の氏名は /officers にだけ出る（D-121）', () => {

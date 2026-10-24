@@ -35,7 +35,7 @@ export interface SiteData {
   /** songs は本文が空なら null（ページもナビも作らない。03 S13、D-81） */
   pages: Record<'about' | 'join', PublicPage> & { songs: PublicPage | null };
   settings: PublicSiteSettings;
-  /** 役員の役職と氏名。sort_order 昇順（D-121） */
+  /** 役員の役職・氏名・写真。sort_order 昇順（D-121、D-122） */
   officers: PublicOfficer[];
   photos: Map<string, PublicPhoto>;
 }
@@ -77,6 +77,28 @@ export function comparePosts(a: PublicPost, b: PublicPost): number {
  */
 export function compareOfficers(a: PublicOfficer, b: PublicOfficer): number {
   return a.sort_order - b.sort_order;
+}
+
+/**
+ * 役員の写真を探す（D-122）
+ * @param officer 役員
+ * @param photos 公開してよい写真（ID → 写真）
+ * @returns 写真。photo_id が null か、公開用ビューに無ければ undefined
+ */
+export function officerPhoto(
+  officer: PublicOfficer,
+  photos: Map<string, PublicPhoto>,
+): PublicPhoto | undefined {
+  return officer.photo_id === null ? undefined : photos.get(officer.photo_id);
+}
+
+/**
+ * 写真のない役員の枠に出す文字を作る：氏名の最初の1文字（D-122）。サロゲートペアの漢字も1文字として扱う
+ * @param name 役員の氏名
+ * @returns 最初の1文字。氏名が空なら空文字
+ */
+export function officerInitial(name: string): string {
+  return Array.from(name.trim())[0] ?? '';
 }
 
 /**

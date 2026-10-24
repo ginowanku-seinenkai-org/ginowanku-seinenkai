@@ -1,7 +1,15 @@
 ---
-// 記事カード（03 §6.2）。行事は data-event-end でブラウザでも「終了」を再判定する（03 §7）
+// 記事カード（03 §6.2）。演舞は data-event-end でブラウザでも「終了」を再判定する（03 §7）
+// 中止の演舞は「終了」の代わりに「中止」の印を出し、再判定しない（13 §6.2）
 import { formatPublishedOn } from '../lib/date.ts';
-import { KIND_LABELS, eventEndDate, isEnded, photoSrc, postUrl } from '../lib/posts.ts';
+import {
+  KIND_LABELS,
+  eventEndDate,
+  isCancelled,
+  isEnded,
+  photoSrc,
+  postUrl,
+} from '../lib/posts.ts';
 import type { SiteData } from '../lib/data.ts';
 import type { PublicPost } from '../lib/view-schemas.ts';
 import EndedBadge from './EndedBadge.astro';
@@ -15,12 +23,13 @@ interface Props {
 }
 const { post, data } = Astro.props;
 const cover = post.cover_photo_id === null ? undefined : data.photos.get(post.cover_photo_id);
-const ended = isEnded(post, data.today);
-const endDate = eventEndDate(post);
+const cancelled = isCancelled(post);
+const ended = !cancelled && isEnded(post, data.today);
+const endDate = cancelled ? null : eventEndDate(post);
 ---
 
 <article
-  class:list={['card', { 'is-ended': ended }]}
+  class:list={['card', { 'is-ended': ended, 'is-cancelled': cancelled }]}
   data-event-end={endDate ?? undefined}
   data-ended-behavior={endDate ? 'badge' : undefined}
 >
@@ -42,6 +51,7 @@ const endDate = eventEndDate(post);
   <div class="tags">
     <KindLabel kind={post.kind} />
     {endDate && <EndedBadge ended={ended} />}
+    {cancelled && <span class="badge-cancelled">中止</span>}
   </div>
   <a class="ttl" href={postUrl(post)}>
     {post.title}

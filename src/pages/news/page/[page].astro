@@ -1,12 +1,12 @@
 ---
-// S03 お知らせ・行事の一覧（すべて）の2ページ目以降（1ページ目は /news。03 §6.1）
+// S03 お知らせ・演舞の一覧（すべて）の2ページ目以降（1ページ目は /news。03 §6.1）
 import type { GetStaticPaths } from 'astro';
 import NewsListPage from '../../../components/NewsListPage.astro';
 import { loadSiteData } from '../../../lib/data.ts';
 import { newsPosts, paginate } from '../../../lib/posts.ts';
 
 /**
- * お知らせ・行事の一覧（すべて）の2ページ目以降を作る
+ * お知らせ・演舞の一覧（すべて）の2ページ目以降を作る
  * @returns ページ番号のパラメーター
  */
 export const getStaticPaths = (async () => {

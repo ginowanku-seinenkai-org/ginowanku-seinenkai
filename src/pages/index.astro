@@ -7,7 +7,14 @@ import PostCard from '../components/PostCard.astro';
 import { loadSiteData } from '../lib/data.ts';
 import { eventDateBox, formatPublishedOn } from '../lib/date.ts';
 import { DATE_LABELS, DESCRIPTIONS, EMPTY, SITE_NAME } from '../lib/messages.ts';
-import { activityPosts, eventEndDate, newsPosts, postUrl, upcomingEvents } from '../lib/posts.ts';
+import {
+  activityPosts,
+  eventEndDate,
+  isCancelled,
+  newsPosts,
+  postUrl,
+  upcomingEvents,
+} from '../lib/posts.ts';
 import { buildMeta, organizationJsonLd } from '../lib/seo.ts';
 
 const data = await loadSiteData();
@@ -28,7 +35,7 @@ const meta = buildMeta({
 
   <section class="wrap sec" aria-labelledby="upcoming-heading">
     <div class="sec-h">
-      <h2 id="upcoming-heading">次の行事</h2>
+      <h2 id="upcoming-heading">次の演舞</h2>
     </div>
     <p class="empty" data-upcoming-empty hidden={events.length > 0}>
       {
@@ -88,6 +95,7 @@ const meta = buildMeta({
               {post.kind === 'event' && post.event_starts_at !== null && (
                 <span class="news-ev">
                   {DATE_LABELS.event} <EventDate post={post} />
+                  {isCancelled(post) && '（中止）'}
                 </span>
               )}
             </a>

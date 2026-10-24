@@ -577,8 +577,9 @@ body {
   color: var(--ink);
 }
 
-/* 色だけで区別しない。灰色の枠に「終了」の文字（03 §6.6） */
-.badge-ended {
+/* 色だけで区別しない。灰色の枠に「終了」「中止」の文字（03 §6.6、13 §6.2） */
+.badge-ended,
+.badge-cancelled {
   display: inline-block;
   padding: 4px 8px;
   border: 1.5px solid var(--ink-2);
@@ -626,7 +627,7 @@ body {
   object-fit: cover;
 }
 
-/* 次の行事（トップ） */
+/* 次の演舞（トップ） */
 .events {
   display: grid;
   gap: 14px;
@@ -742,7 +743,7 @@ body {
   justify-self: start;
 }
 
-/* 行事の記事だけ、表題の下に演舞日時を添える（先頭の日付は掲載日。D-120） */
+/* 演舞の記事だけ、表題の下に演舞日時を添える（先頭の日付は掲載日。D-120） */
 .news .news-ev {
   grid-column: 3;
   color: var(--ink-2);
@@ -821,12 +822,14 @@ body {
   font-size: 13px;
 }
 
-/* 終了した行事は写真を薄く・枠を灰色にする。文字は薄くしない（コントラスト 4.5:1 を保つ。N-06） */
-.card.is-ended .thumb {
+/* 終了・中止の演舞は写真を薄く・枠を灰色にする。文字は薄くしない（コントラスト 4.5:1 を保つ。N-06、13 §6.2） */
+.card.is-ended .thumb,
+.card.is-cancelled .thumb {
   opacity: 0.5;
 }
 
-.card.is-ended .kindbox {
+.card.is-ended .kindbox,
+.card.is-cancelled .kindbox {
   filter: grayscale(1);
 }
 

@@ -10,7 +10,7 @@ import PageHead from './PageHead.astro';
 import { renderBody } from '../lib/content/render-body.ts';
 import { loadSiteData, renderContext } from '../lib/data.ts';
 import { formatPublishedOn } from '../lib/date.ts';
-import { eventEndDate, isEnded, postUrl } from '../lib/posts.ts';
+import { eventEndDate, isCancelled, isEnded, postUrl } from '../lib/posts.ts';
 import { DATE_LABELS, DESCRIPTIONS } from '../lib/messages.ts';
 import { buildMeta, descriptionFromBody, eventJsonLd } from '../lib/seo.ts';
 import type { PublicPhoto, PublicPost } from '../lib/view-schemas.ts';
@@ -35,10 +35,12 @@ const meta = buildMeta({
   image: cover ?? null,
 });
 const event = eventJsonLd(post, description, cover ?? null);
-const ended = isEnded(post, data.today);
-const endDate = eventEndDate(post);
+// 中止の演舞は「終了」の文の代わりに中止の文を出し、ブラウザで再判定しない（13 §6.2）
+const cancelled = isCancelled(post);
+const ended = !cancelled && isEnded(post, data.today);
+const endDate = cancelled ? null : eventEndDate(post);
 const listHref = isActivity ? '/activities' : '/news';
-const listLabel = isActivity ? '活動記録' : 'お知らせ・行事';
+const listLabel = isActivity ? '活動記録' : 'お知らせ・演舞';
 const html = renderBody(post.body, renderContext(data, `記事${post.id}の本文`));
 ---
 
@@ -57,7 +59,11 @@ const html = renderBody(post.body, renderContext(data, `記事${post.id}の本�
   </PageHead>
   <article class="wrap narrow article">
     {post.kind === 'event' && (
-      <dl class="evbox" data-event-end={endDate ?? undefined} data-ended-behavior="badge">
+      <dl
+        class="evbox"
+        data-event-end={endDate ?? undefined}
+        data-ended-behavior={endDate ? 'badge' : undefined}
+      >
         <dt>日時</dt>
         <dd>
           <EventDate post={post} />
@@ -69,9 +75,13 @@ const html = renderBody(post.body, renderContext(data, `記事${post.id}の本�
             <dd>{post.event_place}</dd>
           </>
         )}
-        <dd class="done" data-ended-note hidden={!ended}>
-          この行事は終了しました
-        </dd>
+        {cancelled ? (
+          <dd class="done">この演舞は中止になりました</dd>
+        ) : (
+          <dd class="done" data-ended-note hidden={!ended}>
+            この演舞は終了しました
+          </dd>
+        )}
       </dl>
     )}
     <CoverImage photo={cover} />

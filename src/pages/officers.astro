@@ -1,9 +1,11 @@
 ---
-// 役員紹介（D-121）。役職と氏名を並び順で出す。氏名は本人の同意を得て載せる。写真は出さない
+// 役員紹介（D-121、D-122、D-124）。役職・氏名・写真・呼び名・ひと言のカードを並び順で出す。氏名と写真は本人の同意を得て載せる
+// 呼び名とひと言は、あるときだけ出す
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
-import { loadSiteData } from '../lib/data.ts';
+import { loadSiteData, officerInitial, officerPhoto } from '../lib/data.ts';
 import { DESCRIPTIONS, EMPTY, OFFICERS_PAGE } from '../lib/messages.ts';
+import { photoSrc } from '../lib/posts.ts';
 import { buildMeta } from '../lib/seo.ts';
 
 const data = await loadSiteData();
@@ -14,6 +16,8 @@ const meta = buildMeta({
   path: '/officers',
   description: DESCRIPTIONS.officers,
 });
+// カードと写真の組。写真の代替テキストは空にする（すぐ隣に役職と氏名があり、氏名を代替テキストに書かないため）
+const cards = officers.map((officer) => ({ officer, photo: officerPhoto(officer, data.photos) }));
 ---
 
 <BaseLayout meta={meta} current="officers">
@@ -22,18 +26,37 @@ const meta = buildMeta({
     crumbs={[{ label: OFFICERS_PAGE.title }]}
     lead={termLabel === null ? null : OFFICERS_PAGE.lead(termLabel)}
   />
-  <div class="wrap narrow article">
+  <div class="wrap article">
     {officers.length === 0 ? (
       <p class="empty">{EMPTY.officers}</p>
     ) : (
-      <dl class="officer-list">
-        {officers.map((officer) => (
-          <div class="officer-row">
-            <dt>{officer.role}</dt>
-            <dd>{officer.name}</dd>
-          </div>
+      <ul class="officer-cards">
+        {cards.map(({ officer, photo }) => (
+          <li class="officer-card">
+            {photo ? (
+              <img
+                class="officer-photo"
+                src={photoSrc(photo, 'thumb')}
+                srcset={`${photoSrc(photo, 'thumb')} ${photo.thumb_width}w, ${photoSrc(photo, 'full')} ${photo.width}w`}
+                sizes="(min-width: 768px) 240px, 50vw"
+                width={photo.thumb_width}
+                height={photo.thumb_height}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div class="officer-photo officer-initial" aria-hidden="true">
+                {officerInitial(officer.name)}
+              </div>
+            )}
+            <p class="officer-role">{officer.role}</p>
+            <p class="officer-name">{officer.name}</p>
+            {officer.nickname !== null && <p class="officer-nickname">（{officer.nickname}）</p>}
+            {officer.message !== null && <p class="officer-message">{officer.message}</p>}
+          </li>
         ))}
-      </dl>
+      </ul>
     )}
   </div>
 </BaseLayout>

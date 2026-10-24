@@ -1,6 +1,34 @@
 [
-  { "role": "会長", "name": "宜野湾 一郎", "sort_order": 1 },
-  { "role": "副会長", "name": "宜野湾 二郎", "sort_order": 2 },
-  { "role": "書記", "name": "宜野湾 花子", "sort_order": 3 },
-  { "role": "会計", "name": "宜野湾 三郎", "sort_order": 4 }
+  {
+    "role": "会長",
+    "name": "宜野湾 一郎",
+    "sort_order": 1,
+    "photo_id": "f1000003-0000-4000-8000-000000000003",
+    "nickname": "いっちゃん",
+    "message": "みんなで楽しくエイサーを踊りましょう！"
+  },
+  {
+    "role": "副会長",
+    "name": "宜野湾 二郎",
+    "sort_order": 2,
+    "photo_id": null,
+    "nickname": null,
+    "message": null
+  },
+  {
+    "role": "書記",
+    "name": "宜野湾 花子",
+    "sort_order": 3,
+    "photo_id": "f1000002-0000-4000-8000-000000000002",
+    "nickname": null,
+    "message": "よろしくお願いします。"
+  },
+  {
+    "role": "会計",
+    "name": "宜野湾 三郎",
+    "sort_order": 4,
+    "photo_id": null,
+    "nickname": null,
+    "message": null
+  }
 ]

@@ -169,6 +169,15 @@ test('EP-05b 役員紹介：年度のリードと、役職・氏名・写真の�
     '宜野湾 花子',
     '宜野湾 三郎',
   ]);
+  // 呼び名は会長だけ、ひと言は会長と書記だけ（D-124）
+  await expect(cards.locator('.officer-nickname')).toHaveText(['（いっちゃん）']);
+  await expect(cards.nth(0).locator('.officer-nickname')).toHaveCount(1);
+  await expect(cards.locator('.officer-message')).toHaveText([
+    'みんなで楽しくエイサーを踊りましょう！',
+    'よろしくお願いします。',
+  ]);
+  await expect(cards.nth(0).locator('.officer-message')).toHaveCount(1);
+  await expect(cards.nth(2).locator('.officer-message')).toHaveCount(1);
   // 写真は会長と書記だけ。代替テキストは空（氏名を書かない）。写真のない役員は氏名の最初の1文字の枠
   const photos = page.locator('main img.officer-photo');
   await expect(photos).toHaveCount(2);
@@ -222,6 +231,34 @@ test('EP-05c 役員紹介の並び：スマホは2列で横スクロールなし
       .toBeGreaterThan(0);
   }
   await expectNoA11yViolations(page);
+
+  // 呼び名とひと言が上限の長さ（20文字・60文字）で、区切りのない英数字でも、カードからはみ出さない（D-124）
+  await page.evaluate(() => {
+    const nickname = document.querySelector('.officer-nickname');
+    const message = document.querySelector('.officer-message');
+    if (nickname) nickname.textContent = `（${'W'.repeat(20)}）`;
+    if (message) message.textContent = 'W'.repeat(60);
+  });
+  const fits = await page
+    .locator('ul.officer-cards > li')
+    .first()
+    .evaluate((card) => {
+      const outer = card.getBoundingClientRect();
+      return Array.from(card.children).every((el) => {
+        const r = el.getBoundingClientRect();
+        return (
+          r.left >= outer.left - 0.5 &&
+          r.right <= outer.right + 0.5 &&
+          el.scrollWidth <= el.clientWidth
+        );
+      });
+    });
+  expect(fits).toBe(true);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    ),
+  ).toBeLessThanOrEqual(0);
 
   await page.setViewportSize({ width: 1200, height: 900 });
   const pc = await boxes();

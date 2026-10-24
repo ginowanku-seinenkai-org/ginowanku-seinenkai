@@ -1020,6 +1020,23 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* 呼び名とひと言（あるときだけ。D-124）。長くてもカードからはみ出さないよう折り返す */
+.officer-nickname {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.officer-message {
+  margin: 2px 0 0;
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
 .cover {
   display: block;
   width: 100%;

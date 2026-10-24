@@ -15,7 +15,7 @@ function reader(data: Partial<Record<View, unknown[]>>, calls: string[] = []): V
     v_public_site_settings: [rows.settings],
     v_public_officers: [
       rows.officer(2, '副会長', '宜野湾 二郎'),
-      rows.officer(1, '会長', '宜野湾 一郎', PHOTO_ID),
+      rows.officer(1, '会長', '宜野湾 一郎', PHOTO_ID, 'いっちゃん', 'よろしくお願いします。'),
     ],
     v_public_photos: [rows.photo()],
     ...data,
@@ -65,14 +65,16 @@ describe('fetchData', () => {
       fetched_at: '2026-10-09T15:00:00.000Z',
       today: '2026-10-10',
     });
-    // 役員は sort_order の昇順で、写真の ID を持つ（D-121、D-122）
+    // 役員は sort_order の昇順で、写真の ID・呼び名・ひと言を持つ（D-121、D-122、D-124）
     const officers = JSON.parse(await readFile(join(root, '.data', 'officers.json'), 'utf8')) as {
       sort_order: number;
       photo_id: string | null;
+      nickname: string | null;
+      message: string | null;
     }[];
-    expect(officers.map((o) => [o.sort_order, o.photo_id])).toEqual([
-      [1, PHOTO_ID],
-      [2, null],
+    expect(officers.map((o) => [o.sort_order, o.photo_id, o.nickname, o.message])).toEqual([
+      [1, PHOTO_ID, 'いっちゃん', 'よろしくお願いします。'],
+      [2, null, null, null],
     ]);
   });
 

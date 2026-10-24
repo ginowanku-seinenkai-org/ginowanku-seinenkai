@@ -69,15 +69,19 @@ export const publicSiteSettingsSchema = z.object({
 /** サイト設定 */
 export type PublicSiteSettings = z.infer<typeof publicSiteSettingsSchema>;
 
-/** v_public_officers の行（役員の役職・氏名・写真。本人の同意を得て載せる。D-121、D-122） */
+/** v_public_officers の行（役員の役職・氏名・写真・呼び名・ひと言。本人の同意を得て載せる。D-121、D-122、D-124） */
 export const publicOfficerSchema = z.object({
   role: z.string(),
   name: z.string(),
   sort_order: z.number().int(),
   /** 役員の写真。v_public_photos に含まれる。無ければ null（D-122） */
   photo_id: uuid.nullable(),
+  /** 呼び名（20文字まで）。無ければ null（D-124） */
+  nickname: z.string().nullable(),
+  /** ひと言（60文字まで）。無ければ null（D-124） */
+  message: z.string().nullable(),
 });
-/** 役員の役職・氏名・写真 */
+/** 役員の役職・氏名・写真・呼び名・ひと言 */
 export type PublicOfficer = z.infer<typeof publicOfficerSchema>;
 
 /** v_public_photos の行（公開してよい写真）。パスの形と長辺の上限も確かめる */
@@ -120,7 +124,7 @@ export const VIEW_COLUMNS = {
   v_public_post_photos: 'post_id,photo_id,sort_order',
   v_public_pages: 'key,title,lead,body,cover_photo_id,updated_at',
   v_public_site_settings: 'instagram_url,tiktok_url,join_age_label,og_photo_id,officer_term_label',
-  v_public_officers: 'role,name,sort_order,photo_id',
+  v_public_officers: 'role,name,sort_order,photo_id,nickname,message',
   v_public_photos: 'id,full_path,thumb_path,width,height,thumb_width,thumb_height,alt',
 } as const;
 

@@ -43,11 +43,15 @@ export const rows = {
     role = '会長',
     name = '宜野湾 一郎',
     photo_id: string | null = null,
+    nickname: string | null = null,
+    message: string | null = null,
   ) => ({
     role,
     name,
     sort_order,
     photo_id,
+    nickname,
+    message,
   }),
   photo: (id: string = PHOTO_ID) => ({
     id,

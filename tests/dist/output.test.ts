@@ -35,13 +35,15 @@ const dataPosts = data('posts.json') as {
   event_place: string | null;
 }[];
 const dataSettings = data('site-settings.json') as Record<string, unknown>;
-// 役員（D-121、D-122）。並び順は sort_order の昇順
+// 役員（D-121、D-122、D-124）。並び順は sort_order の昇順
 const dataOfficers = (
   data('officers.json') as {
     role: string;
     name: string;
     sort_order: number;
     photo_id: string | null;
+    nickname: string | null;
+    message: string | null;
   }[]
 )
   .slice()
@@ -322,6 +324,35 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     // 代替テキストに氏名を書かない
     for (const img of Array.from(doc.querySelectorAll('img')))
       for (const o of dataOfficers) expect(img.getAttribute('alt') ?? '').not.toContain(o.name);
+  });
+
+  it('役員紹介の呼び名とひと言：あるときだけ、その役員のカードの氏名の後に出す（D-124）', () => {
+    const { doc } = pageAt('/officers');
+    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
+    expect(cards.length).toBe(dataOfficers.length);
+    dataOfficers.forEach((officer, i) => {
+      const card = cards[i];
+      if (card === undefined) throw new Error(`${officer.role} のカードがありません`);
+      const nickname = card.querySelectorAll(':scope > p.officer-nickname');
+      const message = card.querySelectorAll(':scope > p.officer-message');
+      expect(nickname.length, officer.role).toBe(officer.nickname === null ? 0 : 1);
+      expect(message.length, officer.role).toBe(officer.message === null ? 0 : 1);
+      if (officer.nickname !== null)
+        expect(nickname[0]?.textContent?.trim()).toBe(`（${officer.nickname}）`);
+      if (officer.message !== null) expect(message[0]?.textContent?.trim()).toBe(officer.message);
+      // 並びは 写真 → 役職 → 氏名 → 呼び名 → ひと言
+      const order = Array.from(card.children)
+        .slice(1)
+        .map((el) => el.className);
+      expect(order, officer.role).toEqual(
+        [
+          'officer-role',
+          'officer-name',
+          officer.nickname === null ? null : 'officer-nickname',
+          officer.message === null ? null : 'officer-message',
+        ].filter((c) => c !== null),
+      );
+    });
   });
 
   it('役員の氏名は /officers にだけ出る（D-121）', () => {

@@ -1,6 +1,6 @@
 ---
-// 役員紹介（D-121、D-122、D-124）。役職・氏名・写真・呼び名・ひと言のカードを並び順で出す。氏名と写真は本人の同意を得て載せる
-// 呼び名とひと言は、あるときだけ出す
+// 役員紹介（D-121、D-122、D-124、D-125）。役職・氏名・写真・ひと言のカードを並び順で出す。氏名と写真は本人の同意を得て載せる
+// ひと言は、あるときだけ出す
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHead from '../components/PageHead.astro';
 import { loadSiteData, officerInitial, officerPhoto } from '../lib/data.ts';
@@ -52,7 +52,6 @@ const cards = officers.map((officer) => ({ officer, photo: officerPhoto(officer,
             )}
             <p class="officer-role">{officer.role}</p>
             <p class="officer-name">{officer.name}</p>
-            {officer.nickname !== null && <p class="officer-nickname">（{officer.nickname}）</p>}
             {officer.message !== null && <p class="officer-message">{officer.message}</p>}
           </li>
         ))}

@@ -169,9 +169,7 @@ test('EP-05b 役員紹介：年度のリードと、役職・氏名・写真の�
     '宜野湾 花子',
     '宜野湾 三郎',
   ]);
-  // 呼び名は会長だけ、ひと言は会長と書記だけ（D-124）
-  await expect(cards.locator('.officer-nickname')).toHaveText(['（いっちゃん）']);
-  await expect(cards.nth(0).locator('.officer-nickname')).toHaveCount(1);
+  // ひと言は会長と書記だけ（D-124）
   await expect(cards.locator('.officer-message')).toHaveText([
     'みんなで楽しくエイサーを踊りましょう！',
     'よろしくお願いします。',
@@ -232,11 +230,9 @@ test('EP-05c 役員紹介の並び：スマホは2列で横スクロールなし
   }
   await expectNoA11yViolations(page);
 
-  // 呼び名とひと言が上限の長さ（20文字・60文字）で、区切りのない英数字でも、カードからはみ出さない（D-124）
+  // ひと言が上限の長さ（60文字）で、区切りのない英数字でも、カードからはみ出さない（D-124）
   await page.evaluate(() => {
-    const nickname = document.querySelector('.officer-nickname');
     const message = document.querySelector('.officer-message');
-    if (nickname) nickname.textContent = `（${'W'.repeat(20)}）`;
     if (message) message.textContent = 'W'.repeat(60);
   });
   const fits = await page

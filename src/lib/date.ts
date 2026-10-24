@@ -160,7 +160,7 @@ export function eventDatetime(iso: string, allDay: boolean): string {
 }
 
 /**
- * トップの「次の行事」の日付の箱（月・日・曜日）の文字を作る
+ * トップの「次の演舞」の日付の箱（月・日・曜日）の文字を作る
  * @param iso 開始日時（ISO 8601）
  * @returns 月（例：10月）・日・曜日
  */

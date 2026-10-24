@@ -1,9 +1,10 @@
-// 並び替え、ページ分割、URL、終了判定（07 UT-02、03 §3.7・§6.3）
+// 並び替え、ページ分割、URL、終了・中止の判定（07 UT-02・UT-31、03 §3.7・§6.3、13 §6.3）
 import { describe, expect, it } from 'vitest';
 import type { SiteData } from '../../src/lib/data.ts';
 import {
   activityPosts,
   eventEndDate,
+  isCancelled,
   isEnded,
   newsPosts,
   pageUrl,
@@ -11,7 +12,8 @@ import {
   postUrl,
   upcomingEvents,
 } from '../../src/lib/posts.ts';
-import type { PublicPost } from '../../src/lib/view-schemas.ts';
+import { VIEW_COLUMNS, publicPostSchema, type PublicPost } from '../../src/lib/view-schemas.ts';
+import { rows } from './helpers.ts';
 
 function post(id: number, kind: PublicPost['kind'], extra: Partial<PublicPost> = {}): PublicPost {
   return {
@@ -32,6 +34,8 @@ function post(id: number, kind: PublicPost['kind'], extra: Partial<PublicPost> =
 }
 const ev = (id: number, start: string, end: string | null = null, allDay = false) =>
   post(id, 'event', { event_starts_at: start, event_ends_at: end, event_all_day: allDay });
+const cancelled = (id: number, start: string) =>
+  post(id, 'event', { event_starts_at: start, event_status: 'cancelled' });
 
 function data(posts: PublicPost[], today = '2026-10-10'): SiteData {
   return {
@@ -59,7 +63,7 @@ describe('isEnded・eventEndDate（UT-02、01 §3.2）', () => {
     expect(isEnded(ev(1, '2026-10-10T18:00:00+09:00'), '2026-10-10')).toBe(false);
     expect(isEnded(ev(1, '2026-10-09T18:00:00+09:00'), '2026-10-10')).toBe(true);
   });
-  it('終日の行事は終了日の翌日に終了', () => {
+  it('終日の演舞は終了日の翌日に終了', () => {
     const allDay = ev(1, '2026-10-08T00:00:00+09:00', '2026-10-10T00:00:00+09:00', true);
     expect(isEnded(allDay, '2026-10-10')).toBe(false);
     expect(isEnded(allDay, '2026-10-11')).toBe(true);
@@ -67,7 +71,7 @@ describe('isEnded・eventEndDate（UT-02、01 §3.2）', () => {
   it('UTC と日本時間のずれ：UTC で前日の 15:30 は日本時間の当日', () => {
     expect(eventEndDate(ev(1, '2026-10-09T15:30:00Z'))).toBe('2026-10-10');
   });
-  it('行事以外は終了しない', () => {
+  it('演舞以外は終了しない', () => {
     expect(eventEndDate(post(1, 'news'))).toBeNull();
     expect(isEnded(post(1, 'news'), '2099-01-01')).toBe(false);
   });
@@ -85,13 +89,62 @@ describe('一覧の並び（03 §6.3）', () => {
   it('すべて：活動記録を除き、受け取った順（published_on 降順・id 降順）', () => {
     expect(newsPosts(data(posts)).map((p) => p.id)).toEqual([5, 4, 3, 2, 1]);
   });
-  it('行事：終了していないものを開始の早い順 → 終了したものを開始の遅い順（F-10）', () => {
+  it('演舞：終了していないものを開始の早い順 → 終了したものを開始の遅い順（F-10）', () => {
     expect(newsPosts(data(posts), 'event').map((p) => p.id)).toEqual([2, 3, 4, 1]);
   });
-  it('次の行事：終了していないものを開始の早い順に limit 件', () => {
+  it('次の演舞：終了していないものを開始の早い順に limit 件', () => {
     expect(upcomingEvents(data(posts), 1).map((p) => p.id)).toEqual([2]);
   });
   it('活動記録だけ', () => expect(activityPosts(data(posts)).map((p) => p.id)).toEqual([6]));
+});
+
+describe('中止の演舞（UT-31、13 §6.2・§6.3）', () => {
+  const posts = [
+    ev(4, '2026-09-01T10:00:00+09:00'),
+    cancelled(5, '2026-10-11T10:00:00+09:00'),
+    ev(3, '2026-10-20T10:00:00+09:00', null),
+    cancelled(6, '2026-09-15T10:00:00+09:00'),
+    post(2, 'event', { event_starts_at: '2026-10-12T10:00:00+09:00', event_status: 'confirmed' }),
+    ev(1, '2026-08-01T10:00:00+09:00'),
+  ];
+  it('isCancelled：中止の演舞だけ true。確定・列がない行・演舞以外は false', () => {
+    expect(isCancelled(cancelled(1, '2026-10-11T10:00:00+09:00'))).toBe(true);
+    expect(isCancelled(post(1, 'event', { event_status: 'confirmed' }))).toBe(false);
+    expect(isCancelled(post(1, 'event', { event_status: null }))).toBe(false);
+    // event_status の列がない行（DB の反映前）は確定として扱う
+    expect(isCancelled(ev(1, '2026-10-11T10:00:00+09:00'))).toBe(false);
+    expect(isCancelled(post(1, 'news', { event_status: 'cancelled' }))).toBe(false);
+  });
+  it('次の演舞：中止を除く', () => {
+    expect(upcomingEvents(data(posts), 3).map((p) => p.id)).toEqual([2, 3]);
+  });
+  it('演舞のカテゴリ：終わっていない・中止でないものを開始の早い順 → 終わったものと中止を開始の遅い順', () => {
+    expect(newsPosts(data(posts), 'event').map((p) => p.id)).toEqual([2, 3, 5, 6, 4, 1]);
+  });
+  it('中止の演舞も一覧（すべて）には残る', () => {
+    expect(newsPosts(data(posts)).map((p) => p.id)).toEqual([4, 5, 3, 6, 2, 1]);
+  });
+});
+
+describe('v_public_posts の event_status（13 §3.7・§6.3）', () => {
+  it('取得する列の末尾（13列目）に event_status', () => {
+    const columns = VIEW_COLUMNS.v_public_posts.split(',');
+    expect(columns).toHaveLength(13);
+    expect(columns.at(-1)).toBe('event_status');
+  });
+  it('確定・中止・null と、列がない行を受け付け、仮やほかの値は受け付けない', () => {
+    for (const status of ['confirmed', 'cancelled', null])
+      expect(publicPostSchema.parse({ ...rows.post, event_status: status }).event_status).toBe(
+        status,
+      );
+    const withoutStatus: Record<string, unknown> = { ...rows.post };
+    delete withoutStatus['event_status'];
+    expect(publicPostSchema.parse(withoutStatus).event_status).toBeUndefined();
+    for (const status of ['tentative', 'draft', ''])
+      expect(publicPostSchema.safeParse({ ...rows.post, event_status: status }).success).toBe(
+        false,
+      );
+  });
 });
 
 describe('paginate・URL', () => {

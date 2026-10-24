@@ -1,4 +1,4 @@
-// 並び替え、ページ分割、URL、終了判定（03 §3.7、§6.3、§7）
+// 並び替え、ページ分割、URL、終了・中止の判定（03 §3.7、§6.3、§7、13 §6.3）
 import type { SiteData } from './data.ts';
 import { jstDate } from './date.ts';
 import type { NewsKind, PublicPhoto, PublicPost } from './view-schemas.ts';
@@ -16,9 +16,9 @@ export function postUrl(post: Pick<PublicPost, 'id' | 'kind'>): string {
 }
 
 /**
- * 行事の終了日（日本時間）を求める。終了日時が無ければ開始日時の日付
+ * 演舞の終了日（日本時間）を求める。終了日時が無ければ開始日時の日付
  * @param post 記事
- * @returns 'YYYY-MM-DD'。行事以外・開始日時がないものは null
+ * @returns 'YYYY-MM-DD'。演舞以外・開始日時がないものは null
  */
 export function eventEndDate(post: PublicPost): string | null {
   if (post.kind !== 'event') return null;
@@ -27,14 +27,23 @@ export function eventEndDate(post: PublicPost): string | null {
 }
 
 /**
- * 行事が終了したかを判定する（01 §3.2）。終了日が今日より前なら終了
+ * 演舞が終了したかを判定する（01 §3.2）。終了日が今日より前なら終了
  * @param post 記事
  * @param today 今日（日本時間 'YYYY-MM-DD'）
- * @returns 終了していれば true。行事以外は false
+ * @returns 終了していれば true。演舞以外は false
  */
 export function isEnded(post: PublicPost, today: string): boolean {
   const end = eventEndDate(post);
   return end !== null && end < today;
+}
+
+/**
+ * 演舞が中止になったかを判定する（13 §6.3）。event_status の列がない行は確定として扱う
+ * @param post 記事
+ * @returns 中止の演舞なら true。演舞以外は false
+ */
+export function isCancelled(post: PublicPost): boolean {
+  return post.kind === 'event' && post.event_status === 'cancelled';
 }
 
 /**
@@ -48,7 +57,8 @@ function byStartAsc(a: PublicPost, b: PublicPost): number {
 }
 
 /**
- * お知らせ系の一覧の記事を選ぶ（03 §6.3）。行事のカテゴリは、終了していないものを開始の早い順 → 終了したものを開始の遅い順
+ * お知らせ系の一覧の記事を選ぶ（03 §6.3）。演舞のカテゴリは、終了していない・中止でないものを開始の早い順
+ * → 終了したものと中止を開始の遅い順（13 §6.2）
  * @param data サイトのデータ
  * @param kind カテゴリ。省略すると活動記録以外のすべて（データの並びのまま）
  * @returns 一覧に出す記事
@@ -58,9 +68,15 @@ export function newsPosts(data: SiteData, kind?: NewsKind): PublicPost[] {
     kind === undefined ? p.kind !== 'activity' : p.kind === kind,
   );
   if (kind !== 'event') return items;
-  const upcoming = items.filter((p) => !isEnded(p, data.today)).sort(byStartAsc);
-  const ended = items.filter((p) => isEnded(p, data.today)).sort((a, b) => byStartAsc(b, a));
-  return [...upcoming, ...ended];
+  /**
+   * 後ろの組（終了・中止）に入れるかを判定する
+   * @param p 記事
+   * @returns 終了か中止なら true
+   */
+  const isPast = (p: PublicPost) => isEnded(p, data.today) || isCancelled(p);
+  const upcoming = items.filter((p) => !isPast(p)).sort(byStartAsc);
+  const past = items.filter(isPast).sort((a, b) => byStartAsc(b, a));
+  return [...upcoming, ...past];
 }
 
 /**
@@ -73,14 +89,14 @@ export function activityPosts(data: SiteData): PublicPost[] {
 }
 
 /**
- * 終了していない行事を、開始の早い順に選ぶ
+ * トップの「次の演舞」に出す、終了していない・中止でない演舞を開始の早い順に選ぶ（13 §6.2）
  * @param data サイトのデータ
  * @param limit 最大の件数
- * @returns 行事の記事
+ * @returns 演舞の記事
  */
 export function upcomingEvents(data: SiteData, limit: number): PublicPost[] {
   return data.posts
-    .filter((p) => p.kind === 'event' && !isEnded(p, data.today))
+    .filter((p) => p.kind === 'event' && !isEnded(p, data.today) && !isCancelled(p))
     .sort(byStartAsc)
     .slice(0, limit);
 }
@@ -130,7 +146,7 @@ export function photoSrc(photo: Pick<PublicPhoto, 'id'>, size: 'full' | 'thumb')
 /** 記事の種類の表示名 */
 export const KIND_LABELS: Record<PublicPost['kind'], string> = {
   news: 'お知らせ',
-  event: '行事',
+  event: '演舞',
   recruit: '募集',
   activity: '活動記録',
 };

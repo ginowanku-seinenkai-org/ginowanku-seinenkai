@@ -2,6 +2,7 @@
 import { bodyToPlainText } from './plain-text.ts';
 import { DESCRIPTIONS, SITE_NAME } from './messages.ts';
 import { eventDatetime } from './date.ts';
+import { isCancelled } from './posts.ts';
 import type { PublicPhoto, PublicPost, PublicSiteSettings } from './view-schemas.ts';
 
 /** 本番のサイトのオリジン */
@@ -154,11 +155,11 @@ export function organizationJsonLd(settings: PublicSiteSettings): Record<string,
 }
 
 /**
- * 行事の詳細の Event の JSON-LD を作る（03 §11.6）
+ * 演舞の詳細の Event の JSON-LD を作る（03 §11.6）。中止なら eventStatus を EventCancelled にする（13 §6.2）
  * @param post 記事
  * @param description ページの description
  * @param cover 表紙の写真（無ければ null）
- * @returns JSON-LD の値。行事でない、場所や開始日時がなければ null
+ * @returns JSON-LD の値。演舞でない、場所や開始日時がなければ null
  */
 export function eventJsonLd(
   post: PublicPost,
@@ -175,7 +176,9 @@ export function eventJsonLd(
     // 終日・時間未定は日付だけ（03 §12.1、D-68）
     startDate: eventDatetime(post.event_starts_at, noTime),
     ...(post.event_ends_at !== null ? { endDate: eventDatetime(post.event_ends_at, noTime) } : {}),
-    eventStatus: 'https://schema.org/EventScheduled',
+    eventStatus: isCancelled(post)
+      ? 'https://schema.org/EventCancelled'
+      : 'https://schema.org/EventScheduled',
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',

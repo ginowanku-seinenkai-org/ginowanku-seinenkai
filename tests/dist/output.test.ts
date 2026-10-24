@@ -30,9 +30,11 @@ const NOINDEX_PAGES = new Set(['/contact/thanks', '/404']);
 // 本物のデータでは記事や SNS の URL がまだない時期もあるので、「ある」ことはデータにあるときだけ求める
 const data = (name: string): unknown => JSON.parse(readFileSync(join(ROOT, '.data', name), 'utf8'));
 const dataPosts = data('posts.json') as {
+  id: number;
   kind: string;
   event_starts_at: string | null;
   event_place: string | null;
+  event_status?: string | null;
 }[];
 const dataSettings = data('site-settings.json') as Record<string, unknown>;
 // 役員（D-121、D-122、D-124、D-125）。並び順は sort_order の昇順
@@ -49,6 +51,10 @@ const dataOfficers = (
   .sort((a, b) => a.sort_order - b.sort_order);
 const dataPhotoIds = new Set((data('photos.json') as { id: string }[]).map((p) => p.id));
 const hasPosts = dataPosts.length > 0;
+// 中止の演舞の記事（13 §6.2）
+const cancelledIds = new Set(
+  dataPosts.filter((p) => p.kind === 'event' && p.event_status === 'cancelled').map((p) => p.id),
+);
 const hasEventWithPlace = dataPosts.some(
   (p) => p.kind === 'event' && p.event_starts_at !== null && p.event_place !== null,
 );
@@ -154,15 +160,74 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     }
   });
 
-  it('UT-23 トップに Organization、場所のある行事に Event', () => {
-    const types = (p: (typeof pages)[number]) =>
+  it('UT-23 トップに Organization、場所のある演舞に Event。中止なら EventCancelled（13 §6.2）', () => {
+    const jsonLds = (p: (typeof pages)[number]) =>
       Array.from(p.doc.querySelectorAll('script[type="application/ld+json"]')).map(
-        (s) => (JSON.parse(s.textContent ?? '{}') as { '@type': string })['@type'],
+        (s) => JSON.parse(s.textContent ?? '{}') as { '@type': string; eventStatus?: string },
       );
-    expect(types(pageAt('/'))).toEqual(['Organization']);
-    const events = pages.filter((p) => types(p).includes('Event'));
+    expect(jsonLds(pageAt('/')).map((j) => j['@type'])).toEqual(['Organization']);
+    const events = pages.filter((p) => jsonLds(p).some((j) => j['@type'] === 'Event'));
     expect(events.length > 0).toBe(hasEventWithPlace);
-    for (const p of events) expect(p.doc.querySelector('.evbox')).not.toBeNull();
+    for (const p of events) {
+      expect(p.doc.querySelector('.evbox')).not.toBeNull();
+      const cancelled = cancelledIds.has(Number(p.path.replace('/news/', '')));
+      expect(jsonLds(p).find((j) => j['@type'] === 'Event')?.eventStatus, p.path).toBe(
+        cancelled ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
+      );
+    }
+  });
+
+  it('UT-20 説明文の固定文（13 §6.1）', () => {
+    const description = (path: string) => meta(pageAt(path).doc, 'meta[name="description"]');
+    expect(description('/')).toBe(
+      '沖縄県宜野湾市の宜野湾区青年会の公式サイトです。エイサーの演舞の予定、メンバー募集、演舞依頼の受付をご案内します。',
+    );
+    expect(description('/news')).toBe('宜野湾区青年会のお知らせ、演舞の予定、募集の一覧です。');
+    expect(description('/news/category/event')).toBe('宜野湾区青年会の演舞の予定の一覧です。');
+    expect(description('/activities')).toBe(
+      '宜野湾区青年会のエイサーの演舞や地域の催しなど、活動の記録です。',
+    );
+  });
+
+  it('中止の演舞：「中止」の印、中止の文、トップの「次の演舞」に出ない、「（中止）」を添える（13 §6.2）', () => {
+    const newsListPages = pages.filter((p) =>
+      /^\/news(\/category\/event)?(\/page\/\d+)?$/.test(p.path),
+    );
+    for (const id of cancelledIds) {
+      // 一覧のカード：「中止」の印。「終了」の印と再判定の属性はない
+      const cards = newsListPages.flatMap((p) =>
+        Array.from(p.doc.querySelectorAll(`.card:has(a.ttl[href="/news/${id}"])`)),
+      );
+      expect(cards.length, `${id}`).toBeGreaterThan(0);
+      for (const card of cards) {
+        expect(card.classList.contains('is-cancelled')).toBe(true);
+        expect(card.classList.contains('is-ended')).toBe(false);
+        expect(card.querySelector('.badge-cancelled')?.textContent?.trim()).toBe('中止');
+        expect(card.querySelector('.badge-ended')).toBeNull();
+        expect(card.hasAttribute('data-event-end')).toBe(false);
+      }
+      // 詳細：日時と場所の下に中止の文。終了の文と再判定の属性はない
+      const { doc } = pageAt(`/news/${id}`);
+      const evbox = doc.querySelector('.evbox');
+      expect(evbox?.hasAttribute('data-event-end')).toBe(false);
+      expect(evbox?.querySelector('.done')?.textContent?.trim()).toBe('この演舞は中止になりました');
+      expect(evbox?.textContent).not.toContain('この演舞は終了しました');
+      // トップ：「次の演舞」に出ない。「お知らせ」では演舞日時の後ろに「（中止）」
+      const top = pageAt('/').doc;
+      expect(top.querySelector(`[data-upcoming-list] a[href="/news/${id}"]`)).toBeNull();
+      const li = top.querySelector(`ul.news > li:has(a[href="/news/${id}"])`);
+      if (li !== null) expect(li.querySelector('.news-ev')?.textContent).toMatch(/（中止）$/);
+    }
+    // 確定の演舞には「（中止）」も「中止」の印も付かない
+    for (const li of Array.from(pageAt('/').doc.querySelectorAll('ul.news > li'))) {
+      const id = Number(li.querySelector('a')?.getAttribute('href')?.replace('/news/', ''));
+      if (!cancelledIds.has(id)) expect(li.textContent).not.toContain('（中止）');
+    }
+    for (const p of newsListPages)
+      for (const card of Array.from(p.doc.querySelectorAll('.card.is-cancelled'))) {
+        const id = Number(card.querySelector('a.ttl')?.getAttribute('href')?.replace('/news/', ''));
+        expect(cancelledIds.has(id), p.path).toBe(true);
+      }
   });
 
   it('UT-22 sitemap に公開ページが載り、/contact/thanks と 404 は載らない。URL に末尾スラッシュ・.html がない', () => {
@@ -253,12 +318,12 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     }
   });
 
-  it('日付の名前：記事の詳細は「掲載日」、トップのお知らせの行事は「演舞日時」を添える（D-120）', () => {
+  it('日付の名前：記事の詳細は「掲載日」、トップのお知らせの演舞は「演舞日時」を添える（D-120）', () => {
     for (const p of pages.filter((x) => /^\/(news|activities)\/\d+$/.test(x.path)))
       expect(p.doc.querySelector('.phead .meta')?.textContent, p.path).toContain('掲載日');
     const items = Array.from(pageAt('/').doc.querySelectorAll('ul.news > li'));
     for (const li of items) {
-      const isEvent = li.querySelector('.kind')?.textContent?.includes('行事') ?? false;
+      const isEvent = li.querySelector('.kind')?.textContent?.includes('演舞') ?? false;
       expect(li.querySelector('.news-ev') !== null, li.textContent ?? '').toBe(isEvent);
       if (isEvent) expect(li.querySelector('.news-ev')?.textContent).toContain('演舞日時');
     }

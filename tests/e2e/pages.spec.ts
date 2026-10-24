@@ -75,13 +75,13 @@ test.describe('EP-01 全ページの表示', () => {
   });
 });
 
-test('EP-02 トップ：お知らせ、次の演舞、募集・依頼への導線（メインの帯はない。D-83）', async ({
+test('EP-02 トップ：お知らせ、次回演舞、募集・依頼への導線（メインの帯はない。D-83）', async ({
   page,
 }) => {
   await page.goto('/');
   await expect(page.locator('.hero')).toHaveCount(0);
   await expect(page.locator('.news li')).toHaveCount(5);
-  await expect(page.getByRole('heading', { level: 2, name: '次の演舞' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: '次回演舞' })).toBeVisible();
   // 今日の演舞は終了していない。昨日の演舞と中止の演舞は出ない
   const upcoming = page.locator('[data-upcoming-list] li:visible');
   await expect(upcoming).toHaveCount(3);
@@ -127,11 +127,11 @@ test('EP-03 お知らせ一覧：カテゴリ、演舞の並び、終了の表�
   }
 });
 
-test('EP-20 中止の演舞：一覧に「中止」の印、詳細に中止の文、トップの「次の演舞」に出ない（13 §6.2）', async ({
+test('EP-20 中止の演舞：一覧に「中止」の印、詳細に中止の文、トップの「次回演舞」に出ない（13 §6.2）', async ({
   page,
 }) => {
   const title = '秋の地域まつりでの演舞';
-  // トップ：「次の演舞」に出ず、「お知らせ」では演舞日時の後ろに「（中止）」
+  // トップ：「次回演舞」に出ず、「お知らせ」では演舞日時の後ろに「（中止）」
   await page.goto('/');
   await expect(page.locator('[data-upcoming-list]')).not.toContainText(title);
   const item = page.locator('ul.news > li').filter({ hasText: title });
@@ -181,6 +181,140 @@ test('EP-20 中止の演舞は、開始日を過ぎてもブラウザで「終�
   await page.goto('/news/22');
   await expect(page.locator('.evbox .done')).toHaveText('この演舞は中止になりました');
   await expect(page.locator('.evbox')).not.toContainText('終了');
+});
+
+test('演舞のカレンダー：今日を選んで始まり、月を切り替え、日付を押すとその日の演舞を出す（D-128）', async ({
+  page,
+  consoleErrors,
+}) => {
+  await page.goto('/');
+  const cal = page.locator('[data-calendar]');
+  // 次回演舞の区画の中、一覧の下にある
+  await expect(
+    page.locator(
+      'section[aria-labelledby="upcoming-heading"] [data-upcoming-list] ~ [data-calendar]',
+    ),
+  ).toHaveCount(1);
+  await expect(cal.getByRole('heading', { level: 3 })).toHaveText('演舞のカレンダー 2026年10月');
+  // 今日（10月10日）を選んだ状態。その日の演舞は記事へのリンク
+  const today = cal.getByRole('button', { name: '10月10日（土）、演舞1件' });
+  await expect(today).toHaveAttribute('aria-pressed', 'true');
+  await expect(cal.locator('button[aria-pressed="true"]')).toHaveCount(1);
+  await expect(cal.locator('.cal-date')).toHaveText('2026年10月10日（土）');
+  await expect(cal.getByRole('link', { name: /夏まつりでエイサー演舞/ })).toHaveAttribute(
+    'href',
+    '/news/15',
+  );
+  // 印：演舞のある日にだけ点（10月は 9・10・20・25 日）
+  const dotted = await cal
+    .locator('button:has(.cal-dot)')
+    .evaluateAll((els) => els.map((e) => e.getAttribute('data-date')));
+  expect(dotted).toEqual(['2026-10-09', '2026-10-10', '2026-10-20', '2026-10-25']);
+
+  // 中止の演舞は「中止」の印を付けて出す
+  await cal.getByRole('button', { name: '10月25日（日）、演舞1件' }).click();
+  const cancelled = cal.getByRole('link', { name: /秋の地域まつりでの演舞/ });
+  await expect(cancelled).toHaveAttribute('href', '/news/22');
+  await expect(cancelled.locator('.badge-cancelled')).toHaveText('中止');
+  await expect(cancelled).toContainText('17:00〜19:00');
+  // 場所の前に 📍。読み上げは場所の名前だけ（D-129）
+  await expect(cancelled.locator('.cal-place')).toHaveText('📍宜野湾区公民館の広場');
+  await expect(cancelled.locator('.cal-place .pin')).toHaveAttribute('aria-hidden', 'true');
+  await expect(cancelled).toHaveAccessibleName(/宜野湾区公民館の広場$/);
+  await expect(cancelled).not.toHaveAccessibleName(/📍/);
+
+  // 演舞のない日
+  const empty = cal.getByRole('button', { name: '10月12日（月）、演舞なし' });
+  await empty.click();
+  await expect(empty).toHaveAttribute('aria-pressed', 'true');
+  await expect(today).toHaveAttribute('aria-pressed', 'false');
+  await expect(cal.getByText('この日の演舞はありません。')).toBeVisible();
+  await expect(cal.locator('.cal-list a')).toHaveCount(0);
+
+  // 次の月：1日を選ぶ。複数日の演舞は開始の日にだけ印
+  await cal.getByRole('button', { name: '次の月' }).click();
+  await expect(cal.locator('[data-cal-month]')).toHaveText('2026年11月');
+  await expect(cal.getByRole('button', { name: '11月1日（日）、演舞なし' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(cal.getByRole('button', { name: '11月4日（水）、演舞なし' })).toBeVisible();
+  // キーボードで日付を選ぶ
+  await cal.getByRole('button', { name: '11月3日（火）、演舞1件' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(cal.getByRole('link', { name: /文化祭への出演/ })).toContainText('終日');
+
+  // 前の月に戻ると今日を選ぶ
+  await cal.getByRole('button', { name: '前の月' }).click();
+  await expect(cal.locator('[data-cal-month]')).toHaveText('2026年10月');
+  await expect(today).toHaveAttribute('aria-pressed', 'true');
+  await expectNoA11yViolations(page);
+  expect(consoleErrors).toEqual([]);
+});
+
+test('演舞のカレンダー：前後12か月で止まる（D-128）', async ({ page }) => {
+  await page.goto('/');
+  const cal = page.locator('[data-calendar]');
+  const next = cal.getByRole('button', { name: '次の月' });
+  for (let i = 0; i < 12; i++) await next.click();
+  await expect(cal.locator('[data-cal-month]')).toHaveText('2027年10月');
+  await expect(next).toHaveAttribute('aria-disabled', 'true');
+  // 押せない状態でも焦点は残る。押しても動かない
+  await next.click({ force: true });
+  await expect(cal.locator('[data-cal-month]')).toHaveText('2027年10月');
+  const prev = cal.getByRole('button', { name: '前の月' });
+  for (let i = 0; i < 24; i++) await prev.click();
+  await expect(cal.locator('[data-cal-month]')).toHaveText('2025年10月');
+  await expect(prev).toHaveAttribute('aria-disabled', 'true');
+  await expect(next).not.toHaveAttribute('aria-disabled', /.*/);
+});
+
+test('演舞のカレンダー：390px で横スクロールが出ず、日付は44px 以上、ダークでも読める（D-128）', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const cal = page.locator('[data-calendar]');
+  await expect(cal.locator('button[data-date]').first()).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  for (const button of await cal.locator('button').all()) {
+    const box = await button.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expectNoA11yViolations(page);
+});
+
+test('演舞のカレンダー：JavaScript が動かなくても、ビルドした月を印付きの表で出す（D-128）', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/');
+  const cal = page.locator('[data-calendar]');
+  await expect(cal.locator('[data-cal-month]')).toHaveText('2026年10月');
+  await expect(cal.locator('td[data-date] .cal-dot')).toHaveCount(4);
+  await expect(cal.locator('td button')).toHaveCount(0);
+  await expect(cal.getByRole('button')).toHaveCount(0);
+  await expect(cal.locator('[data-cal-day]')).toBeHidden();
+  await context.close();
+});
+
+test('場所の前に 📍 を付け、読み上げない（D-129）', async ({ page }) => {
+  await page.goto('/');
+  const card = page
+    .locator('[data-upcoming-list] a.ev')
+    .filter({ hasText: '夏まつりでエイサー演舞' });
+  await expect(card.locator('.ev-meta .pin')).toHaveAttribute('aria-hidden', 'true');
+  await expect(card.locator('.ev-meta')).toContainText('📍宜野湾区公民館の広場');
+  await expect(card).not.toHaveAccessibleName(/📍/);
+  await page.goto('/news/15');
+  const place = page.locator('.evbox dt', { hasText: '場所' }).locator('+ dd');
+  await expect(place).toHaveText('📍宜野湾区公民館の広場');
+  await expect(place.locator('.pin')).toHaveAttribute('aria-hidden', 'true');
+  await expect(place.locator('.pin')).toBeVisible();
+  await expectNoA11yViolations(page);
 });
 
 test('EP-04 活動記録の詳細：ギャラリーと YouTube', async ({ page }) => {

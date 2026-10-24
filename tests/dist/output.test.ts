@@ -4,6 +4,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { findInlineViolations } from '../../scripts/postbuild.ts';
+import { jstDate } from '../../src/lib/date.ts';
 import { parseEnv } from '../../src/lib/env.ts';
 import { PRIVACY_ESTABLISHED_ON, PRIVACY_VERSION } from '../../src/lib/privacy.ts';
 
@@ -189,7 +190,7 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
     );
   });
 
-  it('中止の演舞：「中止」の印、中止の文、トップの「次の演舞」に出ない、「（中止）」を添える（13 §6.2）', () => {
+  it('中止の演舞：「中止」の印、中止の文、トップの「次回演舞」に出ない、「（中止）」を添える（13 §6.2）', () => {
     const newsListPages = pages.filter((p) =>
       /^\/news(\/category\/event)?(\/page\/\d+)?$/.test(p.path),
     );
@@ -212,7 +213,7 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       expect(evbox?.hasAttribute('data-event-end')).toBe(false);
       expect(evbox?.querySelector('.done')?.textContent?.trim()).toBe('この演舞は中止になりました');
       expect(evbox?.textContent).not.toContain('この演舞は終了しました');
-      // トップ：「次の演舞」に出ない。「お知らせ」では演舞日時の後ろに「（中止）」
+      // トップ：「次回演舞」に出ない。「お知らせ」では演舞日時の後ろに「（中止）」
       const top = pageAt('/').doc;
       expect(top.querySelector(`[data-upcoming-list] a[href="/news/${id}"]`)).toBeNull();
       const li = top.querySelector(`ul.news > li:has(a[href="/news/${id}"])`);
@@ -228,6 +229,97 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
         const id = Number(card.querySelector('a.ttl')?.getAttribute('href')?.replace('/news/', ''));
         expect(cancelledIds.has(id), p.path).toBe(true);
       }
+  });
+
+  it('演舞のカレンダー：次回演舞の下に、ビルドした月の表と演舞の日の印を出す（03 S01、D-128）', () => {
+    const { doc, html } = pageAt('/');
+    const section = doc.querySelector('section[aria-labelledby="upcoming-heading"]');
+    expect(section?.querySelector('h2')?.textContent?.trim()).toBe('次回演舞');
+    const cal = section?.querySelector<HTMLElement>(':scope > [data-calendar]');
+    expect(cal).not.toBeNull();
+    // 次回演舞の一覧・空の文言のあと
+    expect(section?.querySelector(':scope > [data-upcoming-empty] ~ [data-calendar]')).toBe(cal);
+    const heading = cal?.querySelector('h3');
+    expect(heading?.querySelector('.visually-hidden')?.textContent?.trim()).toBe(
+      '演舞のカレンダー',
+    );
+    const today = (data('meta.json') as { today: string }).today;
+    const month = today.slice(0, 7);
+    expect(cal?.querySelector('[data-cal-month]')?.textContent).toBe(
+      `${Number(month.slice(0, 4))}年${Number(month.slice(5))}月`,
+    );
+    // 印：その月に始まる演舞の数（1日3つまで）
+    const counts = new Map<string, number>();
+    for (const p of dataPosts)
+      if (p.kind === 'event' && p.event_starts_at !== null) {
+        const day = jstDate(p.event_starts_at);
+        if (day.startsWith(month)) counts.set(day, (counts.get(day) ?? 0) + 1);
+      }
+    const cells = Array.from(cal?.querySelectorAll<HTMLElement>('td[data-date]') ?? []);
+    expect(cells.length).toBe(
+      new Date(Date.UTC(+month.slice(0, 4), +month.slice(5), 0)).getUTCDate(),
+    );
+    for (const td of cells) {
+      const n = counts.get(td.dataset['date'] ?? '') ?? 0;
+      expect(td.querySelectorAll('.cal-dot').length, td.dataset['date']).toBe(Math.min(n, 3));
+      expect(td.querySelector('.visually-hidden')?.textContent).toMatch(
+        n === 0 ? /、演舞なし$/ : new RegExp(`、演舞${n}件$`),
+      );
+    }
+    // JavaScript がなくても読める表（押せる部品は置かない）。前後の月のボタンと日の一覧は隠しておく
+    expect(cal?.querySelectorAll('td button').length).toBe(0);
+    for (const sel of ['[data-cal-prev]', '[data-cal-next]', '[data-cal-day]'])
+      expect(cal?.querySelector(sel)?.hasAttribute('hidden'), sel).toBe(true);
+    // データは data-events に JSON で埋め込む（インラインのスクリプトは使わない。UT-28）
+    expect(html).not.toMatch(/<script\b[^>]*type="application\/json"/i);
+    const events = JSON.parse(cal?.dataset['events'] ?? 'null') as {
+      url: string;
+      cancelled: boolean;
+    }[];
+    const expected = dataPosts.filter((p) => p.kind === 'event' && p.event_starts_at !== null);
+    expect(events.map((e) => e.url).sort()).toEqual(expected.map((p) => `/news/${p.id}`).sort());
+    for (const e of events)
+      expect(e.cancelled, e.url).toBe(cancelledIds.has(Number(e.url.replace('/news/', ''))));
+  });
+
+  it('場所の名前の前に 📍 を付け、読み上げない（D-129）。JSON-LD には付けない', () => {
+    const withPlace = dataPosts.filter((p) => p.kind === 'event' && p.event_place !== null);
+    // 記事の詳細の「場所」：ラベルはそのまま、値の先頭に 📍
+    for (const p of withPlace) {
+      const { doc } = pageAt(`/news/${p.id}`);
+      const dt = Array.from(doc.querySelectorAll('.evbox dt')).find(
+        (d) => d.textContent === '場所',
+      );
+      const dd = dt?.nextElementSibling;
+      expect(dd?.firstElementChild?.outerHTML, `${p.id}`).toBe(
+        '<span class="pin" aria-hidden="true">📍</span>',
+      );
+      expect(dd?.textContent?.trim()).toBe(`📍${p.event_place}`);
+      expect(doc.querySelector('script[type="application/ld+json"]')?.textContent).not.toContain(
+        '📍',
+      );
+    }
+    // トップの次回演舞：場所のある演舞は 📍＋場所
+    const top = pageAt('/').doc;
+    for (const a of Array.from(top.querySelectorAll('[data-upcoming-list] a.ev'))) {
+      const id = Number(a.getAttribute('href')?.replace('/news/', ''));
+      const place = withPlace.find((p) => p.id === id)?.event_place;
+      const pin = a.querySelector('.ev-meta .pin');
+      if (place === undefined) expect(pin, `${id}`).toBeNull();
+      else expect(pin?.parentElement?.textContent).toBe(`📍${place}`);
+    }
+    // 埋め込みのデータには付けない（ブラウザで付ける）
+    expect(top.querySelector('[data-calendar]')?.getAttribute('data-events')).not.toContain('📍');
+    // どのページでも 📍 は読み上げない部品の中にだけある
+    for (const p of pages) {
+      for (const pin of Array.from(p.doc.querySelectorAll('.pin'))) {
+        expect(pin.getAttribute('aria-hidden'), p.path).toBe('true');
+        expect(pin.textContent).toBe('📍');
+      }
+      const body = p.doc.body.cloneNode(true) as HTMLElement;
+      for (const pin of Array.from(body.querySelectorAll('.pin'))) pin.remove();
+      expect(body.textContent, p.path).not.toContain('📍');
+    }
   });
 
   it('UT-22 sitemap に公開ページが載り、/contact/thanks と 404 は載らない。URL に末尾スラッシュ・.html がない', () => {

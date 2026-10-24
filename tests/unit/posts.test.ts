@@ -92,7 +92,7 @@ describe('一覧の並び（03 §6.3）', () => {
   it('演舞：終了していないものを開始の早い順 → 終了したものを開始の遅い順（F-10）', () => {
     expect(newsPosts(data(posts), 'event').map((p) => p.id)).toEqual([2, 3, 4, 1]);
   });
-  it('次の演舞：終了していないものを開始の早い順に limit 件', () => {
+  it('次回演舞：終了していないものを開始の早い順に limit 件', () => {
     expect(upcomingEvents(data(posts), 1).map((p) => p.id)).toEqual([2]);
   });
   it('活動記録だけ', () => expect(activityPosts(data(posts)).map((p) => p.id)).toEqual([6]));
@@ -115,7 +115,7 @@ describe('中止の演舞（UT-31、13 §6.2・§6.3）', () => {
     expect(isCancelled(ev(1, '2026-10-11T10:00:00+09:00'))).toBe(false);
     expect(isCancelled(post(1, 'news', { event_status: 'cancelled' }))).toBe(false);
   });
-  it('次の演舞：中止を除く', () => {
+  it('次回演舞：中止を除く', () => {
     expect(upcomingEvents(data(posts), 3).map((p) => p.id)).toEqual([2, 3]);
   });
   it('演舞のカテゴリ：終わっていない・中止でないものを開始の早い順 → 終わったものと中止を開始の遅い順', () => {

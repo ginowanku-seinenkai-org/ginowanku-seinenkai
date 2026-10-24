@@ -89,7 +89,7 @@ export function activityPosts(data: SiteData): PublicPost[] {
 }
 
 /**
- * トップの「次の演舞」に出す、終了していない・中止でない演舞を開始の早い順に選ぶ（13 §6.2）
+ * トップの「次回演舞」に出す、終了していない・中止でない演舞を開始の早い順に選ぶ（13 §6.2）
  * @param data サイトのデータ
  * @param limit 最大の件数
  * @returns 演舞の記事

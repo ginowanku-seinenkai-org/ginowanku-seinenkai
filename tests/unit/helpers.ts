@@ -22,6 +22,7 @@ export const rows = {
     event_place: null,
     published_on: '2026-10-01',
     updated_at: '2026-10-01T00:00:00Z',
+    event_status: null,
   },
   page: (key: 'about' | 'join' | 'songs') => ({
     key,

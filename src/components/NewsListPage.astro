@@ -1,5 +1,5 @@
 ---
-// お知らせ・行事の一覧（S03。03 §6.3・§6.5）。すべて／種類別、1ページ目／2ページ目以降で共通
+// お知らせ・演舞の一覧（S03。03 §6.3・§6.5）。すべて／種類別、1ページ目／2ページ目以降で共通
 import BaseLayout from '../layouts/BaseLayout.astro';
 import KindTabs from './KindTabs.astro';
 import PageHead from './PageHead.astro';
@@ -21,18 +21,18 @@ const data = await loadSiteData();
 const pages = paginate(newsPosts(data, kind ?? undefined));
 const current = pages[page - 1] ?? { items: [], currentPage: page, lastPage: pages.length };
 const base = kind === null ? '/news' : `/news/category/${kind}`;
-const listName = kind === null ? 'お知らせ・行事' : `${KIND_LABELS[kind]}｜お知らせ・行事`;
+const listName = kind === null ? 'お知らせ・演舞' : `${KIND_LABELS[kind]}｜お知らせ・演舞`;
 const meta = buildMeta({
   name: listName,
   page,
   path: pageUrl(base, page),
   description: kind === null ? DESCRIPTIONS.news : DESCRIPTIONS.newsCategory[kind],
 });
-const title = kind === null ? 'お知らせ・行事' : `お知らせ・行事：${KIND_LABELS[kind]}`;
+const title = kind === null ? 'お知らせ・演舞' : `お知らせ・演舞：${KIND_LABELS[kind]}`;
 const crumbs =
   kind === null
-    ? [{ label: 'お知らせ・行事' }]
-    : [{ label: 'お知らせ・行事', href: '/news' }, { label: KIND_LABELS[kind] }];
+    ? [{ label: 'お知らせ・演舞' }]
+    : [{ label: 'お知らせ・演舞', href: '/news' }, { label: KIND_LABELS[kind] }];
 ---
 
 <BaseLayout meta={meta} current="news">

@@ -31,6 +31,8 @@ export const publicPostSchema = z.object({
   event_place: z.string().nullable(),
   published_on: ymd,
   updated_at: timestamp,
+  /** 演舞の予定の状態（確定・中止）。演舞以外は null。列がないとき（DB の反映前）は確定として扱う（13 §6.3） */
+  event_status: z.enum(['confirmed', 'cancelled']).nullable().optional(),
 });
 /** 公開中の記事 */
 export type PublicPost = z.infer<typeof publicPostSchema>;
@@ -118,7 +120,7 @@ export type DataMeta = z.infer<typeof metaSchema>;
 /** ビューごとの取得する列（select('*') は使わない。03 §3.2） */
 export const VIEW_COLUMNS = {
   v_public_posts:
-    'id,kind,title,body,cover_photo_id,event_starts_at,event_ends_at,event_all_day,event_time_tbd,event_place,published_on,updated_at',
+    'id,kind,title,body,cover_photo_id,event_starts_at,event_ends_at,event_all_day,event_time_tbd,event_place,published_on,updated_at,event_status',
   v_public_post_photos: 'post_id,photo_id,sort_order',
   v_public_pages: 'key,title,lead,body,cover_photo_id,updated_at',
   v_public_site_settings: 'instagram_url,tiktok_url,join_age_label,og_photo_id,officer_term_label',

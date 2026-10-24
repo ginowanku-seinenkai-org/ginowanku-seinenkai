@@ -19,7 +19,7 @@ const items: { key: Exclude<NavKey, null>; href: string; label: string; cta?: bo
   ...(pages.songs ? [{ key: 'songs' as const, href: '/songs', label: '曲目一覧' }] : []),
   // 役員紹介は曲目一覧の次（曲目一覧が無ければ「宜野湾区青年会について」の次。D-81、D-121）
   { key: 'officers', href: '/officers', label: '役員紹介' },
-  { key: 'news', href: '/news', label: 'お知らせ・行事' },
+  { key: 'news', href: '/news', label: 'お知らせ・演舞' },
   { key: 'activities', href: '/activities', label: '活動記録' },
   { key: 'join', href: '/join', label: 'メンバー募集' },
   { key: 'contact', href: '/contact', label: '演舞依頼・お問い合わせ', cta: true },

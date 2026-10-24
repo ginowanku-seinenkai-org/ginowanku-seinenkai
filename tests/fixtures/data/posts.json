@@ -75,7 +75,36 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-10-08",
-    "updated_at": "2026-10-08T09:00:00+09:00"
+    "updated_at": "2026-10-08T09:00:00+09:00",
+    "event_status": null
+  },
+  {
+    "id": 22,
+    "kind": "event",
+    "title": "秋の地域まつりでの演舞",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "秋の地域まつりでの演舞は、雨の予報のため中止になりました。"
+            }
+          ]
+        }
+      ]
+    },
+    "cover_photo_id": "f1000008-0000-4000-8000-000000000008",
+    "event_starts_at": "2026-10-25T17:00:00+09:00",
+    "event_ends_at": "2026-10-25T19:00:00+09:00",
+    "event_all_day": false,
+    "event_time_tbd": false,
+    "event_place": "宜野湾区公民館の広場",
+    "published_on": "2026-10-06",
+    "updated_at": "2026-10-09T09:00:00+09:00",
+    "event_status": "cancelled"
   },
   {
     "id": 17,
@@ -102,7 +131,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-10-05",
-    "updated_at": "2026-10-05T09:00:00+09:00"
+    "updated_at": "2026-10-05T09:00:00+09:00",
+    "event_status": "confirmed"
   },
   {
     "id": 18,
@@ -129,7 +159,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-10-02",
-    "updated_at": "2026-10-02T09:00:00+09:00"
+    "updated_at": "2026-10-02T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 16,
@@ -156,7 +187,8 @@
     "event_time_tbd": false,
     "event_place": "宜野湾市民会館",
     "published_on": "2026-10-01",
-    "updated_at": "2026-10-01T09:00:00+09:00"
+    "updated_at": "2026-10-01T09:00:00+09:00",
+    "event_status": "confirmed"
   },
   {
     "id": 20,
@@ -183,7 +215,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-28",
-    "updated_at": "2026-09-28T09:00:00+09:00"
+    "updated_at": "2026-09-28T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 15,
@@ -210,7 +243,8 @@
     "event_time_tbd": false,
     "event_place": "宜野湾区公民館の広場",
     "published_on": "2026-09-25",
-    "updated_at": "2026-09-25T09:00:00+09:00"
+    "updated_at": "2026-09-25T09:00:00+09:00",
+    "event_status": "confirmed"
   },
   {
     "id": 14,
@@ -237,7 +271,8 @@
     "event_time_tbd": false,
     "event_place": "宜野湾区公民館",
     "published_on": "2026-09-20",
-    "updated_at": "2026-09-20T09:00:00+09:00"
+    "updated_at": "2026-09-20T09:00:00+09:00",
+    "event_status": "confirmed"
   },
   {
     "id": 21,
@@ -264,7 +299,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-15",
-    "updated_at": "2026-09-15T09:00:00+09:00"
+    "updated_at": "2026-09-15T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 12,
@@ -291,7 +327,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-12",
-    "updated_at": "2026-09-12T09:00:00+09:00"
+    "updated_at": "2026-09-12T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 11,
@@ -318,7 +355,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-11",
-    "updated_at": "2026-09-11T09:00:00+09:00"
+    "updated_at": "2026-09-11T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 10,
@@ -345,7 +383,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-10",
-    "updated_at": "2026-09-10T09:00:00+09:00"
+    "updated_at": "2026-09-10T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 9,
@@ -372,7 +411,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-09",
-    "updated_at": "2026-09-09T09:00:00+09:00"
+    "updated_at": "2026-09-09T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 8,
@@ -399,7 +439,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-08",
-    "updated_at": "2026-09-08T09:00:00+09:00"
+    "updated_at": "2026-09-08T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 7,
@@ -426,7 +467,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-07",
-    "updated_at": "2026-09-07T09:00:00+09:00"
+    "updated_at": "2026-09-07T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 6,
@@ -453,7 +495,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-06",
-    "updated_at": "2026-09-06T09:00:00+09:00"
+    "updated_at": "2026-09-06T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 5,
@@ -480,7 +523,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-05",
-    "updated_at": "2026-09-05T09:00:00+09:00"
+    "updated_at": "2026-09-05T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 4,
@@ -507,7 +551,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-04",
-    "updated_at": "2026-09-04T09:00:00+09:00"
+    "updated_at": "2026-09-04T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 3,
@@ -534,7 +579,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-03",
-    "updated_at": "2026-09-03T09:00:00+09:00"
+    "updated_at": "2026-09-03T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 2,
@@ -561,7 +607,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-02",
-    "updated_at": "2026-09-02T09:00:00+09:00"
+    "updated_at": "2026-09-02T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 1,
@@ -588,7 +635,8 @@
     "event_time_tbd": false,
     "event_place": null,
     "published_on": "2026-09-01",
-    "updated_at": "2026-09-01T09:00:00+09:00"
+    "updated_at": "2026-09-01T09:00:00+09:00",
+    "event_status": null
   },
   {
     "id": 13,
@@ -615,6 +663,7 @@
     "event_time_tbd": false,
     "event_place": "宜野湾区内",
     "published_on": "2026-08-01",
-    "updated_at": "2026-08-01T09:00:00+09:00"
+    "updated_at": "2026-08-01T09:00:00+09:00",
+    "event_status": "confirmed"
   }
 ]

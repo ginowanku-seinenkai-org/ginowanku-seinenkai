@@ -18,8 +18,8 @@ describe('buildMeta', () => {
     expect(buildMeta({ name: '活動記録', path: '/activities' }).title).toBe(
       '活動記録｜宜野湾区青年会',
     );
-    expect(buildMeta({ name: 'お知らせ・行事', page: 2, path: '/news/page/2' }).title).toBe(
-      'お知らせ・行事（2ページ目）｜宜野湾区青年会',
+    expect(buildMeta({ name: 'お知らせ・演舞', page: 2, path: '/news/page/2' }).title).toBe(
+      'お知らせ・演舞（2ページ目）｜宜野湾区青年会',
     );
   });
   it('og:title は「｜宜野湾区青年会」を除いたもの。画像がなければ共通画像', () => {
@@ -70,7 +70,7 @@ describe('JSON-LD', () => {
     const post: PublicPost = {
       id: 1,
       kind: 'event',
-      title: '行事',
+      title: '演舞',
       body: null,
       cover_photo_id: null,
       event_starts_at: '2026-10-10T09:00:00Z',
@@ -83,7 +83,15 @@ describe('JSON-LD', () => {
     };
     expect(eventJsonLd(post, '説明', null)).toMatchObject({
       startDate: '2026-10-10T18:00:00+09:00',
+      eventStatus: 'https://schema.org/EventScheduled',
       url: 'https://ginowanku-seinenkai.com/news/1',
+    });
+    // 中止の演舞は EventCancelled、確定は EventScheduled（UT-23、13 §6.2）
+    expect(eventJsonLd({ ...post, event_status: 'cancelled' }, '説明', null)).toMatchObject({
+      eventStatus: 'https://schema.org/EventCancelled',
+    });
+    expect(eventJsonLd({ ...post, event_status: 'confirmed' }, '説明', null)).toMatchObject({
+      eventStatus: 'https://schema.org/EventScheduled',
     });
     expect(eventJsonLd({ ...post, event_place: null }, '説明', null)).toBeNull();
     // 時間未定は終日と同じく日付だけ（D-68）

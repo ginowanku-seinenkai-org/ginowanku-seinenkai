@@ -23,7 +23,7 @@ async function writeData(root: string, overrides: Record<string, unknown> = {}) 
     'site-settings.json': rows.settings,
     'officers.json': [
       rows.officer(2, '副会長', '宜野湾 二郎'),
-      rows.officer(1, '会長', '宜野湾 一郎'),
+      rows.officer(1, '会長', '宜野湾 一郎', PHOTO_ID),
     ],
     'photos.json': [rows.photo()],
     ...overrides,
@@ -49,16 +49,16 @@ describe('readSiteData', () => {
     expect(data.photos.get(PHOTO_ID)?.alt).toBe('写真');
   });
 
-  it('役員は sort_order の昇順に並べ、年度の表示はサイト設定から読む（D-121）', async () => {
+  it('役員は sort_order の昇順に並べ、写真の ID を持つ。年度の表示はサイト設定から読む（D-121、D-122）', async () => {
     const root = await tempDir();
     await writeData(root, {
       'site-settings.json': { ...rows.settings, officer_term_label: '令和8年度' },
     });
     await writePhotos(root);
     const data = await readSiteData(root);
-    expect(data.officers.map((o) => [o.role, o.name])).toEqual([
-      ['会長', '宜野湾 一郎'],
-      ['副会長', '宜野湾 二郎'],
+    expect(data.officers.map((o) => [o.role, o.name, o.photo_id])).toEqual([
+      ['会長', '宜野湾 一郎', PHOTO_ID],
+      ['副会長', '宜野湾 二郎', null],
     ]);
     expect(data.settings.officer_term_label).toBe('令和8年度');
   });

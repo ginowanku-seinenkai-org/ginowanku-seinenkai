@@ -156,24 +156,84 @@ test('EP-05 宜野湾区青年会について：本文があり、役員の氏�
   await expect(page.getByText('宜野湾 一郎')).toHaveCount(0);
 });
 
-test('EP-05b 役員紹介：年度のリードと、役職・氏名を並び順で出す（D-121）', async ({ page }) => {
+test('EP-05b 役員紹介：年度のリードと、役職・氏名・写真のカードを並び順で出す（D-121、D-122）', async ({
+  page,
+}) => {
   await page.goto('/officers');
   await expect(page.locator('.phead .lead')).toHaveText('令和8年度の役員です。');
-  const list = page.locator('dl.officer-list');
-  await expect(list.locator('dt')).toHaveText(['会長', '副会長', '書記', '会計']);
-  await expect(list.locator('dd')).toHaveText([
+  const cards = page.locator('ul.officer-cards > li');
+  await expect(cards.locator('.officer-role')).toHaveText(['会長', '副会長', '書記', '会計']);
+  await expect(cards.locator('.officer-name')).toHaveText([
     '宜野湾 一郎',
     '宜野湾 二郎',
     '宜野湾 花子',
     '宜野湾 三郎',
   ]);
-  // 写真は出さない
-  await expect(page.locator('main img')).toHaveCount(0);
+  // 写真は会長と書記だけ。代替テキストは空（氏名を書かない）。写真のない役員は氏名の最初の1文字の枠
+  const photos = page.locator('main img.officer-photo');
+  await expect(photos).toHaveCount(2);
+  for (const alt of await photos.evaluateAll((imgs) => imgs.map((i) => i.getAttribute('alt'))))
+    expect(alt).toBe('');
+  await expect(cards.nth(0).locator('img.officer-photo')).toHaveCount(1);
+  await expect(cards.nth(2).locator('img.officer-photo')).toHaveCount(1);
+  const initials = page.locator('.officer-initial');
+  await expect(initials).toHaveText(['宜', '宜']);
+  for (const i of [0, 1]) await expect(initials.nth(i)).toHaveAttribute('aria-hidden', 'true');
   // フッターからも行ける
   await expect(page.locator('footer.ftr').getByRole('link', { name: '役員紹介' })).toHaveAttribute(
     'href',
     '/officers',
   );
+});
+
+test('EP-05c 役員紹介の並び：スマホは2列で横スクロールなし、PC は4列。写真は正方形（D-122）', async ({
+  page,
+}) => {
+  /**
+   * カードの写真（または枠）の位置と大きさを読む
+   * @returns 各カードの写真の左端・上端・幅・高さ
+   */
+  const boxes = () =>
+    page.locator('ul.officer-cards > li .officer-photo').evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y), w: r.width, h: r.height };
+      }),
+    );
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/officers');
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow).toBeLessThanOrEqual(0);
+  const phone = await boxes();
+  expect(phone).toHaveLength(4);
+  // 1行目に2つ、2行目に2つ
+  expect(phone[0]?.y).toBe(phone[1]?.y);
+  expect(phone[2]?.y).toBe(phone[3]?.y);
+  expect(phone[2]?.y).toBeGreaterThan(phone[0]?.y ?? 0);
+  for (const b of phone) expect(Math.abs(b.w - b.h)).toBeLessThanOrEqual(1);
+  // 写真は読み込めている
+  for (const img of await page.locator('img.officer-photo').all()) {
+    await img.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
+  }
+  await expectNoA11yViolations(page);
+
+  await page.setViewportSize({ width: 1200, height: 900 });
+  const pc = await boxes();
+  expect(new Set(pc.map((b) => b.y)).size).toBe(1);
+  for (const b of pc) expect(Math.abs(b.w - b.h)).toBeLessThanOrEqual(1);
+});
+
+test('EP-05d 役員紹介：ダークの表示でも読みやすい（D-86、D-122）', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/officers');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expectNoA11yViolations(page);
 });
 
 test('EP-06 メンバー募集：対象年齢の表示（F-19）', async ({ page }) => {
@@ -187,7 +247,7 @@ test('EP-06 メンバー募集：対象年齢の表示（F-19）', async ({ page
 
 test('EP-13 スマホ表示：横スクロールが出ない、メニューが開閉できる', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'iPhone のプロジェクトで確かめる');
-  for (const path of ['/', '/news', '/activities/19', '/privacy']) {
+  for (const path of ['/', '/news', '/activities/19', '/officers', '/privacy']) {
     await page.goto(path);
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

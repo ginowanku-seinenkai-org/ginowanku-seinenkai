@@ -960,34 +960,60 @@ body {
   display: none;
 }
 
-/* 役員紹介（D-121）。役職と氏名を1行ずつ並べる。名前が長ければ折り返す */
-.officer-list {
-  margin: 0;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.officer-row {
+/* 役員紹介（D-121、D-122）。写真と役職・氏名のカード。スマホは2列、PC は4列。名前が長ければ折り返す */
+.officer-cards {
   display: grid;
-  grid-template-columns: minmax(5em, 10em) minmax(0, 1fr);
-  gap: 12px;
-  align-items: baseline;
-  padding: 14px 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.officer-row + .officer-row {
-  border-top: 1px solid var(--line);
+@media (min-width: 768px) {
+  .officer-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px 20px;
+  }
 }
 
-.officer-row dt {
+.officer-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.officer-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* 写真がないときの枠：氏名の最初の1文字（読み上げない） */
+.officer-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--tint-ai);
+  color: var(--head);
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.officer-role {
+  margin: 0;
   color: var(--ink-2);
   font-size: 14px;
   font-weight: 700;
 }
 
-.officer-row dd {
+.officer-name {
   margin: 0;
   font-size: 17px;
   font-weight: 700;

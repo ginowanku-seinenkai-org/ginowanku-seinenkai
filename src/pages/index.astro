@@ -1,7 +1,9 @@
 ---
 // S01 トップ（03 §6.5）
 import BaseLayout from '../layouts/BaseLayout.astro';
+import EventCalendar from '../components/EventCalendar.astro';
 import EventDate from '../components/EventDate.astro';
+import EventPlace from '../components/EventPlace.astro';
 import KindLabel from '../components/KindLabel.astro';
 import PostCard from '../components/PostCard.astro';
 import { loadSiteData } from '../lib/data.ts';
@@ -35,7 +37,7 @@ const meta = buildMeta({
 
   <section class="wrap sec" aria-labelledby="upcoming-heading">
     <div class="sec-h">
-      <h2 id="upcoming-heading">次の演舞</h2>
+      <h2 id="upcoming-heading">次回演舞</h2>
     </div>
     <p class="empty" data-upcoming-empty hidden={events.length > 0}>
       {
@@ -64,7 +66,11 @@ const meta = buildMeta({
                   <span class="ev-title">{post.title}</span>
                   <span class="ev-meta">
                     <EventDate post={post} />
-                    {post.event_place && <span>{post.event_place}</span>}
+                    {post.event_place && (
+                      <span>
+                        <EventPlace place={post.event_place} />
+                      </span>
+                    )}
                   </span>
                 </span>
               </a>
@@ -73,6 +79,8 @@ const meta = buildMeta({
         })}
       </ul>
     )}
+    <!-- 演舞のカレンダー（次回演舞のすぐ下。03 S01、D-128） -->
+    <EventCalendar posts={data.posts} today={data.today} />
   </section>
 
   <section class="wrap sec" aria-labelledby="news-heading">

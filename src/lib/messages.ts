@@ -37,6 +37,38 @@ export const EMPTY = {
   officers: '役員の紹介は準備中です。',
 } as const;
 
+/** 演舞の場所の名前の前に付ける印（D-129。読み上げない） */
+export const PLACE_PIN = '📍';
+
+/** トップの「演舞のカレンダー」（06 §4.6、D-128）。時刻の「終日」「時間未定」は管理画面のカレンダーと同じ */
+export const CALENDAR = {
+  heading: '演舞のカレンダー',
+  /**
+   * 表示している月の見出し
+   * @param year 年
+   * @param month 月（1〜12）
+   * @returns 「y年m月」
+   */
+  month: (year: number, month: number) => `${year}年${month}月`,
+  prev: '前の月',
+  next: '次の月',
+  weekdays: ['日', '月', '火', '水', '木', '金', '土'],
+  /**
+   * 日付のボタンの読み上げ
+   * @param month 月
+   * @param day 日
+   * @param weekday 曜日の1文字
+   * @param count その日の演舞の件数
+   * @returns 「m月d日（曜）、演舞n件」。0件は「…、演舞なし」
+   */
+  dayLabel: (month: number, day: number, weekday: string, count: number) =>
+    `${month}月${day}日（${weekday}）、${count === 0 ? '演舞なし' : `演舞${count}件`}`,
+  dayEmpty: 'この日の演舞はありません。',
+  cancelled: '中止',
+  allDay: '終日',
+  timeTbd: '時間未定',
+} as const;
+
 /** 役員紹介のページ（D-121） */
 export const OFFICERS_PAGE = {
   title: '役員紹介',

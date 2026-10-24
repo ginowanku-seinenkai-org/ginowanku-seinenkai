@@ -1,0 +1,15 @@
+---
+// 演舞の場所の表示（D-129）。場所の名前の前に 📍 を付ける。読み上げは場所の名前だけ
+import { PLACE_PIN } from '../lib/messages.ts';
+
+/** place：場所の名前 */
+interface Props {
+  place: string;
+}
+const { place } = Astro.props;
+---
+
+<span class="pin" aria-hidden="true">
+  {PLACE_PIN}
+</span>
+{place}

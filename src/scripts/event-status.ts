@@ -15,7 +15,7 @@ for (const el of document.querySelectorAll<HTMLElement>('[data-event-end]')) {
   }
 }
 
-// トップの「次の演舞」：すべて隠れたら空の文言を出す
+// トップの「次回演舞」：すべて隠れたら空の文言を出す
 for (const list of document.querySelectorAll<HTMLElement>('[data-upcoming-list]')) {
   const items = list.querySelectorAll<HTMLElement>('[data-event-end]');
   if (items.length > 0 && Array.from(items).every((item) => item.hidden)) {

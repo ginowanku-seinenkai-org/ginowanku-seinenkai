@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import CoverImage from './CoverImage.astro';
 import EndedBadge from './EndedBadge.astro';
 import EventDate from './EventDate.astro';
+import EventPlace from './EventPlace.astro';
 import Gallery from './Gallery.astro';
 import KindLabel from './KindLabel.astro';
 import PageHead from './PageHead.astro';
@@ -72,7 +73,9 @@ const html = renderBody(post.body, renderContext(data, `記事${post.id}の本�
         {post.event_place !== null && (
           <>
             <dt>場所</dt>
-            <dd>{post.event_place}</dd>
+            <dd>
+              <EventPlace place={post.event_place} />
+            </dd>
           </>
         )}
         {cancelled ? (

@@ -22,6 +22,9 @@
   /* キーボードの焦点の枠と、入力欄の枠（背景との差 3:1 以上。WCAG 1.4.11・2.4.7） */
   --focus: #1d2d5a;
   --field-line: #8a91a3;
+  /* 演舞のカレンダーの印・土曜・選んだ日の地と、その上の文字（D-128） */
+  --cal-mark: #1d2d5a;
+  --cal-on-mark: #ffffff;
   --font-body:
     'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', Meiryo, sans-serif;
 }
@@ -47,6 +50,8 @@
     --danger: #ff8f86;
     --focus: #f5c451;
     --field-line: #6b7594;
+    --cal-mark: #9db0ea;
+    --cal-on-mark: #0f1424;
   }
 }
 
@@ -71,6 +76,8 @@
   --danger: #ff8f86;
   --focus: #f5c451;
   --field-line: #6b7594;
+  --cal-mark: #9db0ea;
+  --cal-on-mark: #0f1424;
 }
 
 *,
@@ -627,7 +634,7 @@ body {
   object-fit: cover;
 }
 
-/* 次の演舞（トップ） */
+/* 次回演舞（トップ） */
 .events {
   display: grid;
   gap: 14px;
@@ -707,6 +714,220 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+/* 演舞のカレンダー（トップ。管理画面のホームのカレンダーと同じ形。03 S01、D-128） */
+.cal-box {
+  max-width: 560px;
+  margin: 28px auto 0;
+}
+
+.cal {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.cal-head {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.cal-month {
+  grid-column: 2;
+  margin: 0;
+  color: var(--head);
+  font-size: 17px;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.cal-nav[hidden] {
+  display: none;
+}
+
+.cal-prev {
+  grid-column: 1;
+}
+
+.cal-next {
+  grid-column: 3;
+}
+
+.cal-nav:hover {
+  border-color: var(--ink-2);
+}
+
+.cal-nav[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cal-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.cal-grid th {
+  padding: 2px 0;
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cal-grid td {
+  padding: 1px;
+}
+
+.cal-grid button,
+.cal-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 6px 0 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: 500 15px/1.2 var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-grid button {
+  cursor: pointer;
+}
+
+.cal-grid button:hover {
+  background: var(--tint-ai);
+}
+
+.cal-grid .sun {
+  color: var(--danger);
+}
+
+.cal-grid .sat {
+  color: var(--cal-mark);
+}
+
+.cal-grid button.today > .cal-num {
+  border-bottom: 2px solid var(--shu);
+  font-weight: 700;
+}
+
+.cal-grid button[aria-pressed='true'] {
+  background: var(--cal-mark);
+  color: var(--cal-on-mark);
+}
+
+.cal-dots {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+  margin-top: 4px;
+}
+
+/* 印は演舞の紺だけ（中止も同じ色。中止は日付の一覧の「中止」で伝える。D-127） */
+.cal-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cal-mark);
+}
+
+.cal-grid button[aria-pressed='true'] .cal-dot {
+  background: var(--cal-on-mark);
+}
+
+.cal-day {
+  margin-top: 16px;
+}
+
+.cal-day[hidden],
+.cal-list[hidden] {
+  display: none;
+}
+
+.cal-date {
+  margin: 0 0 8px;
+  color: var(--head);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cal-empty {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+.cal-list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.cal-item {
+  display: grid;
+  grid-template-columns: 6.5em minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  min-height: 44px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.cal-item:hover .cal-title {
+  text-decoration: underline;
+}
+
+.cal-time {
+  color: var(--cal-mark);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-item-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.cal-title {
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.cal-place {
   color: var(--ink-2);
   font-size: 13px;
 }

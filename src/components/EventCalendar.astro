@@ -1,0 +1,107 @@
+---
+// トップの「演舞のカレンダー」（03 §6.5、D-128）。ビルドした日の月を印付きの表で出し、ブラウザで月の切り替えと日付の選択を足す
+import {
+  MAX_DOTS,
+  byDay,
+  dayLabel,
+  monthLabel,
+  monthWeeks,
+  toCalendarEvents,
+} from '../lib/calendar.ts';
+import { CALENDAR } from '../lib/messages.ts';
+import type { PublicPost } from '../lib/view-schemas.ts';
+
+/** posts：公開中の記事、today：ビルドした日（SiteData.today） */
+interface Props {
+  posts: readonly PublicPost[];
+  today: string;
+}
+const { posts, today } = Astro.props;
+const events = toCalendarEvents(posts);
+const month = today.slice(0, 7);
+const days = byDay(events);
+---
+
+<div class="cal-box" data-calendar data-events={JSON.stringify(events)}>
+  <div class="cal">
+    <div class="cal-head">
+      <button
+        type="button"
+        class="cal-nav cal-prev"
+        data-cal-prev
+        aria-label={CALENDAR.prev}
+        hidden
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M12.5 4 6.5 10l6 6" fill="none" stroke="currentColor" stroke-width="2.2"></path>
+        </svg>
+      </button>
+      <h3 class="cal-month" id="calendar-heading">
+        <span class="visually-hidden">{CALENDAR.heading} </span>
+        <span data-cal-month>{monthLabel(month)}</span>
+      </h3>
+      <button
+        type="button"
+        class="cal-nav cal-next"
+        data-cal-next
+        aria-label={CALENDAR.next}
+        hidden
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="m7.5 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2"></path>
+        </svg>
+      </button>
+    </div>
+    <table class="cal-grid" aria-labelledby="calendar-heading">
+      <thead>
+        <tr>
+          {CALENDAR.weekdays.map((w, i) => (
+            <th scope="col" class={i === 0 ? 'sun' : i === 6 ? 'sat' : undefined}>
+              {w}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody data-cal-body>
+        {
+          // JavaScript が動かないときの表（ビルドした日の月。押せる部品は置かない）
+          monthWeeks(month).map((week) => (
+            <tr>
+              {week.map((date, di) => {
+                if (date === null) return <td />;
+                const count = days.get(date)?.length ?? 0;
+                const cls = [di === 0 ? 'sun' : di === 6 ? 'sat' : '', 'cal-cell']
+                  .filter(Boolean)
+                  .join(' ');
+                return (
+                  <td data-date={date}>
+                    <span class={cls}>
+                      <span aria-hidden="true">{Number(date.slice(8))}</span>
+                      <span class="visually-hidden">{dayLabel(date, count)}</span>
+                      <span class="cal-dots" aria-hidden="true">
+                        {Array.from({ length: Math.min(count, MAX_DOTS) }, () => (
+                          <i class="cal-dot" />
+                        ))}
+                      </span>
+                    </span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="cal-day" data-cal-day aria-live="polite" hidden>
+    <h4 class="cal-date" data-cal-date></h4>
+    <p class="cal-empty" data-cal-empty hidden>
+      {CALENDAR.dayEmpty}
+    </p>
+    <ul class="cal-list" data-cal-list></ul>
+  </div>
+</div>
+
+<script>
+  import '../scripts/event-calendar.ts';
+</script>

@@ -160,11 +160,39 @@ export function eventDatetime(iso: string, allDay: boolean): string {
 }
 
 /**
- * トップの「次の演舞」の日付の箱（月・日・曜日）の文字を作る
+ * トップの「次回演舞」の日付の箱（月・日・曜日）の文字を作る
  * @param iso 開始日時（ISO 8601）
  * @returns 月（例：10月）・日・曜日
  */
 export function eventDateBox(iso: string): { month: string; day: string; weekday: string } {
   const p = jstParts(new Date(iso));
   return { month: `${p.month}月`, day: String(p.day), weekday: WEEKDAYS[p.weekday] ?? '' };
+}
+
+/**
+ * 日本時間の時刻の表示にする（例：18:00、9:00）
+ * @param value 日時（ISO 8601 の文字列か Date）
+ * @returns 'H:mm'
+ */
+export function jstTime(value: Date | string): string {
+  return hm(jstParts(typeof value === 'string' ? new Date(value) : value));
+}
+
+/**
+ * 日付を年月日と曜日の表示にする（例：2026年10月10日（土））
+ * @param ymd 日付（'YYYY-MM-DD'）
+ * @returns 表示の文字
+ */
+export function formatDateWithWeekday(ymd: string): string {
+  const p = dateOnlyParts(ymd);
+  return `${p.year}年${md(p)}`;
+}
+
+/**
+ * 日付の曜日の表示（例：土）
+ * @param ymd 日付（'YYYY-MM-DD'）
+ * @returns 曜日の1文字
+ */
+export function weekdayOf(ymd: string): string {
+  return WEEKDAYS[dateOnlyParts(ymd).weekday] ?? '';
 }

@@ -78,6 +78,8 @@ export const OFFICERS_PAGE = {
    * @returns リードの文
    */
   lead: (termLabel: string) => `${termLabel}の役員です。`,
+  /** 2人目からの一覧の見出し（D-132） */
+  othersHeading: '役員',
 } as const;
 
 /** 問い合わせフォーム上部の案内（06 §4.1） */

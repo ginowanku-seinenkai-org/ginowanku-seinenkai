@@ -1184,36 +1184,14 @@ body {
   display: none;
 }
 
-/* 役員紹介（D-121、D-122）。写真と役職・氏名のカード。スマホは2列、PC は4列。名前が長ければ折り返す */
-.officer-cards {
+/* 役員紹介（D-121、D-122、D-132）。先頭の1人を大きく出し、2人目からを丸い写真の一覧にする。名前・ひと言が長ければ折り返す */
+.officer-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 768px) {
-  .officer-cards {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 28px 20px;
-  }
-}
-
-.officer-card {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: center;
+  gap: 40px;
 }
 
 .officer-photo {
   display: block;
-  width: 100%;
-  aspect-ratio: 1;
-  margin-bottom: 6px;
-  border-radius: 12px;
   object-fit: cover;
 }
 
@@ -1225,32 +1203,202 @@ body {
   border: 1px solid var(--line);
   background: var(--tint-ai);
   color: var(--head);
-  font-size: 44px;
   font-weight: 800;
   line-height: 1;
 }
 
-.officer-role {
+.officer-role,
+.officer-name,
+.officer-message {
   margin: 0;
-  color: var(--ink-2);
-  font-size: 14px;
-  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
-.officer-name {
+/* 先頭の1人：スマホは写真の下に文。PC は写真を左、文を右 */
+.officer-top {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.officer-top .officer-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+}
+
+.officer-top .officer-initial {
+  border: 0;
+  font-size: 96px;
+}
+
+.officer-top-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 20px 24px;
+}
+
+/* 役職の札（朱の地） */
+.officer-top .officer-role {
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: var(--shu);
+  color: var(--on-shu);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.officer-top .officer-name {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+}
+
+/* ひと言は引用の形。前の「“」は飾り（読み上げない） */
+.officer-top .officer-message {
+  display: flex;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.officer-quote {
+  flex: none;
+  color: var(--ki);
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 0.9;
+}
+
+@media (min-width: 768px) {
+  .officer-top {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  }
+
+  .officer-top .officer-photo {
+    height: 100%;
+    min-height: 320px;
+    aspect-ratio: auto;
+  }
+
+  .officer-top-body {
+    justify-content: center;
+    gap: 16px;
+    padding: 32px 36px;
+  }
+
+  .officer-top .officer-name {
+    font-size: 32px;
+  }
+
+  .officer-top .officer-message {
+    font-size: 17px;
+  }
+}
+
+/* 2人目から：見出し「役員」と線 */
+.officer-others {
+  display: grid;
+  gap: 24px;
+}
+
+.officer-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0;
-  font-size: 17px;
-  font-weight: 700;
-  overflow-wrap: anywhere;
+  color: var(--head);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.officer-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+/* 一覧：スマホは2列、PC は4列 */
+.officer-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .officer-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 40px 20px;
+  }
+}
+
+.officer-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+/* 丸い写真。地の色の細い隙間と黄の縁を付ける */
+.officer-card .officer-photo {
+  width: 128px;
+  height: 128px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px var(--ground),
+    0 0 0 5px var(--ki);
+}
+
+.officer-card .officer-initial {
+  font-size: 44px;
+}
+
+@media (min-width: 768px) {
+  .officer-card .officer-photo {
+    width: 160px;
+    height: 160px;
+  }
+
+  .officer-card .officer-initial {
+    font-size: 52px;
+  }
+}
+
+.officer-card .officer-role {
+  color: var(--shu);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.officer-card .officer-name {
+  font-size: 18px;
+  font-weight: 800;
 }
 
 /* ひと言（あるときだけ。D-124）。長くてもカードからはみ出さないよう折り返す */
-.officer-message {
-  margin: 2px 0 0;
+.officer-card .officer-message {
+  align-self: stretch;
+  margin-top: 4px;
   color: var(--ink-2);
   font-size: 13px;
   line-height: 1.6;
-  overflow-wrap: anywhere;
   text-wrap: pretty;
 }
 

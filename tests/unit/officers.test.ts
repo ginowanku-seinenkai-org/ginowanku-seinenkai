@@ -1,6 +1,11 @@
-// 役員紹介の部品（D-121、D-122）
+// 役員紹介の部品（D-121、D-122、D-132）
 import { describe, expect, it } from 'vitest';
-import { compareOfficers, officerInitial, officerPhoto } from '../../src/lib/data.ts';
+import {
+  compareOfficers,
+  officerInitial,
+  officerPhoto,
+  splitOfficers,
+} from '../../src/lib/data.ts';
 import { OFFICERS_PAGE } from '../../src/lib/messages.ts';
 import { VIEW_COLUMNS, publicOfficerSchema, type PublicPhoto } from '../../src/lib/view-schemas.ts';
 import { PHOTO_ID, rows } from './helpers.ts';
@@ -9,6 +14,16 @@ describe('役員紹介', () => {
   it('compareOfficers は sort_order の昇順に並べる', () => {
     const list = [rows.officer(3, '書記'), rows.officer(1, '会長'), rows.officer(2, '副会長')];
     expect([...list].sort(compareOfficers).map((o) => o.role)).toEqual(['会長', '副会長', '書記']);
+  });
+
+  it('splitOfficers は先頭の1人と2人目からに分ける（D-132）', () => {
+    const list = [rows.officer(1, '会長'), rows.officer(2, '副会長'), rows.officer(3, '書記')];
+    const { top, rest } = splitOfficers(list);
+    expect(top?.role).toBe('会長');
+    expect(rest.map((o) => o.role)).toEqual(['副会長', '書記']);
+    // 1人だけなら一覧は空、0人なら先頭もない
+    expect(splitOfficers([rows.officer(1, '会長')]).rest).toEqual([]);
+    expect(splitOfficers([])).toEqual({ top: undefined, rest: [] });
   });
 
   it('リードは年度の表示を添える', () => {

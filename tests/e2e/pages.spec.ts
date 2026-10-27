@@ -370,33 +370,39 @@ test('EP-05 宜野湾区青年会について：本文があり、役員の氏�
   await expect(page.getByText('宜野湾 一郎')).toHaveCount(0);
 });
 
-test('EP-05b 役員紹介：年度のリードと、役職・氏名・写真のカードを並び順で出す（D-121、D-122）', async ({
+test('EP-05b 役員紹介：年度のリードと、先頭の1人を大きく、2人目からを「役員」の一覧に並び順で出す（D-121、D-122、D-132）', async ({
   page,
 }) => {
   await page.goto('/officers');
   await expect(page.locator('.phead .lead')).toHaveText('令和8年度の役員です。');
+  // 先頭の1人（会長）は大きな枠
+  const top = page.locator('.officer-top');
+  await expect(top).toHaveCount(1);
+  await expect(top.locator('.officer-role')).toHaveText('会長');
+  await expect(top.locator('.officer-name')).toHaveText('宜野湾 一郎');
+  await expect(top.locator('.officer-message')).toHaveText(
+    '“みんなで楽しくエイサーを踊りましょう！',
+  );
+  await expect(top.locator('.officer-quote')).toHaveAttribute('aria-hidden', 'true');
+  await expect(top.locator('img.officer-photo')).toHaveCount(1);
+  // 2人目からは見出し「役員」の下の一覧
+  await expect(page.getByRole('heading', { level: 2, name: '役員', exact: true })).toBeVisible();
   const cards = page.locator('ul.officer-cards > li');
-  await expect(cards.locator('.officer-role')).toHaveText(['会長', '副会長', '書記', '会計']);
+  await expect(cards.locator('.officer-role')).toHaveText(['副会長', '書記', '会計']);
   await expect(cards.locator('.officer-name')).toHaveText([
-    '宜野湾 一郎',
     '宜野湾 二郎',
     '宜野湾 花子',
     '宜野湾 三郎',
   ]);
   // ひと言は会長と書記だけ（D-124）
-  await expect(cards.locator('.officer-message')).toHaveText([
-    'みんなで楽しくエイサーを踊りましょう！',
-    'よろしくお願いします。',
-  ]);
-  await expect(cards.nth(0).locator('.officer-message')).toHaveCount(1);
-  await expect(cards.nth(2).locator('.officer-message')).toHaveCount(1);
+  await expect(cards.locator('.officer-message')).toHaveText(['よろしくお願いします。']);
+  await expect(cards.nth(1).locator('.officer-message')).toHaveCount(1);
   // 写真は会長と書記だけ。代替テキストは空（氏名を書かない）。写真のない役員は氏名の最初の1文字の枠
   const photos = page.locator('main img.officer-photo');
   await expect(photos).toHaveCount(2);
   for (const alt of await photos.evaluateAll((imgs) => imgs.map((i) => i.getAttribute('alt'))))
     expect(alt).toBe('');
-  await expect(cards.nth(0).locator('img.officer-photo')).toHaveCount(1);
-  await expect(cards.nth(2).locator('img.officer-photo')).toHaveCount(1);
+  await expect(cards.nth(1).locator('img.officer-photo')).toHaveCount(1);
   const initials = page.locator('.officer-initial');
   await expect(initials).toHaveText(['宜', '宜']);
   for (const i of [0, 1]) await expect(initials.nth(i)).toHaveAttribute('aria-hidden', 'true');
@@ -407,34 +413,54 @@ test('EP-05b 役員紹介：年度のリードと、役職・氏名・写真の�
   );
 });
 
-test('EP-05c 役員紹介の並び：スマホは2列で横スクロールなし、PC は4列。写真は正方形（D-122）', async ({
+test('EP-05c 役員紹介の並び：先頭はスマホで縦に積みPCで横並び、一覧はスマホ2列・PC4列の丸い写真。横スクロールなし（D-122、D-132）', async ({
   page,
 }) => {
   /**
-   * カードの写真（または枠）の位置と大きさを読む
-   * @returns 各カードの写真の左端・上端・幅・高さ
+   * 要素の位置と大きさを読む
+   * @param selector 読む要素の CSS セレクター
+   * @returns 各要素の左端・上端・幅・高さ
    */
-  const boxes = () =>
-    page.locator('ul.officer-cards > li .officer-photo').evaluateAll((els) =>
+  const boxes = (selector: string) =>
+    page.locator(selector).evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
         return { x: Math.round(r.x), y: Math.round(r.y), w: r.width, h: r.height };
       }),
     );
+  /**
+   * 横スクロールの量を読む
+   * @returns ページの幅から画面の幅を引いた値
+   */
+  const overflow = () =>
+    page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/officers');
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
-  const phone = await boxes();
-  expect(phone).toHaveLength(4);
-  // 1行目に2つ、2行目に2つ
+  expect(await overflow()).toBeLessThanOrEqual(0);
+  // 先頭：写真は横長（4:3）で幅いっぱい、文は写真の下
+  const [topBox] = await boxes('.officer-top');
+  const [topPhoto] = await boxes('.officer-top .officer-photo');
+  const [topBody] = await boxes('.officer-top-body');
+  expect(Math.abs((topPhoto?.w ?? 0) - (topBox?.w ?? 0))).toBeLessThanOrEqual(2);
+  expect(Math.abs((topPhoto?.h ?? 0) - ((topPhoto?.w ?? 0) * 3) / 4)).toBeLessThanOrEqual(1);
+  expect(topBody?.y).toBeGreaterThanOrEqual((topPhoto?.y ?? 0) + (topPhoto?.h ?? 0) - 1);
+  // 一覧：1行目に2つ、2行目に1つ。写真は丸
+  const phone = await boxes('ul.officer-cards > li .officer-photo');
+  expect(phone).toHaveLength(3);
   expect(phone[0]?.y).toBe(phone[1]?.y);
-  expect(phone[2]?.y).toBe(phone[3]?.y);
   expect(phone[2]?.y).toBeGreaterThan(phone[0]?.y ?? 0);
-  for (const b of phone) expect(Math.abs(b.w - b.h)).toBeLessThanOrEqual(1);
+  for (const b of phone) {
+    expect(Math.abs(b.w - b.h)).toBeLessThanOrEqual(1);
+    expect(b.w).toBeCloseTo(128, 0);
+  }
+  const radius = await page
+    .locator('ul.officer-cards > li .officer-photo')
+    .first()
+    .evaluate((el) => getComputedStyle(el).borderRadius);
+  expect(radius).toBe('50%');
   // 写真は読み込めている
   for (const img of await page.locator('img.officer-photo').all()) {
     await img.scrollIntoViewIfNeeded();
@@ -444,36 +470,44 @@ test('EP-05c 役員紹介の並び：スマホは2列で横スクロールなし
   }
   await expectNoA11yViolations(page);
 
-  // ひと言が上限の長さ（60文字）で、区切りのない英数字でも、カードからはみ出さない（D-124）
+  // ひと言が上限の長さ（60文字）で、区切りのない英数字でも、枠からはみ出さない（D-124）
   await page.evaluate(() => {
-    const message = document.querySelector('.officer-message');
-    if (message) message.textContent = 'W'.repeat(60);
+    for (const message of document.querySelectorAll('.officer-message')) {
+      const quote = message.querySelector('.officer-quote');
+      message.textContent = 'W'.repeat(60);
+      if (quote) message.prepend(quote);
+    }
   });
-  const fits = await page
-    .locator('ul.officer-cards > li')
-    .first()
-    .evaluate((card) => {
-      const outer = card.getBoundingClientRect();
-      return Array.from(card.children).every((el) => {
-        const r = el.getBoundingClientRect();
-        return (
-          r.left >= outer.left - 0.5 &&
-          r.right <= outer.right + 0.5 &&
-          el.scrollWidth <= el.clientWidth
-        );
+  for (const selector of ['.officer-top-body', 'ul.officer-cards > li']) {
+    for (const block of await page.locator(selector).all()) {
+      const fits = await block.evaluate((card) => {
+        const outer = card.getBoundingClientRect();
+        return Array.from(card.children).every((el) => {
+          const r = el.getBoundingClientRect();
+          return (
+            r.left >= outer.left - 0.5 &&
+            r.right <= outer.right + 0.5 &&
+            el.scrollWidth <= el.clientWidth
+          );
+        });
       });
-    });
-  expect(fits).toBe(true);
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    ),
-  ).toBeLessThanOrEqual(0);
+      expect(fits, selector).toBe(true);
+    }
+  }
+  expect(await overflow()).toBeLessThanOrEqual(0);
 
+  // PC：先頭は写真が左・文が右。一覧の3人は1行に並ぶ
   await page.setViewportSize({ width: 1200, height: 900 });
-  const pc = await boxes();
+  const [pcPhoto] = await boxes('.officer-top .officer-photo');
+  const [pcBody] = await boxes('.officer-top-body');
+  expect(pcBody?.x).toBeGreaterThanOrEqual((pcPhoto?.x ?? 0) + (pcPhoto?.w ?? 0) - 1);
+  expect(pcBody?.y).toBeLessThan((pcPhoto?.y ?? 0) + (pcPhoto?.h ?? 0));
+  const pc = await boxes('ul.officer-cards > li .officer-photo');
   expect(new Set(pc.map((b) => b.y)).size).toBe(1);
-  for (const b of pc) expect(Math.abs(b.w - b.h)).toBeLessThanOrEqual(1);
+  for (const b of pc) {
+    expect(Math.abs(b.w - b.h)).toBeLessThanOrEqual(1);
+    expect(b.w).toBeCloseTo(160, 0);
+  }
 });
 
 test('EP-05d 役員紹介：ダークの表示でも読みやすい（D-86、D-122）', async ({ page }) => {

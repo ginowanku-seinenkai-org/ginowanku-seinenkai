@@ -80,6 +80,16 @@ export function compareOfficers(a: PublicOfficer, b: PublicOfficer): number {
 }
 
 /**
+ * 役員を、大きく出す先頭の1人と、一覧に出す2人目からに分ける（D-132）
+ * @param officers 並び順に並べた役員
+ * @returns 先頭の1人（0人なら undefined）と2人目から
+ */
+export function splitOfficers<T>(officers: readonly T[]): { top: T | undefined; rest: T[] } {
+  const [top, ...rest] = officers;
+  return { top, rest };
+}
+
+/**
  * 役員の写真を探す（D-122）
  * @param officer 役員
  * @param photos 公開してよい写真（ID → 写真）

@@ -436,15 +436,34 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       expect(headers).toContain(name);
   });
 
-  it('役員紹介：役職と氏名のカードを並び順で出し、年度があればリードに添える（D-121、D-122）', () => {
+  /**
+   * 役員紹介の各役員の枠を並び順で読む（D-132）。先頭は .officer-top（文は .officer-top-body）、2人目からは一覧の li
+   * @param doc 役員紹介のページ
+   * @returns 役員ごとの、枠（写真を含む）と文の入れ物
+   */
+  const officerBlocks = (doc: Document) => {
+    const top = doc.querySelector('.officer-top');
+    const body = top?.querySelector(':scope > .officer-top-body');
+    const rest = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
+    return [
+      ...(top && body ? [{ block: top, text: body }] : []),
+      ...rest.map((li) => ({ block: li, text: li })),
+    ];
+  };
+
+  it('役員紹介：先頭の1人を大きく、2人目からを「役員」の一覧に並び順で出し、年度があればリードに添える（D-121、D-122、D-132）', () => {
     const { doc } = pageAt('/officers');
-    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
     expect(
-      cards.map((card) => [
-        card.querySelector(':scope > p.officer-role')?.textContent?.trim(),
-        card.querySelector(':scope > p.officer-name')?.textContent?.trim(),
+      officerBlocks(doc).map(({ text }) => [
+        text.querySelector(':scope > p.officer-role')?.textContent?.trim(),
+        text.querySelector(':scope > p.officer-name')?.textContent?.trim(),
       ]),
     ).toEqual(dataOfficers.map((o) => [o.role, o.name]));
+    expect(doc.querySelectorAll('.officer-top').length).toBe(dataOfficers.length === 0 ? 0 : 1);
+    // 2人目からがいるときだけ、見出し「役員」と一覧を出す
+    const heading = doc.querySelector('h2.officer-heading');
+    expect(heading?.textContent?.trim() ?? null).toBe(dataOfficers.length >= 2 ? '役員' : null);
+    expect(doc.querySelectorAll('ul.officer-cards').length).toBe(dataOfficers.length >= 2 ? 1 : 0);
     const lead = doc.querySelector('.phead .lead')?.textContent?.trim() ?? null;
     const label = dataSettings['officer_term_label'];
     expect(lead).toBe(typeof label === 'string' ? `${label}の役員です。` : null);
@@ -454,10 +473,10 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
 
   it('役員紹介の写真：写真があれば幅・高さと空の alt の画像、無ければ氏名の最初の1文字の枠（D-122）', () => {
     const { doc } = pageAt('/officers');
-    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
-    expect(cards.length).toBe(dataOfficers.length);
+    const blocks = officerBlocks(doc);
+    expect(blocks.length).toBe(dataOfficers.length);
     dataOfficers.forEach((officer, i) => {
-      const card = cards[i];
+      const card = blocks[i]?.block;
       if (card === undefined) throw new Error(`${officer.role} のカードがありません`);
       // 写真か枠のどちらかが1つ、役職より前にある
       expect(card.firstElementChild?.classList.contains('officer-photo'), officer.role).toBe(true);
@@ -482,19 +501,29 @@ describe(`ビルド出力（PUBLIC_SITE_ENV=${siteEnv}）`, () => {
       for (const o of dataOfficers) expect(img.getAttribute('alt') ?? '').not.toContain(o.name);
   });
 
-  it('役員紹介のひと言：あるときだけ、その役員のカードの氏名の後に出す（D-124、D-125）', () => {
+  it('役員紹介のひと言：あるときだけ、その役員の氏名の後に出す（D-124、D-125、D-132）', () => {
     const { doc } = pageAt('/officers');
-    const cards = Array.from(doc.querySelectorAll('ul.officer-cards > li.officer-card'));
-    expect(cards.length).toBe(dataOfficers.length);
+    const blocks = officerBlocks(doc);
+    expect(blocks.length).toBe(dataOfficers.length);
     dataOfficers.forEach((officer, i) => {
-      const card = cards[i];
-      if (card === undefined) throw new Error(`${officer.role} のカードがありません`);
-      const message = card.querySelectorAll(':scope > p.officer-message');
+      const block = blocks[i];
+      if (block === undefined) throw new Error(`${officer.role} のカードがありません`);
+      const message = block.text.querySelectorAll(':scope > p.officer-message');
       expect(message.length, officer.role).toBe(officer.message === null ? 0 : 1);
-      if (officer.message !== null) expect(message[0]?.textContent?.trim()).toBe(officer.message);
-      // 並びは 写真 → 役職 → 氏名 → ひと言
-      const order = Array.from(card.children)
-        .slice(1)
+      // 先頭のひと言の前の「“」は飾り（読み上げない）
+      const quote = message[0]?.querySelector('.officer-quote');
+      expect(quote === null || quote === undefined ? null : quote.getAttribute('aria-hidden')).toBe(
+        i === 0 && officer.message !== null ? 'true' : null,
+      );
+      const said = Array.from(message[0]?.childNodes ?? [])
+        .filter((n) => !(n.nodeType === 1 && (n as Element).classList.contains('officer-quote')))
+        .map((n) => n.textContent)
+        .join('')
+        .trim();
+      if (officer.message !== null) expect(said).toBe(officer.message);
+      // 並びは 写真 → 役職 → 氏名 → ひと言（先頭は写真の隣の .officer-top-body の中）
+      const order = Array.from(block.text.children)
+        .slice(i === 0 ? 0 : 1)
         .map((el) => el.className);
       expect(order, officer.role).toEqual(
         [
